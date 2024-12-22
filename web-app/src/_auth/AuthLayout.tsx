@@ -5,9 +5,9 @@ function AuthLayout() {
 
   return (
 
-          <section className="">
-            <Outlet />
-          </section>
+    <section className="comman-backgroud">
+      <Outlet />
+    </section>
   );
 }
 

@@ -1,7 +1,7 @@
 
 import { RouterProvider } from "react-router";
 import "./global.css";
-import React from 'react'
+import "./assets/scss/auth.scss"
 import router from "./routes/router";
 
 const App = () => {

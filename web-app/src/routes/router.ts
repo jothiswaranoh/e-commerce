@@ -6,6 +6,7 @@ import SigninForm from "../_auth/forms/SigninForm";
 import SignupForm from "../_auth/forms/SignupForm";
 import AuthLayout from "../_auth/AuthLayout";
 import Dashboard from "../pages/home_page/Dashboard";
+import ForgotPassword from "../_auth/forms/ForgotPassword";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
           {
             path: "/signup",
             Component: SignupForm, // Replace with your signup page component
+          },
+          {
+            path: "/forgotpassword",
+            Component: ForgotPassword, // Replace with your signup page component
           },
         ],
       },

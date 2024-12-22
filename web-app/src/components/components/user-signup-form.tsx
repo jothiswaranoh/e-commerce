@@ -8,38 +8,51 @@ import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 
 
-export function LoginForm({
+
+export function UserSignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
 
   // Handle redirection to the Sign In form
-  const handleSignupRedirect = () => {
-    navigate("/signup"); // Redirect to the sign-in page
+  const handleSignInRedirect = () => {
+    navigate("/signin"); // Redirect to the sign-in page
   };
 
-  const handleForgotPassword = () =>{
-    navigate("/forgotpassword");
-  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden">
         <CardContent className="grid p-0 md:grid-cols-2">
         <div className="relative hidden bg-muted md:block">
         <img
-                src={`${authForms.signInForm}`}
+                src={`${authForms.signOutForm}`}
                 alt="Image"
                 className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
               />
           </div>
           <form className="p-6 md:p-8">
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-balance text-muted-foreground p-3">
-                Please login here
-                </p>
+                <h1 className="text-2xl font-bold">Sign Up</h1>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="first_name">First Name</Label>
+                <Input
+                  id="first_name"
+                  type="first_name"
+                  placeholder="First Name"
+                  required
+                />
+              </div>             
+               <div className="grid gap-2">
+                <Label htmlFor="Last_name">Last Name</Label>
+                <Input
+                  id="Last_name"
+                  type="Last_name"
+                  placeholder="Last Name"
+                  required
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -64,18 +77,11 @@ export function LoginForm({
                   htmlFor="remember-me"
                   className="text-sm font-medium cursor-pointer"
                 >
-                  Remember Me
+                  I agree to the Terms & Conditions
                 </label>
-                  <a
-                    href="#"
-                    onClick={handleForgotPassword}
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                   </div>
               <Button type="submit" className="w-full">
-                Login
+                Sign up
               </Button>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                 <span className="relative z-10 bg-background px-2 text-muted-foreground">
@@ -90,7 +96,7 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Apple</span>
+                  <span className="sr-only">Sign up with Apple</span>
                 </Button>
                 <Button variant="outline" className="w-full">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -99,7 +105,7 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Google</span>
+                  <span className="sr-only">Sign up with Google</span>
                 </Button>
                 <Button variant="outline" className="w-full">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -108,25 +114,22 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Meta</span>
+                  <span className="sr-only">Sign up with Meta</span>
                 </Button>
               </div>
               <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4" onClick={handleSignupRedirect}>
-                  Sign up
+                Already have an account?{" "}
+                <a href="#" className="underline underline-offset-4"
+                onClick={handleSignInRedirect}
+                >
+                  Sign In
                 </a>
               </div>
             </div>
-            <br></br>
-            <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-              By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-              and <a href="#">Privacy Policy</a>.
-            </div>
+
           </form>
         </CardContent>
       </Card>
-
     </div>
   )
 }
