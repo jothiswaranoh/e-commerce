@@ -1,0 +1,28 @@
+web-app/node_modules/
+
+# Ignore bundler config.
+backend-api/.bundle/
+
+# Ignore all environment files.
+backend-api/.env*
+
+# Ignore all logfiles and tempfiles.
+backend-api/log/*
+!backend-api/log/.keep
+backend-api/tmp/*
+!backend-api/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
+backend-api/tmp/pids/*
+!backend-api/tmp/pids/
+!backend-api/tmp/pids/.keep
+
+# Ignore storage (uploaded files in development and any SQLite databases).
+backend-api/storage/*
+!backend-api/storage/.keep
+backend-api/tmp/storage/*
+!backend-api/tmp/storage/
+!backend-api/tmp/storage/.keep
+
+# Ignore master key for decrypting credentials and more.
+backend-api/config/master.key

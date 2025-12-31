@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile.dev
+    command: ./bin/rails server -b 0.0.0.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend-api:/rails
+    environment:
+      RAILS_ENV: development
+      DB_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build:
+      context: ./web-app
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web-app:/app
+      - /app/node_modules # Avoid overwriting container node_modules with local
+    environment:
+      VITE_API_URL: http://localhost:3000
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

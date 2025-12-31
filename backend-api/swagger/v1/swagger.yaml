@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: E-commerce API
+  version: 1.0.0
+  description: API for the E-commerce platform.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+
+paths:
+  /signup:
+    post:
+      summary: User Signup
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email_address:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                    password_confirmation:
+                      type: string
+                    org_id:
+                      type: integer
+      responses:
+        '201':
+          description: Created
+        '422':
+          description: Unprocessable Entity
+
+  /login:
+    post:
+      summary: User Login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_address:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Logged in
+        '401':
+          description: Unauthorized
+
+  /logout:
+    delete:
+      summary: User Logout
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Logged out
+
+  /me:
+    get:
+      summary: Current User Info
+      tags:
+        - User
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
