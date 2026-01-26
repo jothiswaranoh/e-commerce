@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, loginUser, registerUser, logoutUser, getCurrentUser, isAuthenticated } from '../services/authService';
+import { authService } from '../services/authService';
+import type { User } from '../types';
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
+    isAdmin: boolean;
     login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
     register: (userData: { name: string; email: string; password: string; phone?: string }) => Promise<{ success: boolean; message: string }>;
     logout: () => Promise<void>;
@@ -19,17 +21,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check for existing session on mount
     useEffect(() => {
-        const currentUser = getCurrentUser();
-        if (currentUser) {
-            setUser(currentUser);
-        }
-        setIsLoading(false);
+        const loadUser = async () => {
+            const result = await authService.getCurrentUser();
+            if (result?.user) {
+                setUser(result.user);
+            }
+            setIsLoading(false);
+        };
+        loadUser();
     }, []);
 
     const login = async (email: string, password: string) => {
         setIsLoading(true);
         try {
-            const response = await loginUser(email, password);
+            const response = await authService.loginUser(email, password);
             if (response.success && response.user) {
                 setUser(response.user);
             }
@@ -42,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const register = async (userData: { name: string; email: string; password: string; phone?: string }) => {
         setIsLoading(true);
         try {
-            const response = await registerUser(userData);
+            const response = await authService.registerUser(userData);
             if (response.success && response.user) {
                 setUser(response.user);
             }
@@ -55,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         setIsLoading(true);
         try {
-            await logoutUser();
+            await authService.logoutUser();
             setUser(null);
         } finally {
             setIsLoading(false);
@@ -70,7 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         <AuthContext.Provider
             value={{
                 user,
-                isAuthenticated: isAuthenticated(),
+                isAuthenticated: authService.isAuthenticated(),
+                isAdmin: authService.isAdmin(user),
                 isLoading,
                 login,
                 register,

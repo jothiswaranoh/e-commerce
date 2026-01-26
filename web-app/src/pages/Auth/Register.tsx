@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone, CheckCircle2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
+import { UI_CONFIG } from '../../config/ui.config';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { useState } from 'react';
@@ -8,6 +9,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import PasswordStrengthIndicator from '../../components/auth/PasswordStrengthIndicator';
 import { validateEmail, validatePhone, validatePassword } from '../../utils/validators';
+
+const { auth, brand, messages, images } = UI_CONFIG;
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -17,29 +20,29 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   });
-  const [isSuccess, setIsSuccess] = useState(false);
   const { register, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateEmail(formData.email)) {
-      toast.error('Please enter a valid email address');
+      toast.error(messages.validation.invalidEmail);
       return;
     }
 
     if (formData.phone && !validatePhone(formData.phone)) {
-      toast.error('Please enter a valid phone number');
+      toast.error(messages.validation.invalidPhone);
       return;
     }
 
     if (!validatePassword(formData.password)) {
-      toast.error('Password does not meet requirements');
+      toast.error(messages.validation.passwordTooShort);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(messages.validation.passwordsDoNotMatch);
       return;
     }
 
@@ -52,44 +55,16 @@ export default function Register() {
       });
 
       if (response.success) {
-        setIsSuccess(true);
-        toast.success('Account created successfully!');
+        toast.success(messages.success.registerSuccess);
+        // Redirect to home page for customers
+        navigate(ROUTES.HOME, { replace: true });
       } else {
         toast.error(response.message);
       }
     } catch (error) {
-      toast.error('An error occurred during registration');
+      toast.error(messages.error.genericError);
     }
   };
-
-  if (isSuccess) {
-    return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-8 h-8 text-green-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-neutral-900 mb-2">Account Created!</h2>
-          <p className="text-neutral-600 mb-8">
-            We've sent a verification link to <span className="font-medium text-neutral-900">{formData.email}</span>.
-            Please verify your email to access all features.
-          </p>
-          <div className="space-y-4">
-            <Link to={ROUTES.HOME}>
-              <Button fullWidth>
-                Go to Homepage
-              </Button>
-            </Link>
-            <Link to={ROUTES.LOGIN}>
-              <Button variant="outline" fullWidth>
-                Sign In
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-neutral-50 flex">
@@ -101,20 +76,20 @@ export default function Register() {
             <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
               <Package className="w-7 h-7 text-white" />
             </div>
-            <span className="text-2xl font-bold gradient-text">ShopHub</span>
+            <span className="text-2xl font-bold gradient-text">{brand.name}</span>
           </Link>
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-neutral-900 mb-2">Create Account</h1>
-            <p className="text-neutral-600">Join us to start your shopping journey</p>
+            <h1 className="text-4xl font-bold text-neutral-900 mb-2">{auth.register.title}</h1>
+            <p className="text-neutral-600">{auth.register.subtitle}</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
-              label="Full Name"
-              placeholder="John Doe"
+              label={auth.register.fields.fullName.label}
+              placeholder={auth.register.fields.fullName.placeholder}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               leftIcon={<User className="w-5 h-5" />}
@@ -123,8 +98,8 @@ export default function Register() {
 
             <Input
               type="email"
-              label="Email Address"
-              placeholder="you@example.com"
+              label={auth.register.fields.email.label}
+              placeholder={auth.register.fields.email.placeholder}
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               leftIcon={<Mail className="w-5 h-5" />}
@@ -133,8 +108,8 @@ export default function Register() {
 
             <Input
               type="tel"
-              label="Phone Number (Optional)"
-              placeholder="+1 (555) 000-0000"
+              label={auth.register.fields.phone.label}
+              placeholder={auth.register.fields.phone.placeholder}
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               leftIcon={<Phone className="w-5 h-5" />}
@@ -143,8 +118,8 @@ export default function Register() {
             <div className="space-y-4">
               <Input
                 type="password"
-                label="Password"
-                placeholder="••••••••"
+                label={auth.register.fields.password.label}
+                placeholder={auth.register.fields.password.placeholder}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 leftIcon={<Lock className="w-5 h-5" />}
@@ -155,8 +130,8 @@ export default function Register() {
 
             <Input
               type="password"
-              label="Confirm Password"
-              placeholder="••••••••"
+              label={auth.register.fields.confirmPassword.label}
+              placeholder={auth.register.fields.confirmPassword.placeholder}
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               leftIcon={<Lock className="w-5 h-5" />}
@@ -171,7 +146,7 @@ export default function Register() {
             </div>
 
             <Button type="submit" fullWidth size="lg" isLoading={isLoading}>
-              Create Account
+              {auth.register.submitButton}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </form>
@@ -182,27 +157,27 @@ export default function Register() {
               <div className="w-full border-t border-neutral-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-neutral-50 text-neutral-500">Or sign up with</span>
+              <span className="px-2 bg-neutral-50 text-neutral-500">{auth.register.orSignUpWith}</span>
             </div>
           </div>
 
           {/* Social Login */}
           <div className="grid grid-cols-2 gap-4">
             <button className="flex items-center justify-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl hover:bg-white hover:border-neutral-300 transition-all bg-white/50">
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+              <img src={images.socialIcons.google} alt="Google" className="w-5 h-5" />
               <span className="font-medium text-neutral-700">Google</span>
             </button>
             <button className="flex items-center justify-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl hover:bg-white hover:border-neutral-300 transition-all bg-white/50">
-              <img src="https://www.svgrepo.com/show/448224/github.svg" alt="GitHub" className="w-5 h-5" />
+              <img src={images.socialIcons.github} alt="GitHub" className="w-5 h-5" />
               <span className="font-medium text-neutral-700">GitHub</span>
             </button>
           </div>
 
           {/* Footer */}
           <p className="mt-8 text-center text-neutral-600">
-            Already have an account?{' '}
+            {auth.register.haveAccount}{' '}
             <Link to={ROUTES.LOGIN} className="font-semibold text-primary-600 hover:text-primary-700">
-              Sign in
+              {auth.register.signIn}
             </Link>
           </p>
         </div>

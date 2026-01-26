@@ -18,7 +18,6 @@ export default function Navbar() {
     { label: 'Cart', path: ROUTES.CART },
   ];
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -34,6 +33,14 @@ export default function Navbar() {
     setIsUserMenuOpen(false);
     setIsMobileMenuOpen(false);
     navigate(ROUTES.HOME);
+  };
+
+  const getUserInitial = () => {
+    return user?.name?.charAt(0)?.toUpperCase() || 'U';
+  };
+
+  const getUserFirstName = () => {
+    return user?.name?.split(' ')[0] || 'User';
   };
 
   return (
@@ -107,10 +114,10 @@ export default function Navbar() {
                   className="hidden sm:flex items-center gap-2 p-1.5 pr-3 rounded-lg hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
                 >
                   <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {user.name.charAt(0).toUpperCase()}
+                    {getUserInitial()}
                   </div>
                   <span className="font-medium text-sm text-neutral-700 max-w-[100px] truncate">
-                    {user.name.split(' ')[0]}
+                    {getUserFirstName()}
                   </span>
                   <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -119,8 +126,8 @@ export default function Navbar() {
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-100 py-2 animate-fade-in z-50">
                     <div className="px-4 py-3 border-b border-neutral-100">
-                      <p className="text-sm font-semibold text-neutral-900 truncate">{user.name}</p>
-                      <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+                      <p className="text-sm font-semibold text-neutral-900 truncate">{user.name || 'User'}</p>
+                      <p className="text-xs text-neutral-500 truncate">{user.email || ''}</p>
                     </div>
 
                     <div className="py-1">
@@ -221,11 +228,11 @@ export default function Navbar() {
                 <div className="border-t border-neutral-100 my-2 pt-2">
                   <div className="px-4 py-2 flex items-center gap-3">
                     <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
-                      {user.name.charAt(0).toUpperCase()}
+                      {getUserInitial()}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-neutral-900">{user.name}</p>
-                      <p className="text-xs text-neutral-500">{user.email}</p>
+                      <p className="text-sm font-semibold text-neutral-900">{user.name || 'User'}</p>
+                      <p className="text-xs text-neutral-500">{user.email || ''}</p>
                     </div>
                   </div>
                   <Link
@@ -274,4 +281,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

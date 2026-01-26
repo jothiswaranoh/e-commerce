@@ -7,37 +7,83 @@ servers:
   - url: http://localhost:3000/api/v1
     description: Development server
 
-paths:
-  /signup:
-    post:
-      summary: User Signup
-      tags:
-        - Authentication
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                user:
-                  type: object
-                  properties:
-                    email_address:
-                      type: string
-                      format: email
-                    password:
-                      type: string
-                    password_confirmation:
-                      type: string
-                    org_id:
-                      type: integer
-      responses:
-        '201':
-          description: Created
-        '422':
-          description: Unprocessable Entity
 
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    XOrgSlug:
+      name: X-Org-Slug
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Organization slug for multi-tenant resolution
+
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        org_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Men
+        slug:
+          type: string
+          example: men
+        parent_id:
+          type: integer
+          nullable: true
+          example: null
+        is_active:
+          type: boolean
+          example: true
+        sort_order:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CategoryInput:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+          example: Men
+        slug:
+          type: string
+          example: men
+        parent_id:
+          type: integer
+          nullable: true
+        is_active:
+          type: boolean
+          example: true
+        sort_order:
+          type: integer
+          example: 1
+
+security:
+  - BearerAuth: []
+
+paths:
   /login:
     post:
       summary: User Login
@@ -80,3 +126,140 @@ paths:
           description: Success
         '401':
           description: Unauthorized
+
+  /categories:
+    get:
+      summary: List categories
+      tags: [Categories]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+    post:
+      summary: Create a category
+      tags: [Categories]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category]
+              properties:
+                category:
+                  $ref: '#/components/schemas/CategoryInput'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '422':
+          description: Validation error
+
+  /categories/{id}:
+    get:
+      summary: Get category
+      tags: [Categories]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: Not found
+
+    put:
+      summary: Update category
+      tags: [Categories]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category]
+              properties:
+                category:
+                  $ref: '#/components/schemas/CategoryInput'
+      responses:
+        '200':
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '422':
+          description: Validation error
+
+    delete:
+      summary: Delete category
+      tags: [Categories]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Category deleted
+
+  /signup:
+    post:
+      summary: User Signup
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email_address:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                    password_confirmation:
+                      type: string
+                    org_id:
+                      type: integer
+      responses:
+        '201':
+          description: Created
+        '422':
+          description: Unprocessable Entity
+

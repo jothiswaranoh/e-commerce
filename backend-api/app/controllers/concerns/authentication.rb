@@ -24,11 +24,12 @@ module Authentication
     token = bearer_token
     return unless token
 
-    session = UserSession.active.find_by_access_token(token)
-    return unless session
+    payload = JsonWebToken.decode(token)
+    return unless payload
 
-    Current.session = session
-    Current.user    = session.user
+    Current.user = User.find_by(id: payload[:user_id])
+    return unless Current.user
+
     true
   end
 
@@ -46,7 +47,7 @@ module Authentication
   end
 
   def current_org
-    Current.org
+    Current.user.organization
   end
 
   # ---- Errors ----

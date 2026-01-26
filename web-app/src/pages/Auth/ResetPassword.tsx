@@ -5,7 +5,7 @@ import { ROUTES } from '../../config/routes.constants';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { toast } from 'react-toastify';
-import { resetPasswordWithToken } from '../../services/authService';
+import { authService } from '../../services/authService';
 import { validatePassword } from '../../utils/validators';
 import PasswordStrengthIndicator from '../../components/auth/PasswordStrengthIndicator';
 
@@ -37,7 +37,7 @@ export default function ResetPassword() {
 
         setIsLoading(true);
         try {
-            const response = await resetPasswordWithToken(token, password);
+            const response = await authService.resetPasswordWithToken(token, password);
             if (response.success) {
                 setIsSuccess(true);
                 toast.success('Password reset successfully');

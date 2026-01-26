@@ -6,13 +6,14 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resource :session, only: [:create, :destroy]
-
       resources :passwords, param: :token
+
 
       post   "signup", to: "registrations#create"
       post   "login",  to: "sessions#create"
       delete "logout", to: "sessions#destroy"
       get    "me",     to: "users#show"
+      resources :categories
     end
   end
 

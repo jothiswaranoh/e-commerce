@@ -2,7 +2,167 @@
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
 # Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+# https://docs.rubocop.org/rubocop/cops.html
+
+#################### Bundler ###############################
+
+Bundler:
+  Enabled: true
+
+#################### Layout ###############################
+
+Layout/AccessModifierIndentation:
+  Enabled: true
+
+Layout/ArgumentAlignment:
+  Enabled: true
+
+# Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: false
+
+#################### Lint ###############################
+
+Lint:
+  Enabled: true
+
+#################### Metrics ###############################
+
+# Metrics/CyclomaticComplexity:
+#   Enabled: true
+#   Max: 10
+
+# Metrics/MethodLength:
+#   Enabled: true
+#   CountComments: false
+#   Max: 20
+
+Metrics/ModuleLength:
+  Enabled: true
+  Max: 100
+  CountAsOne: ['array', 'hash', 'heredoc', 'method_call']
+
+#################### Naming ###############################
+
+Naming/ClassAndModuleCamelCase:
+  Enabled: true
+
+Naming/ConstantName:
+  Enabled: true
+
+Naming/FileName:
+  Enabled: true
+
+Naming/MethodName:
+  Enabled: true
+
+Naming/MethodParameterName:
+  Enabled: true
+
+Naming/VariableName:
+  Enabled: true
+
+Naming/VariableNumber:
+  Enabled: true
+  EnforcedStyle: snake_case
+
+#################### Rails ###############################
+# https://docs.rubocop.org/rubocop-rails/cops.html
+
+Rails:
+  Enabled: true
+
+Rails/ActionOrder:
+  Enabled: true
+
+Rails/ActiveRecordCallbacksOrder:
+  Enabled: true
+
+Rails/AttributeDefaultBlockValue:
+  Enabled: true
+
+Rails/DangerousColumnNames:
+  Enabled: true
+
+Rails/DuplicateAssociation:
+  Enabled: true
+
+Rails/DurationArithmetic:
+  Enabled: true
+
+Rails/EnumSyntax:
+  Enabled: true
+
+# Rails/EnvironmentVariableAccess:
+#   Enabled: true
+
+Rails/MailerName:
+  Enabled: true
+
+Rails/Pluck:
+  Enabled: true
+
+Rails/SelectMap:
+  Enabled: true
+
+Rails/SkipsModelValidations:
+  Exclude: ["db/seeds.rb"]
+
+Rails/TopLevelHashWithIndifferentAccess:
+  Enabled: true
+
+Rails/TransactionExitStatement:
+  Enabled: true
+
+Rails/WhereEquals:
+  Enabled: true
+
+Rails/WhereMissing:
+  Enabled: true
+
+Rails/WhereNot:
+  Enabled: true
+
+Rails/WhereNotWithMultipleConditions:
+  Enabled: true
+
+Rails/WhereRange:
+  Enabled: true
+
+#################### Security ###############################
+
+Security:
+  Enabled: true
+
+#################### Style ###############################
+
+Style/EachForSimpleLoop:
+  Enabled: true
+
+Style/EmptyCaseCondition:
+  Enabled: true
+
+Style/EmptyElse:
+  Enabled: true
+
+Style/EvenOdd:
+  Enabled: true
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: true
+  # If `comma`, the cop requires a comma after the last item in an array,
+  # but only when each item is on its own line.
+  # If `consistent_comma`, the cop requires a comma after the last item of all
+  # non-empty, multiline array literals.
+  EnforcedStyleForMultiline: consistent_comma
+  SupportedStylesForMultiline:
+    - comma
+    - consistent_comma
+    - no_comma
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: true
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/ZeroLengthPredicate:
+  Enabled: true

@@ -8,12 +8,12 @@ import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import { toast } from 'react-toastify';
-import { updateUserProfile, changeUserPassword, resendVerificationEmail } from '../services/authService';
 import { validatePassword } from '../utils/validators';
 import PasswordStrengthIndicator from '../components/auth/PasswordStrengthIndicator';
+import { authService } from '../services/authService';
 
 export default function Profile() {
-    const { user, updateUser } = useAuth();
+    const { user, updateUser } = authService;
     const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'orders'>('profile');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -63,7 +63,7 @@ export default function Profile() {
 
         setIsLoading(true);
         try {
-            const response = await changeUserPassword(passwordData.currentPassword, passwordData.newPassword);
+            const response = await authService.changeUserPassword(passwordData.currentPassword, passwordData.newPassword);
             if (response.success) {
                 toast.success('Password changed successfully');
                 setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -79,7 +79,7 @@ export default function Profile() {
 
     const handleResendVerification = async () => {
         try {
-            const response = await resendVerificationEmail();
+            const response = await authService.resendVerificationEmail();
             if (response.success) {
                 toast.success('Verification email sent');
             }

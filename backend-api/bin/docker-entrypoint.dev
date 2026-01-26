@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+echo "🔄 Installing missing gems if any..."
+bundle check || bundle install
+
+echo "🗄️ Running pending migrations..."
+bundle exec rails db:prepare
+
+exec "$@"

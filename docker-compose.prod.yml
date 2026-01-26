@@ -1,0 +1,46 @@
+# docker-compose.prod.yml
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-password}
+      POSTGRES_DB: ecommerce_production
+    networks:
+      - ecommerce_network_prod
+    restart: always
+
+  backend:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile.prod
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgresql://${DATABASE_USER:-postgres}:${DATABASE_PASSWORD:-password}@db:5432/ecommerce_production
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    depends_on:
+      - db
+    networks:
+      - ecommerce_network_prod
+    restart: always
+
+  frontend:
+    build:
+      context: ./web-app
+      dockerfile: Dockerfile.prod
+    depends_on:
+      - backend
+    networks:
+      - ecommerce_network_prod
+    ports:
+      - "80:80"
+    restart: always
+
+networks:
+  ecommerce_network_prod:
+    driver: bridge
+
+volumes:
+  postgres_data_prod:

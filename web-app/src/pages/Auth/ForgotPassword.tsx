@@ -5,7 +5,7 @@ import { ROUTES } from '../../config/routes.constants';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { toast } from 'react-toastify';
-import { sendPasswordResetEmail } from '../../services/authService';
+import { authService } from '../../services/authService';
 import { validateEmail } from '../../utils/validators';
 
 export default function ForgotPassword() {
@@ -23,7 +23,7 @@ export default function ForgotPassword() {
 
         setIsLoading(true);
         try {
-            const response = await sendPasswordResetEmail(email);
+            const response = await authService.sendPasswordResetEmail(email);
             if (response.success) {
                 setIsSubmitted(true);
                 toast.success('Reset link sent to your email');
