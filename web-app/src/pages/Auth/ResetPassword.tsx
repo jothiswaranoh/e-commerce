@@ -5,9 +5,9 @@ import { ROUTES } from '../../config/routes.constants';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { toast } from 'react-toastify';
-import { authService } from '../../services/authService';
 import { validatePassword } from '../../utils/validators';
 import PasswordStrengthIndicator from '../../components/auth/PasswordStrengthIndicator';
+import authService from '../../api/authService';
 
 export default function ResetPassword() {
     const { token } = useParams();

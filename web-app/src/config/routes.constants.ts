@@ -23,6 +23,7 @@ export const ROUTES = {
     ADMIN_PRODUCTS: '/admin/products',
     ADMIN_ORDERS: '/admin/orders',
     ADMIN_USERS: '/admin/users',
+    ADMIN_CATEGORY: '/admin/category',
 } as const;
 
 // Helper function to generate product detail route
@@ -48,6 +49,11 @@ export const ADMIN_NAV_ITEMS = [
     {
         label: 'Users',
         path: ROUTES.ADMIN_USERS,
+        icon: 'Users',
+    },
+    {
+        label: 'Categories',
+        path: ROUTES.ADMIN_CATEGORY,
         icon: 'Users',
     },
 ] as const;

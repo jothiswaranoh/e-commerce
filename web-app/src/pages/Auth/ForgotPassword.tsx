@@ -5,8 +5,8 @@ import { ROUTES } from '../../config/routes.constants';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { toast } from 'react-toastify';
-import { authService } from '../../services/authService';
 import { validateEmail } from '../../utils/validators';
+import authService from '../../api/authService';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');

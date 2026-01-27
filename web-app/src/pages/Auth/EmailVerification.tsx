@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { CheckCircle2, XCircle, Package, ArrowRight } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
 import Button from '../../components/ui/Button';
-import { authService } from '../../services/authService';
+import { authService } from '../../api/authService';
 
 export default function EmailVerification() {
     const { token } = useParams();

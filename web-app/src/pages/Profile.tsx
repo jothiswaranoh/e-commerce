@@ -10,7 +10,8 @@ import Badge from '../components/ui/Badge';
 import { toast } from 'react-toastify';
 import { validatePassword } from '../utils/validators';
 import PasswordStrengthIndicator from '../components/auth/PasswordStrengthIndicator';
-import { authService } from '../services/authService';
+import authService from '../api/authService';
+
 
 export default function Profile() {
     const { user, updateUser } = authService;

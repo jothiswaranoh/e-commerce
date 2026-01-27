@@ -1,5 +1,5 @@
 import { apiService, service } from './apiService';
-import { TokenManager } from './TokenManager';
+import { TokenManager } from '../services/TokenManager';
 import type { User, AuthResponse } from '../types';
 
 // Auth Service

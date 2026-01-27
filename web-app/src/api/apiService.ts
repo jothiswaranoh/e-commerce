@@ -4,7 +4,7 @@ import axios, {
     AxiosResponse,
     InternalAxiosRequestConfig,
 } from 'axios';
-import { TokenManager } from './TokenManager';
+import { TokenManager } from '../services/TokenManager';
 
 // --------------------
 // API Response Types
