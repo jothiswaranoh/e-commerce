@@ -6,7 +6,7 @@
 
 // ==================== BRAND ====================
 export const BRAND = {
-    name: 'ShopHubs',
+    name: 'ShopHub',
     tagline: 'Your Premium Shopping Destination',
     logo: '/logo.svg',
     logoAlt: 'ShopHub Logo',
