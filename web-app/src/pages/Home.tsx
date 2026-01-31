@@ -7,11 +7,13 @@ import { Product } from '../types';
 import { ROUTES } from '../config/routes.constants';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { HOME } from '../config/ui.config';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -89,59 +91,71 @@ export default function Home() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Discover Amazing
+              {HOME.hero.title}
               <span className="block bg-gradient-to-r from-white to-accent-200 bg-clip-text text-transparent">
-                Products Today
+                
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
-              Shop the latest trends with unbeatable prices and fast, free shipping on orders over ₹999
+              {HOME.hero.tagline}
+
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to={ROUTES.PRODUCTS}>
                 <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
-                  Shop Now
+                  {HOME.hero.primaryCTA}
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
               <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-white text-white hover:bg-white/10">
-                View Collections
+                {HOME.hero.secondaryCTA}
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-white py-12 border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 p-4 rounded-xl hover:bg-neutral-50 transition-colors"
-              >
-                <div className="p-3 bg-gradient-to-br from-primary-100 to-accent-100 rounded-lg">
-                  <feature.icon className="w-6 h-6 text-primary-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-neutral-900">{feature.title}</h3>
-                  <p className="text-sm text-neutral-600">{feature.description}</p>
-                </div>
-              </div>
-            ))}
+     {/* Features */}
+<section className="bg-white py-12 border-b border-neutral-100">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+      {features.map((feature, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-4 p-4 rounded-xl hover:bg-neutral-50 transition-colors"
+        >
+          {/* Icon */}
+          <div className="p-3 bg-gradient-to-br from-primary-100 to-accent-100 rounded-lg">
+            <feature.icon className="w-6 h-6 text-primary-600" />
           </div>
+
+          {/* Text */}
+          <div>
+            <h3 className="font-semibold text-neutral-900">
+              {feature.title}
+            </h3>
+            <p className="text-sm text-neutral-600">
+              {feature.description}
+            </p>
+          </div>
+
         </div>
-      </section>
+      ))}
+
+    </div>
+  </div>
+</section>
+
 
       {/* Categories */}
       <section className="py-16 bg-neutral-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-neutral-900 mb-4">Shop by Category</h2>
-            <p className="text-lg text-neutral-600">Explore our wide range of products</p>
+            <h2 className="text-4xl font-bold text-neutral-900 mb-4">{HOME.sections.categories.title}</h2>
+            <p className="text-lg text-neutral-600">{HOME.sections.categories.subtitle}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -172,8 +186,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-4xl font-bold text-neutral-900 mb-2">Featured Products</h2>
-              <p className="text-lg text-neutral-600">Handpicked items just for you</p>
+              <h2 className="text-4xl font-bold text-neutral-900 mb-2">{HOME.sections.featured.title}</h2>
+              <p className="text-lg text-neutral-600">{HOME.sections.featured.subtitle}</p>
             </div>
             <Link to={ROUTES.PRODUCTS}>
               <Button variant="outline">
@@ -211,14 +225,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Special Offer: Up to 50% Off!
+              {HOME.sections.promotion.title}
             </h2>
             <p className="text-xl mb-8 text-white/90">
-              Limited time offer on selected items. Don't miss out on amazing deals!
+              {HOME.sections.promotion.subtitle}
             </p>
             <Link to={ROUTES.PRODUCTS}>
               <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
-                Shop Deals Now
+                {HOME.sections.promotion.primaryCTA}
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
@@ -229,21 +243,21 @@ export default function Home() {
       {/* Newsletter */}
       <section className="py-16 bg-neutral-900 text-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Stay Updated</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{HOME.sections.newsletter.title}</h2>
           <p className="text-lg text-neutral-300 mb-8">
-            Subscribe to our newsletter for exclusive deals and new arrivals
+            {HOME.sections.newsletter.subtitle}
           </p>
 
           <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
             <Input
               type="email"
-              placeholder="Enter your email"
+              placeholder={HOME.sections.newsletter.description}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="flex-1 bg-white"
             />
-            <Button type="submit" size="lg" variant="primary">
-              Subscribe
+            <Button type="submit" size="sm" variant="primary">
+              {HOME.sections.newsletter.primaryCTA}
             </Button>
           </form>
         </div>
