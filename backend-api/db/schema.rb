@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_31_133332) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -51,6 +51,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_133332) do
   create_table "orders", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "org_id", null: false
+    t.bigint "user_id", null: false
+    t.string "order_number"
+    t.string "status", default: "pending"
+    t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
+    t.decimal "tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "shipping_fee", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total", precision: 12, scale: 2, default: "0.0"
+    t.string "payment_status", default: "unpaid"
+    t.string "payment_method"
+    t.text "shipping_address"
+    t.text "billing_address"
+    t.index ["order_number"], name: "index_orders_on_order_number", unique: true
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -150,6 +163,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_133332) do
   add_foreign_key "carts", "organizations", column: "org_id"
   add_foreign_key "carts", "users"
   add_foreign_key "categories", "organizations", column: "org_id"
+  add_foreign_key "orders", "organizations", column: "org_id"
+  add_foreign_key "orders", "users"
   add_foreign_key "payments", "orders"
   add_foreign_key "product_attributes", "products"
   add_foreign_key "product_variants", "products"
