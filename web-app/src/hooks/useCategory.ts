@@ -10,7 +10,7 @@ const CATEGORY_KEYS = {
     detail: (id: number) => ['categories', id] as const,
 };
 
-/* =========================
+/* =========================pn
    Queries
 ========================= */
 
