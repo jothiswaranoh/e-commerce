@@ -10,9 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_31_165655) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_31_104909) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "cart_items", force: :cascade do |t|
+    t.bigint "cart_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.decimal "price", precision: 10, scale: 2, null: false
+    t.integer "quantity", default: 1
+    t.decimal "total", precision: 12, scale: 2, default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "carts", force: :cascade do |t|
+    t.bigint "org_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_id"], name: "index_carts_on_org_id"
+    t.index ["user_id"], name: "index_carts_on_user_id"
+  end
 
   create_table "categories", force: :cascade do |t|
     t.bigint "org_id", null: false
@@ -26,6 +46,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_31_165655) do
     t.index ["org_id", "slug"], name: "index_categories_on_org_id_and_slug", unique: true
     t.index ["org_id"], name: "index_categories_on_org_id"
     t.index ["parent_id"], name: "index_categories_on_parent_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -105,6 +130,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_31_165655) do
     t.index ["org_id"], name: "index_users_on_org_id"
   end
 
+  add_foreign_key "cart_items", "carts"
+  add_foreign_key "cart_items", "product_variants"
+  add_foreign_key "cart_items", "products"
+  add_foreign_key "carts", "organizations", column: "org_id"
+  add_foreign_key "carts", "users"
   add_foreign_key "categories", "organizations", column: "org_id"
   add_foreign_key "product_attributes", "products"
   add_foreign_key "product_variants", "products"
