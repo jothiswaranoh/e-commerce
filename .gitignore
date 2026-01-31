@@ -26,3 +26,6 @@ backend-api/tmp/storage/*
 
 # Ignore master key for decrypting credentials and more.
 backend-api/config/master.key
+.DS_Store
+.DS_Store
+.DS_Store
