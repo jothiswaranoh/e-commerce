@@ -14,7 +14,7 @@ export default function CategoryTable({ categories, onEdit, onDelete }: Props) {
                 <thead className="bg-neutral-50 border-b">
                     <tr>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600">Slug</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600">Description</th>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600">Status</th>
                         <th className="px-6 py-3 text-right text-xs font-semibold text-neutral-600">Actions</th>
                     </tr>

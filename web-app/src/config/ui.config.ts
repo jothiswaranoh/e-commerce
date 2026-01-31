@@ -6,7 +6,7 @@
 
 // ==================== BRAND ====================
 export const BRAND = {
-    name: 'ShopHubs',
+    name: 'ShopHub',
     tagline: 'Your Premium Shopping Destination',
     logo: '/logo.svg',
     logoAlt: 'ShopHub Logo',
@@ -82,8 +82,10 @@ export const HOME = {
     hero: {
         title: 'Elevate Your Style',
         subtitle: 'Discover curated collections of premium products',
-        primaryCTA: 'Shop Now',
-        secondaryCTA: 'Browse Collections',
+        primaryCTA: 'Start Shopping',
+        secondaryCTA: 'Explore Collections',
+        tagline:'Latest trends! Unbeatable prices!' ,
+
     },
 
     features: [
@@ -116,8 +118,20 @@ export const HOME = {
         },
         categories: {
             title: 'Shop by Category',
-            subtitle: 'Find what you need',
+            subtitle: 'Explore our wide range of products',
         },
+        promotion: {
+            title:'Special offer:Up to 50% off',
+            subtitle:' Limited time offer on selected items. Dont miss out on amazing deals!',
+            primaryCTA: 'Shop deals now' ,     
+        },
+        newsletter: {
+            title:'Stay updated',
+            subtitle: 'Subscribe to our newsletter for exclusive deals and new arrivals',
+            description:'Enter your email',
+            primaryCTA:'Join us'
+
+        }
     },
 } as const;
 

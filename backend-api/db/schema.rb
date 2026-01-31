@@ -40,6 +40,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_101550) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
+  create_table "cart_items", force: :cascade do |t|
+    t.bigint "cart_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.decimal "price", precision: 10, scale: 2, null: false
+    t.integer "quantity", default: 1
+    t.decimal "total", precision: 12, scale: 2, default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "carts", force: :cascade do |t|
+    t.bigint "org_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_id"], name: "index_carts_on_org_id"
+    t.index ["user_id"], name: "index_carts_on_user_id"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -56,12 +78,44 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_101550) do
     t.index ["parent_id"], name: "index_categories_on_parent_id"
   end
 
+  create_table "orders", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "org_id", null: false
+    t.bigint "user_id", null: false
+    t.string "order_number"
+    t.string "status", default: "pending"
+    t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
+    t.decimal "tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "shipping_fee", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total", precision: 12, scale: 2, default: "0.0"
+    t.string "payment_status", default: "unpaid"
+    t.string "payment_method"
+    t.text "shipping_address"
+    t.text "billing_address"
+    t.index ["order_number"], name: "index_orders_on_order_number", unique: true
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name"
     t.string "slug"
     t.boolean "is_active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.string "provider"
+    t.string "payment_reference"
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.string "currency", default: "INR"
+    t.string "status", default: "pending"
+    t.jsonb "gateway_response"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_payments_on_order_id"
+    t.index ["payment_reference"], name: "index_payments_on_payment_reference", unique: true
   end
 
   create_table "product_attributes", force: :cascade do |t|
@@ -135,7 +189,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_101550) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  
+  add_foreign_key "cart_items", "carts"
+  add_foreign_key "cart_items", "product_variants"
+  add_foreign_key "cart_items", "products"
+  add_foreign_key "carts", "organizations", column: "org_id"
+  add_foreign_key "carts", "users"
   add_foreign_key "categories", "organizations", column: "org_id"
+  add_foreign_key "orders", "organizations", column: "org_id"
+  add_foreign_key "orders", "users"
+  add_foreign_key "payments", "orders"
   add_foreign_key "product_attributes", "products"
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Package, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
+import { FOOTER,CONTACT,SOCIAL,BRAND} from '../config/ui.config';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -15,24 +16,24 @@ export default function Footer() {
               <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
                 <Package className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-white">ShopHub</span>
+              <span className="text-2xl font-bold text-white">{BRAND.name}</span>
             </Link>
             <p className="text-sm text-neutral-400 mb-4">
-              Your trusted e-commerce destination for quality products at great prices.
+              {FOOTER.description}
             </p>
 
             {/* Social Media */}
             <div className="flex gap-3">
-              <a href="#" className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
+              <a href={SOCIAL.facebook} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
+              <a href={SOCIAL.twitter} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
+              <a href={SOCIAL.instagram} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
+              <a href={SOCIAL.linkedin} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
                 <Linkedin className="w-5 h-5" />
               </a>
             </div>
@@ -40,26 +41,26 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-white text-lg font-semibold mb-4">{FOOTER.sections.quickLinks.title}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to={ROUTES.HOME} className="hover:text-primary-400 transition-colors">
-                  Home
+                  {FOOTER.sections.quickLinks.home}
                 </Link>
               </li>
               <li>
                 <Link to={ROUTES.PRODUCTS} className="hover:text-primary-400 transition-colors">
-                  Products
+                  {FOOTER.sections.quickLinks.products}
                 </Link>
               </li>
               <li>
                 <Link to={ROUTES.CART} className="hover:text-primary-400 transition-colors">
-                  Shopping Cart
+                  {FOOTER.sections.quickLinks.cart}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-400 transition-colors">
-                  About Us
+                  {FOOTER.sections.quickLinks.about}
                 </Link>
               </li>
             </ul>
@@ -67,26 +68,26 @@ export default function Footer() {
 
           {/* Customer Service */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">Customer Service</h3>
+            <h3 className="text-white text-lg font-semibold mb-4">{FOOTER.sections.customerService.title}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="#" className="hover:text-primary-400 transition-colors">
-                  Contact Us
+                  {FOOTER.sections.customerService.contact}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-400 transition-colors">
-                  Shipping Info
+                  {FOOTER.sections.customerService.shipping}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-400 transition-colors">
-                  Returns
+                  {FOOTER.sections.customerService.returns}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-400 transition-colors">
-                  FAQ
+                  {FOOTER.sections.customerService.faq}
                 </Link>
               </li>
             </ul>
@@ -94,19 +95,19 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">Contact Us</h3>
+            <h3 className="text-white text-lg font-semibold mb-4">{FOOTER.sections.contactUs.title}</h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">
                 <Mail className="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5" />
-                <span>support@shophub.com</span>
+                <span>{CONTACT.email}</span>
               </li>
               <li className="flex items-start gap-2">
                 <Phone className="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5" />
-                <span>+91 1234567890</span>
+                <span>{CONTACT.phone}</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5" />
-                <span>123 Commerce Street, Mumbai, India</span>
+                <span>{CONTACT.address}</span>
               </li>
             </ul>
           </div>
@@ -118,13 +119,13 @@ export default function Footer() {
             <p>&copy; {currentYear} ShopHub. All rights reserved.</p>
             <div className="flex gap-6">
               <Link to="#" className="hover:text-primary-400 transition-colors">
-                Privacy Policy
+                {FOOTER.legal.privacyPolicy}
               </Link>
               <Link to="#" className="hover:text-primary-400 transition-colors">
-                Terms of Service
+                {FOOTER.legal.termsOfService}
               </Link>
               <Link to="#" className="hover:text-primary-400 transition-colors">
-                Cookie Policy
+                {FOOTER.legal.cookiePolicy}
               </Link>
             </div>
           </div>
