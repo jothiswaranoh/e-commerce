@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       delete "logout", to: "sessions#destroy"
       get    "me",     to: "users#show"
       resources :categories
+      resources :products
     end
   end
 
