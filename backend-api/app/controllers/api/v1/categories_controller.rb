@@ -1,13 +1,12 @@
 module Api
   module V1
     class CategoriesController < ApplicationController
-      before_action :set_category, only: [:show, :update, :destroy]
+        include Authorization
+        load_and_authorize_resource
 
       # GET /api/v1/categories
       def index
-        categories = current_org.categories.order(:sort_order)
-
-        render json: categories
+        render json: @categories.order(:sort_order)
       end
 
       # GET /api/v1/categories/:id
@@ -17,12 +16,12 @@ module Api
 
       # POST /api/v1/categories
       def create
-        category = current_org.categories.new(category_params)
+        @category.org_id = current_user.org_id
 
-        if category.save
-          render json: category, status: :created
+        if @category.save
+          render json: @category, status: :created
         else
-          render json: { errors: category.errors.full_messages }, status: :unprocessable_entity
+          render json: { errors: @category.errors.full_messages }, status: :unprocessable_entity
         end
       end
 
@@ -42,11 +41,6 @@ module Api
       end
 
       private
-
-      # 🔐 Org-scoped lookup (NO DATA LEAKS)
-      def set_category
-        @category = current_org.categories.find(params[:id])
-      end
 
       def category_params
         params.require(:category).permit(
