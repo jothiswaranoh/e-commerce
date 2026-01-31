@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Package, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
-import { FOOTER,CONTACT,SOCIAL} from '../config/ui.config';
+import { FOOTER,CONTACT,SOCIAL,BRAND} from '../config/ui.config';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -16,10 +16,10 @@ export default function Footer() {
               <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
                 <Package className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-white">ShopHub</span>
+              <span className="text-2xl font-bold text-white">{BRAND.name}</span>
             </Link>
             <p className="text-sm text-neutral-400 mb-4">
-              Your trusted e-commerce destination for quality products at great prices.
+              {FOOTER.description}
             </p>
 
             {/* Social Media */}
@@ -119,13 +119,13 @@ export default function Footer() {
             <p>&copy; {currentYear} ShopHub. All rights reserved.</p>
             <div className="flex gap-6">
               <Link to="#" className="hover:text-primary-400 transition-colors">
-                Privacy Policy
+                {FOOTER.legal.privacyPolicy}
               </Link>
               <Link to="#" className="hover:text-primary-400 transition-colors">
-                Terms of Service
+                {FOOTER.legal.termsOfService}
               </Link>
               <Link to="#" className="hover:text-primary-400 transition-colors">
-                Cookie Policy
+                {FOOTER.legal.cookiePolicy}
               </Link>
             </div>
           </div>
