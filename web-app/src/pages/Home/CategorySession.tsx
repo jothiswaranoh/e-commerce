@@ -13,10 +13,8 @@ type Category = {
 
 
 
-  const { data: categories = [], isLoading } = useCategories();
-
-
 export default function CategoriesSection() {
+  const { data: categories = [], isLoading } = useCategories();
   return (
     <section className="py-16 bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

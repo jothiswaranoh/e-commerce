@@ -16,6 +16,8 @@ export interface Category {
     sort_order: number;
     created_at: string;
     updated_at: string;
+    image?: string | null;
+    count?: string | number;
 }
 
 export interface CategoryPayload {
