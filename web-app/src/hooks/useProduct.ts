@@ -2,11 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productService } from '../services/productService';
 import { ProductFormData } from '../types/product';
 
-export const useProducts = () => {
+export const useProducts = (params?: Record<string, any>) => {
     return useQuery({
-        queryKey: ['products'],
+        queryKey: ['products', params],
         queryFn: async () => {
-            const response = await productService.getProducts();
+            const response = await productService.getProducts(params);
             if (!response.success) throw new Error(response.message);
             return response.data || [];
         },
@@ -40,7 +40,7 @@ export const useUpdateProduct = () => {
     return useMutation({
         mutationFn: ({ id, data }: { id: string | number; data: ProductFormData }) =>
             productService.updateProduct(id, data),
-        onSuccess: (response, variables) => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
             queryClient.invalidateQueries({ queryKey: ['products', variables.id] });
         },

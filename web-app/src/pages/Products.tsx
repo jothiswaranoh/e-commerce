@@ -160,8 +160,8 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`p-2 rounded-md transition-colors ${viewMode === 'grid'
-                          ? 'bg-white text-primary-600 shadow-sm'
-                          : 'text-neutral-600 hover:text-neutral-900'
+                        ? 'bg-white text-primary-600 shadow-sm'
+                        : 'text-neutral-600 hover:text-neutral-900'
                         }`}
                     >
                       <Grid3x3 className="w-5 h-5" />
@@ -169,8 +169,8 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode('list')}
                       className={`p-2 rounded-md transition-colors ${viewMode === 'list'
-                          ? 'bg-white text-primary-600 shadow-sm'
-                          : 'text-neutral-600 hover:text-neutral-900'
+                        ? 'bg-white text-primary-600 shadow-sm'
+                        : 'text-neutral-600 hover:text-neutral-900'
                         }`}
                     >
                       <List className="w-5 h-5" />

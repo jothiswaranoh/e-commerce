@@ -1,11 +1,14 @@
 module Api
   module V1
     class ProductsController < ApplicationController
+      allow_unauthenticated_access only: %i[index show]
       before_action :set_product, only: [:show, :update, :destroy]
 
       # GET /api/v1/products
       def index
-        products = current_org.products.includes(:variants, :product_attributes, :category)
+        org = current_org || Organization.first
+        products = org.products.includes(:variants, :product_attributes, :category)
+        products = products.featured if params[:featured] == 'true'
         render json: products, include: [:variants, :product_attributes, :category]
       end
 
@@ -43,7 +46,12 @@ module Api
       private
 
       def set_product
-        @product = current_org.products.find(params[:id])
+        org = current_org || Organization.first
+        @product = org.products.find(params[:id])
+      end
+
+      def current_org
+        Current.user&.organization
       end
 
       def product_params
@@ -52,6 +60,7 @@ module Api
           :slug,
           :description,
           :status,
+          :is_featured,
           :category_id,
           variants_attributes: [:id, :sku, :price, :stock, :_destroy],
           product_attributes_attributes: [:id, :key, :value, :_destroy]

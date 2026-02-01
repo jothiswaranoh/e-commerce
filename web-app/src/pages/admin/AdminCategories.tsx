@@ -40,8 +40,9 @@ export default function AdminCategories() {
             await createMutation.mutateAsync(payload);
             toast.success('Category created');
             setIsCreateOpen(false);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to create category:', error);
+            toast.error(error.response?.data?.message || error.message || 'Failed to create category');
         }
     };
 

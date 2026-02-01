@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
-import { mockApi } from '../../services/mockApi';
-import { Product } from '../../types';
 import { ROUTES } from '../../config/routes.constants';
 import Button from '../../components/ui/Button';
 import { HOME } from '../../config/ui.config';
+import { mockApi } from '../../services/mockApi';
+import { Product } from '../../types';
 
 export default function FeaturedProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -15,7 +15,9 @@ export default function FeaturedProductsSection() {
     const fetchProducts = async () => {
       try {
         const data = await mockApi.getAllProducts();
-        setProducts(data.slice(0, 8));
+        setProducts(data.slice(0, 8)); // Display first 8 products from mock data
+      } catch (error) {
+        console.error('Error fetching featured products:', error);
       } finally {
         setLoading(false);
       }
@@ -49,11 +51,20 @@ export default function FeaturedProductsSection() {
               <div key={i} className="bg-neutral-100 rounded-xl h-96 animate-shimmer" />
             ))}
           </div>
-        ) : (
+        ) : products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map(product => (
-              <ProductCard key={product.id} {...product} />
+              <ProductCard
+                key={product.id}
+                {...product}
+                id={String(product.id)}
+                category={typeof product.category === 'string' ? product.category : product.category?.name}
+              />
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-neutral-50 rounded-xl">
+            <p className="text-neutral-500 text-lg">No products found.</p>
           </div>
         )}
       </div>

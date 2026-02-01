@@ -2,7 +2,7 @@ import { apiService } from '../api/apiService';
 import { Product, ProductFormData } from '../types/product';
 
 export const productService = {
-    getProducts: () => apiService.get<Product[]>('/products'),
+    getProducts: (params?: Record<string, any>) => apiService.get<Product[]>('/products', { params }),
 
     getProduct: (id: string | number) => apiService.get<Product>(`/products/${id}`),
 

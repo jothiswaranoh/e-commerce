@@ -46,6 +46,7 @@ export default function AdminProducts() {
         stock: '',
         description: '',
         status: 'active' as const,
+        is_featured: false,
     });
 
     const isLoading = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
@@ -63,6 +64,7 @@ export default function AdminProducts() {
             slug: formData.slug || formData.name.toLowerCase().replace(/ /g, '-'),
             category_id: Number(formData.category_id),
             status: formData.status,
+            is_featured: formData.is_featured,
             description: formData.description,
             variants_attributes: [{
                 sku: `${formData.name.substring(0, 3).toUpperCase()}-${Date.now()}`,
@@ -74,7 +76,7 @@ export default function AdminProducts() {
         try {
             await createMutation.mutateAsync(data);
             setIsAddModalOpen(false);
-            setFormData({ name: '', slug: '', category_id: '', price: '', stock: '', description: '', status: 'active' });
+            setFormData({ name: '', slug: '', category_id: '', price: '', stock: '', description: '', status: 'active', is_featured: false });
             toast.success('Product added successfully!');
         } catch (error: any) {
             toast.error(error.message || 'Failed to add product');
@@ -89,6 +91,7 @@ export default function AdminProducts() {
             slug: formData.slug,
             category_id: Number(formData.category_id),
             status: formData.status,
+            is_featured: formData.is_featured,
             description: formData.description,
             variants_attributes: selectedProduct.variants.map(v => ({
                 id: v.id,
@@ -131,6 +134,7 @@ export default function AdminProducts() {
             stock: String(mainVariant?.stock || 0),
             description: product.description || '',
             status: product.status as any,
+            is_featured: product.is_featured || false,
         });
         setIsEditModalOpen(true);
     };
@@ -226,6 +230,19 @@ export default function AdminProducts() {
                 </div>
             </div>
 
+            <div className="flex items-center gap-2 pb-4">
+                <input
+                    type="checkbox"
+                    id="is_featured"
+                    checked={formData.is_featured}
+                    onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <label htmlFor="is_featured" className="text-sm font-medium text-neutral-700">
+                    Featured Product
+                </label>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
                 <Input
                     label="Price (₹)"
@@ -264,7 +281,7 @@ export default function AdminProducts() {
                     onClick={() => {
                         setIsAddModalOpen(false);
                         setIsEditModalOpen(false);
-                        setFormData({ name: '', slug: '', category_id: '', price: '', stock: '', description: '', status: 'active' });
+                        setFormData({ name: '', slug: '', category_id: '', price: '', stock: '', description: '', status: 'active', is_featured: false });
                     }}
                 >
                     Cancel
@@ -378,7 +395,7 @@ export default function AdminProducts() {
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 bg-neutral-100 rounded-lg"></div>
                                             <div>
-                                                <p className="font-semibold text-neutral-900">{product.name}</p>
+                                                <p className="font-semibold text-neutral-900">{product.name} {product.is_featured && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full ml-2">Featured</span>}</p>
                                                 <p className="text-sm text-neutral-500">ID: {product.id}</p>
                                             </div>
                                         </div>
@@ -472,6 +489,10 @@ export default function AdminProducts() {
                             <div>
                                 <label className="text-sm font-medium text-neutral-600">Status</label>
                                 <div className="mt-1">{getStatusBadge(selectedProduct.status, selectedProduct.stock)}</div>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-neutral-600">Featured</label>
+                                <p className="text-neutral-900">{selectedProduct.is_featured ? 'Yes' : 'No'}</p>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">

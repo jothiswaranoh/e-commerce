@@ -15,4 +15,6 @@ class Product < ApplicationRecord
   validates :org_id, presence: true
   validates :category_id, presence: true
   validates :status, inclusion: { in: %w[active inactive archived], message: "%{value} is not a valid status" }
+
+  scope :featured, -> { where(is_featured: true) }
 end

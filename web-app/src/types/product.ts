@@ -19,6 +19,7 @@ export interface Product {
     slug: string;
     description?: string;
     status: 'active' | 'inactive' | 'archived';
+    is_featured?: boolean;
     org_id?: number | string;
     category_id: number | string;
     category?: {
