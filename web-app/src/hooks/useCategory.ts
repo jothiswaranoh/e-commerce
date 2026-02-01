@@ -20,7 +20,8 @@ export function useCategories() {
         queryFn: async () => {
             const res = await CategoryAPI.list();
             if (!res.success) throw res;
-            return res.data as Category[];
+            // API returns wrapped response { success: true, data: [...] }
+            return (res.data as any).data as Category[];
         },
     });
 }
@@ -31,7 +32,8 @@ export function useCategory(id: number) {
         queryFn: async () => {
             const res = await CategoryAPI.get(id);
             if (!res.success) throw res;
-            return res.data as Category;
+            // API returns wrapped response { success: true, data: {...} }
+            return (res.data as any).data as Category;
         },
         enabled: !!id,
     });
