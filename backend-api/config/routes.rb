@@ -1,18 +1,30 @@
 Rails.application.routes.draw do
   # Swagger UI
-  mount Rswag::Ui::Engine => '/api-docs'
-  mount Rswag::Api::Engine => '/api-docs'
+  mount Rswag::Ui::Engine => "/api-docs"
+  mount Rswag::Api::Engine => "/api-docs"
 
   namespace :api do
     namespace :v1 do
-      resource :session, only: [:create, :destroy]
-      resources :passwords, param: :token
-
-
+      # Auth
       post   "signup", to: "registrations#create"
       post   "login",  to: "sessions#create"
       delete "logout", to: "sessions#destroy"
       get    "me",     to: "users#show"
+
+      resource :session, only: [:create, :destroy]
+      resources :passwords, param: :token
+
+      # Cart (one per user)
+      resource :cart, only: [:show] do
+        post   :add_item
+        patch  "items/:id", action: :update_item
+        delete "items/:id", action: :remove_item
+      end
+
+      # Orders
+      resources :orders, only: [:index, :show, :create]
+
+      # Catalog
       resources :categories
       resources :products
     end

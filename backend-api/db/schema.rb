@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_01_110544) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,19 +45,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
   create_table "cart_items", force: :cascade do |t|
     t.bigint "cart_id", null: false
     t.bigint "product_id", null: false
-    t.bigint "product_variant_id"
-    t.decimal "price", precision: 10, scale: 2, null: false
-    t.integer "quantity", default: 1
-    t.decimal "total", precision: 12, scale: 2, default: "0.0"
+    t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "price", precision: 10, scale: 2
+    t.decimal "total", precision: 10, scale: 2, default: "0.0", null: false
+    t.index ["cart_id"], name: "index_cart_items_on_cart_id"
+    t.index ["product_id"], name: "index_cart_items_on_product_id"
   end
 
   create_table "carts", force: :cascade do |t|
-    t.bigint "org_id", null: false
-    t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "org_id"
+    t.bigint "user_id"
+    t.index ["org_id"], name: "index_carts_on_org_id"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -70,25 +72,41 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["org_id", "slug"], name: "index_categories_on_org_id_and_slug", unique: true
+    t.index ["org_id"], name: "index_categories_on_org_id"
     t.index ["parent_id"], name: "index_categories_on_parent_id"
   end
 
-  create_table "orders", force: :cascade do |t|
-    t.bigint "org_id", null: false
-    t.bigint "user_id", null: false
-    t.string "order_number"
-    t.string "status", default: "pending"
-    t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
-    t.decimal "tax", precision: 12, scale: 2, default: "0.0"
-    t.decimal "shipping_fee", precision: 12, scale: 2, default: "0.0"
-    t.decimal "total", precision: 12, scale: 2, default: "0.0"
-    t.string "payment_status", default: "unpaid"
-    t.string "payment_method"
-    t.text "shipping_address"
-    t.text "billing_address"
+  create_table "order_items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "order_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "product_variant_id"
+    t.decimal "price", precision: 12, scale: 2, default: "0.0", null: false
+    t.integer "quantity", default: 1, null: false
+    t.decimal "total", precision: 12, scale: 2, default: "0.0", null: false
+    t.string "product_name"
+    t.index ["order_id", "product_id"], name: "index_order_items_on_order_id_and_product_id"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+    t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.string "status"
+    t.bigint "org_id", null: false
+    t.string "order_number", null: false
+    t.string "payment_status", default: "unpaid", null: false
+    t.decimal "subtotal", precision: 10, scale: 2, default: "0.0"
+    t.decimal "tax", precision: 10, scale: 2, default: "0.0"
+    t.decimal "shipping_fee", precision: 10, scale: 2, default: "0.0"
+    t.decimal "total", precision: 10, scale: 2, default: "0.0"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
+    t.index ["org_id"], name: "index_orders_on_org_id"
+    t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -109,6 +127,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
     t.jsonb "gateway_response"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_payments_on_order_id"
     t.index ["payment_reference"], name: "index_payments_on_payment_reference", unique: true
   end
 
@@ -119,6 +138,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["product_id", "key"], name: "index_product_attributes_on_product_id_and_key"
+    t.index ["product_id"], name: "index_product_attributes_on_product_id"
   end
 
   create_table "product_variants", force: :cascade do |t|
@@ -129,6 +149,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_variants_on_product_id"
     t.index ["sku"], name: "index_product_variants_on_sku", unique: true
   end
 
@@ -143,6 +164,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["org_id", "slug"], name: "index_products_on_org_id_and_slug", unique: true
+    t.index ["org_id"], name: "index_products_on_org_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -151,6 +173,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
     t.string "user_agent"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
   create_table "user_sessions", force: :cascade do |t|
@@ -163,15 +186,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
     t.datetime "revoked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_sessions_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "password_digest", null: false
-    t.bigint "org_id", null: false
-    t.string "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "org_id", null: false
+    t.string "role"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["org_id"], name: "index_users_on_org_id"
   end
@@ -179,11 +203,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_31_135741) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "cart_items", "carts"
-  add_foreign_key "cart_items", "product_variants"
   add_foreign_key "cart_items", "products"
   add_foreign_key "carts", "organizations", column: "org_id"
-  add_foreign_key "carts", "users"
   add_foreign_key "categories", "organizations", column: "org_id"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "product_variants"
+  add_foreign_key "order_items", "products"
   add_foreign_key "orders", "organizations", column: "org_id"
   add_foreign_key "orders", "users"
   add_foreign_key "payments", "orders"
