@@ -1,43 +1,40 @@
 module Api
   module V1
     class CategoriesController < ApplicationController
-        include Authorization
-        load_and_authorize_resource
+      include Authorization
+      include ResponseRenderingConcern
+
+      load_and_authorize_resource
 
       # GET /api/v1/categories
       def index
-        render json: @categories.order(:sort_order)
+        handle_response(@categories.order(:sort_order))
       end
 
       # GET /api/v1/categories/:id
       def show
-        render json: @category
+        handle_response(@category)
       end
 
       # POST /api/v1/categories
       def create
+        @category = Category.new(category_params)
         @category.org_id = current_user.org_id
 
-        if @category.save
-          render json: @category, status: :created
-        else
-          render json: { errors: @category.errors.full_messages }, status: :unprocessable_entity
-        end
+        @category.save
+        handle_response(@category, "common.created", nil, :created)
       end
 
       # PATCH/PUT /api/v1/categories/:id
       def update
-        if @category.update(category_params)
-          render json: @category
-        else
-          render json: { errors: @category.errors.full_messages }, status: :unprocessable_entity
-        end
+        @category.update(category_params)
+        handle_response(@category)
       end
 
       # DELETE /api/v1/categories/:id
       def destroy
         @category.destroy
-        head :no_content
+        handle_response(nil, "common.deleted", "Category deleted successfully")
       end
 
       private
@@ -48,7 +45,8 @@ module Api
           :slug,
           :parent_id,
           :is_active,
-          :sort_order
+          :sort_order,
+          :image
         )
       end
     end

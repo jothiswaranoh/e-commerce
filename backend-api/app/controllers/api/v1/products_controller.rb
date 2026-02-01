@@ -53,6 +53,7 @@ module Api
           :description,
           :status,
           :category_id,
+          images: [],
           variants_attributes: [:id, :sku, :price, :stock, :_destroy],
           product_attributes_attributes: [:id, :key, :value, :_destroy]
         )
