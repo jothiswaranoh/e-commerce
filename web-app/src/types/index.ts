@@ -1,10 +1,4 @@
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
+export * from './product';
 
 export interface CartItem extends Product {
   quantity: number;

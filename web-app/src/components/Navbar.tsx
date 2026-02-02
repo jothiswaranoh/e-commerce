@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { ROUTES } from '../config/routes.constants';
 import { useAuth } from '../contexts/AuthContext';
+import { NAVBAR,BRAND } from '../config/ui.config';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,9 +14,9 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
-    { label: 'Home', path: ROUTES.HOME },
-    { label: 'Products', path: ROUTES.PRODUCTS },
-    { label: 'Cart', path: ROUTES.CART },
+    { label: NAVBAR.nav.home, path: ROUTES.HOME },
+    { label: NAVBAR.nav.products, path: ROUTES.PRODUCTS },
+    { label: NAVBAR.nav.cart, path: ROUTES.CART },
   ];
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function Navbar() {
               <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
                 <Package className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold gradient-text hidden sm:block">ShopHub</span>
+              <span className="text-2xl font-bold gradient-text hidden sm:block">{BRAND.name}</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -77,7 +78,7 @@ export default function Navbar() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder={NAVBAR.searchPlaceholder}
                 className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               />
             </div>
@@ -137,7 +138,7 @@ export default function Navbar() {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <UserIcon className="w-4 h-4" />
-                        My Profile
+                        {NAVBAR.menu.myOrders}
                       </Link>
                       <Link
                         to="/profile?tab=orders"
@@ -145,7 +146,7 @@ export default function Navbar() {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <Package className="w-4 h-4" />
-                        My Orders
+                        {NAVBAR.menu.adminDashboard}
                       </Link>
                       {user.role === 'admin' && (
                         <Link
@@ -154,7 +155,7 @@ export default function Navbar() {
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <Settings className="w-4 h-4" />
-                          Admin Dashboard
+                          {NAVBAR.menu.adminDashboard}
                         </Link>
                       )}
                     </div>
@@ -165,7 +166,7 @@ export default function Navbar() {
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        {NAVBAR.menu.signOut}
                       </button>
                     </div>
                   </div>
@@ -177,7 +178,7 @@ export default function Navbar() {
                 className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-md hover:shadow-lg"
               >
                 <UserIcon className="w-4 h-4" />
-                <span className="font-semibold">Login</span>
+                <span className="font-semibold">{NAVBAR.login}</span>
               </Link>
             )}
 
@@ -201,7 +202,7 @@ export default function Navbar() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder={NAVBAR.searchPlaceholder}
               className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
@@ -240,14 +241,14 @@ export default function Navbar() {
                     className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    My Profile
+                    {NAVBAR.menu.myProfile}
                   </Link>
                   <Link
                     to="/profile?tab=orders"
                     className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    My Orders
+                    {NAVBAR.menu.myOrders}
                   </Link>
                   {user.role === 'admin' && (
                     <Link
@@ -255,14 +256,14 @@ export default function Navbar() {
                       className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      Admin Dashboard
+                      {NAVBAR.menu.adminDashboard}
                     </Link>
                   )}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
                   >
-                    Sign Out
+                    {NAVBAR.menu.signOut}
                   </button>
                 </div>
               </>
@@ -272,7 +273,7 @@ export default function Navbar() {
                 className="block px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg font-semibold text-center"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Login
+                {NAVBAR.login}
               </Link>
             )}
           </div>

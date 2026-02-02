@@ -34,11 +34,11 @@ class CreateOrders < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :orders, :order_number, unique: true
-    add_foreign_key :orders, :organizations
-    add_foreign_key :orders, :users
-    add_foreign_key :order_items, :orders
-    add_foreign_key :order_items, :products
-    add_foreign_key :order_items, :product_variants
+        add_index :orders, :order_number, unique: true
+        add_foreign_key :orders, :organizations, column: :org_id
+        add_foreign_key :orders, :users, column: :user_id
+        add_foreign_key :order_items, :orders, column: :order_id
+        add_foreign_key :order_items, :products, column: :product_id
+        add_foreign_key :order_items, :product_variants, column: :product_variant_id
   end
 end

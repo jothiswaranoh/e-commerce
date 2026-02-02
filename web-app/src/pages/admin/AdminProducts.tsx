@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, X } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
 import Card from '../../components/ui/Card';
@@ -8,41 +8,26 @@ import Badge from '../../components/ui/Badge';
 import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import { TableRowSkeleton } from '../../components/ui/Skeleton';
-
-interface Product {
-    id: string;
-    name: string;
-    category: string;
-    price: number;
-    stock: number;
-    description?: string;
-    status: string;
-}
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '../../hooks/useProduct';
+import { Product, ProductFormData } from '../../types';
 
 const categoryOptions = [
-    { value: 'Electronics', label: 'Electronics' },
-    { value: 'Fashion', label: 'Fashion' },
-    { value: 'Home', label: 'Home' },
-    { value: 'Sports', label: 'Sports' },
+    { value: 1, label: 'Electronics' },
+    { value: 2, label: 'Fashion' },
 ];
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },
-    { value: 'in_stock', label: 'In Stock' },
-    { value: 'low_stock', label: 'Low Stock' },
-    { value: 'out_of_stock', label: 'Out of Stock' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+    { value: 'archived', label: 'Archived' },
 ];
 
 export default function AdminProducts() {
-    const [products, setProducts] = useState<Product[]>([
-        { id: '1', name: 'Wireless Headphones', category: 'Electronics', price: 2999, stock: 45, status: 'active', description: 'High-quality wireless headphones' },
-        { id: '2', name: 'Smart Watch', category: 'Electronics', price: 4999, stock: 23, status: 'active', description: 'Feature-rich smartwatch' },
-        { id: '3', name: 'Running Shoes', category: 'Sports', price: 3499, stock: 0, status: 'out_of_stock', description: 'Comfortable running shoes' },
-        { id: '4', name: 'Yoga Mat', category: 'Sports', price: 899, stock: 67, status: 'active', description: 'Non-slip yoga mat' },
-        { id: '5', name: 'Coffee Maker', category: 'Home', price: 5999, stock: 12, status: 'low_stock', description: 'Automatic coffee maker' },
-        { id: '6', name: 'Desk Lamp', category: 'Home', price: 1299, stock: 34, status: 'active', description: 'LED desk lamp' },
-    ]);
+    const { data: products = [] } = useProducts();
+    const createMutation = useCreateProduct();
+    const updateMutation = useUpdateProduct();
+    const deleteMutation = useDeleteProduct();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<any>(null);
@@ -52,90 +37,100 @@ export default function AdminProducts() {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+
     const [formData, setFormData] = useState({
         name: '',
-        category: '',
+        slug: '',
+        category_id: '',
         price: '',
         stock: '',
         description: '',
+        status: 'active' as const,
     });
 
+    const isLoading = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+
     const getStatusBadge = (status: string, stock: number) => {
-        if (status === 'out_of_stock' || stock === 0) {
-            return <Badge variant="error">Out of Stock</Badge>;
-        }
-        if (stock < 20) {
-            return <Badge variant="warning">Low Stock</Badge>;
-        }
+        if (status === 'archived') return <Badge variant="neutral">Archived</Badge>;
+        if (stock === 0) return <Badge variant="error">Out of Stock</Badge>;
+        if (stock < 20) return <Badge variant="warning">Low Stock</Badge>;
         return <Badge variant="success">In Stock</Badge>;
     };
 
-    const handleAddProduct = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            const newProduct: Product = {
-                id: String(products.length + 1),
-                name: formData.name,
-                category: formData.category,
+    const handleAddProduct = async () => {
+        const data: ProductFormData = {
+            name: formData.name,
+            slug: formData.slug || formData.name.toLowerCase().replace(/ /g, '-'),
+            category_id: Number(formData.category_id),
+            status: formData.status,
+            description: formData.description,
+            variants_attributes: [{
+                sku: `${formData.name.substring(0, 3).toUpperCase()}-${Date.now()}`,
                 price: Number(formData.price),
-                stock: Number(formData.stock),
-                description: formData.description,
-                status: Number(formData.stock) > 0 ? 'active' : 'out_of_stock',
-            };
-            setProducts([...products, newProduct]);
+                stock: Number(formData.stock)
+            }]
+        };
+
+        try {
+            await createMutation.mutateAsync(data);
             setIsAddModalOpen(false);
-            setFormData({ name: '', category: '', price: '', stock: '', description: '' });
-            setIsLoading(false);
+            setFormData({ name: '', slug: '', category_id: '', price: '', stock: '', description: '', status: 'active' });
             toast.success('Product added successfully!');
-        }, 1000);
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to add product');
+        }
     };
 
-    const handleEditProduct = () => {
+    const handleEditProduct = async () => {
         if (!selectedProduct) return;
-        setIsLoading(true);
-        setTimeout(() => {
-            setProducts(products.map(p =>
-                p.id === selectedProduct.id
-                    ? {
-                        ...p,
-                        name: formData.name,
-                        category: formData.category,
-                        price: Number(formData.price),
-                        stock: Number(formData.stock),
-                        description: formData.description,
-                        status: Number(formData.stock) > 0 ? 'active' : 'out_of_stock',
-                    }
-                    : p
-            ));
+
+        const data: ProductFormData = {
+            name: formData.name,
+            slug: formData.slug,
+            category_id: Number(formData.category_id),
+            status: formData.status,
+            description: formData.description,
+            variants_attributes: selectedProduct.variants.map(v => ({
+                id: v.id,
+                sku: v.sku,
+                price: Number(formData.price),
+                stock: Number(formData.stock)
+            }))
+        };
+
+        try {
+            await updateMutation.mutateAsync({ id: selectedProduct.id, data });
             setIsEditModalOpen(false);
             setSelectedProduct(null);
-            setFormData({ name: '', category: '', price: '', stock: '', description: '' });
-            setIsLoading(false);
             toast.success('Product updated successfully!');
-        }, 1000);
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to update product');
+        }
     };
 
-    const handleDeleteProduct = () => {
+    const handleDeleteProduct = async () => {
         if (!selectedProduct) return;
-        setIsLoading(true);
-        setTimeout(() => {
-            setProducts(products.filter(p => p.id !== selectedProduct.id));
+        try {
+            await deleteMutation.mutateAsync(selectedProduct.id);
             setIsDeleteDialogOpen(false);
             setSelectedProduct(null);
-            setIsLoading(false);
             toast.success('Product deleted successfully!');
-        }, 1000);
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to delete product');
+        }
     };
 
     const openEditModal = (product: Product) => {
         setSelectedProduct(product);
+        const mainVariant = product.variants[0];
         setFormData({
             name: product.name,
-            category: product.category,
-            price: String(product.price),
-            stock: String(product.stock),
+            slug: product.slug,
+            category_id: String(product.category_id),
+            price: String(mainVariant?.price || 0),
+            stock: String(mainVariant?.stock || 0),
             description: product.description || '',
+            status: product.status as any,
         });
         setIsEditModalOpen(true);
     };
@@ -152,12 +147,14 @@ export default function AdminProducts() {
 
     const filteredProducts = products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = !selectedCategory || product.category === selectedCategory.value;
+        const matchesCategory = !selectedCategory || product.category_id === selectedCategory.value;
+        const mainVariant = product.variants[0];
+        const stock = mainVariant?.stock || 0;
+
         const matchesStatus =
             selectedStatus.value === 'all' ||
-            (selectedStatus.value === 'in_stock' && product.stock >= 20) ||
-            (selectedStatus.value === 'low_stock' && product.stock > 0 && product.stock < 20) ||
-            (selectedStatus.value === 'out_of_stock' && product.stock === 0);
+            product.status === selectedStatus.value;
+
         return matchesSearch && matchesCategory && matchesStatus;
     });
 
@@ -169,37 +166,64 @@ export default function AdminProducts() {
             }}
             className="space-y-5"
         >
-            <Input
-                label="Product Name"
-                placeholder="Enter product name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-            />
-
-            <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">Category</label>
-                <Select
-                    options={categoryOptions}
-                    value={categoryOptions.find(opt => opt.value === formData.category)}
-                    onChange={(option) => setFormData({ ...formData, category: option?.value || '' })}
-                    placeholder="Select category"
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                    styles={{
-                        control: (base) => ({
-                            ...base,
-                            borderColor: '#d4d4d4',
-                            '&:hover': { borderColor: '#7c3aed' },
-                            boxShadow: 'none',
-                        }),
-                        option: (base, state) => ({
-                            ...base,
-                            backgroundColor: state.isSelected ? '#7c3aed' : state.isFocused ? '#f5f3ff' : 'white',
-                            color: state.isSelected ? 'white' : '#171717',
-                        }),
-                    }}
+            <div className="grid grid-cols-2 gap-4">
+                <Input
+                    label="Product Name"
+                    placeholder="Enter product name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
                 />
+                <Input
+                    label="Slug (optional)"
+                    placeholder="product-slug"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Category</label>
+                    <Select
+                        options={categoryOptions}
+                        value={categoryOptions.find(opt => opt.value === Number(formData.category_id))}
+                        onChange={(option) => setFormData({ ...formData, category_id: String(option?.value || '') })}
+                        placeholder="Select category"
+                        className="react-select-container"
+                        classNamePrefix="react-select"
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                borderColor: '#d4d4d4',
+                                '&:hover': { borderColor: '#7c3aed' },
+                                boxShadow: 'none',
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isSelected ? '#7c3aed' : state.isFocused ? '#f5f3ff' : 'white',
+                                color: state.isSelected ? 'white' : '#171717',
+                            }),
+                        }}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Status</label>
+                    <Select
+                        options={statusOptions.filter(opt => opt.value !== 'all')}
+                        value={statusOptions.find(opt => opt.value === formData.status)}
+                        onChange={(option: any) => setFormData({ ...formData, status: option?.value || 'active' })}
+                        placeholder="Select status"
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                borderColor: '#d4d4d4',
+                                '&:hover': { borderColor: '#7c3aed' },
+                                boxShadow: 'none',
+                            }),
+                        }}
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -212,7 +236,7 @@ export default function AdminProducts() {
                     required
                 />
                 <Input
-                    label="Stock"
+                    label="Initial Stock"
                     type="number"
                     placeholder="0"
                     value={formData.stock}
@@ -240,7 +264,7 @@ export default function AdminProducts() {
                     onClick={() => {
                         setIsAddModalOpen(false);
                         setIsEditModalOpen(false);
-                        setFormData({ name: '', category: '', price: '', stock: '', description: '' });
+                        setFormData({ name: '', slug: '', category_id: '', price: '', stock: '', description: '', status: 'active' });
                     }}
                 >
                     Cancel

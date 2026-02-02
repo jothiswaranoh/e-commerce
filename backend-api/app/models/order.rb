@@ -13,7 +13,7 @@ class Order < ApplicationRecord
   validates :total, numericality: { greater_than_or_equal_to: 0 }
 
   before_validation :set_defaults, on: :create
-  before_create :generate_order_number
+  before_validation :generate_order_number, on: :create
   before_save :recalculate_totals
 
   private

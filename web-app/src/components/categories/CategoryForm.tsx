@@ -39,7 +39,7 @@ export default function CategoryForm({
             />
 
             <Input
-                label="Slug"
+                label="Description"
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
                 required

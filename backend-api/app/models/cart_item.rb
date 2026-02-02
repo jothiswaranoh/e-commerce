@@ -1,4 +1,3 @@
-# app/models/cart_item.rb
 class CartItem < ApplicationRecord
   belongs_to :cart
   belongs_to :product
@@ -12,7 +11,8 @@ class CartItem < ApplicationRecord
   private
 
   def set_price
-    self.price ||= product_variant&.price || product.price
+    return if price.present?
+    self.price = 0
   end
 
   def calculate_total
