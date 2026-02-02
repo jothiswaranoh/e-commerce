@@ -26,6 +26,7 @@ export interface CategoryPayload {
     parent_id?: number | null;
     is_active?: boolean;
     sort_order?: number;
+    image?: string | null;
 }
 
 /* =========================

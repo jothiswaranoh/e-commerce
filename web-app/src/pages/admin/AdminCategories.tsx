@@ -10,6 +10,7 @@ import { TableRowSkeleton } from '../../components/ui/Skeleton';
 
 import {
     useCategories,
+    useCategory,
     useCreateCategory,
     useUpdateCategory,
     useDeleteCategory,
@@ -30,6 +31,11 @@ export default function AdminCategories() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+    // Initial Data Fetch for Edit
+    const { data: categoryDetail, isLoading: isCategoryLoading } = useCategory(
+        selectedCategory?.id || 0
+    );
 
     /* =========================
        Handlers
@@ -134,13 +140,19 @@ export default function AdminCategories() {
                 onClose={() => setIsEditOpen(false)}
                 title="Edit Category"
             >
-                {selectedCategory && (
-                    <CategoryForm
-                        initialData={selectedCategory}
-                        onSubmit={handleUpdate}
-                        submitText="Update"
-                        isLoading={updateMutation.isPending}
-                    />
+                {isCategoryLoading ? (
+                    <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    </div>
+                ) : (
+                    categoryDetail && (
+                        <CategoryForm
+                            initialData={categoryDetail}
+                            onSubmit={handleUpdate}
+                            submitText="Update"
+                            isLoading={updateMutation.isPending}
+                        />
+                    )
                 )}
             </Modal>
 
