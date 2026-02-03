@@ -19,6 +19,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import { ROUTES } from './config/routes.constants';
 import ToastProvider from './components/ToastProvider';
 import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AdminCategories from './pages/admin/AdminCategories';
@@ -37,61 +38,63 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
-          <ToastProvider />
-          <Routes>
-            {/* Customer Routes */}
-            <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-            <Route path={ROUTES.PRODUCTS} element={<MainLayout><Products /></MainLayout>} />
-            <Route path={ROUTES.PRODUCT_DETAIL} element={<MainLayout><ProductDetail /></MainLayout>} />
-            <Route path={ROUTES.CART} element={<MainLayout><Cart /></MainLayout>} />
+          <CartProvider>
+            <ToastProvider />
+            <Routes>
+              {/* Customer Routes */}
+              <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+              <Route path={ROUTES.PRODUCTS} element={<MainLayout><Products /></MainLayout>} />
+              <Route path={ROUTES.PRODUCT_DETAIL} element={<MainLayout><ProductDetail /></MainLayout>} />
+              <Route path={ROUTES.CART} element={<MainLayout><Cart /></MainLayout>} />
 
-            {/* Auth Routes */}
-            <Route path={ROUTES.LOGIN} element={<MainLayout><Login /></MainLayout>} />
-            <Route path={ROUTES.REGISTER} element={<MainLayout><Register /></MainLayout>} />
-            <Route path={ROUTES.FORGOT_PASSWORD} element={<MainLayout><ForgotPassword /></MainLayout>} />
-            <Route path={ROUTES.RESET_PASSWORD} element={<MainLayout><ResetPassword /></MainLayout>} />
-            <Route path={ROUTES.VERIFY_EMAIL} element={<MainLayout><EmailVerification /></MainLayout>} />
+              {/* Auth Routes */}
+              <Route path={ROUTES.LOGIN} element={<MainLayout><Login /></MainLayout>} />
+              <Route path={ROUTES.REGISTER} element={<MainLayout><Register /></MainLayout>} />
+              <Route path={ROUTES.FORGOT_PASSWORD} element={<MainLayout><ForgotPassword /></MainLayout>} />
+              <Route path={ROUTES.RESET_PASSWORD} element={<MainLayout><ResetPassword /></MainLayout>} />
+              <Route path={ROUTES.VERIFY_EMAIL} element={<MainLayout><EmailVerification /></MainLayout>} />
 
-            {/* Protected Customer Routes */}
-            <Route path={ROUTES.CHECKOUT} element={
-              <ProtectedRoute>
-                <MainLayout><Checkout /></MainLayout>
-              </ProtectedRoute>
-            } />
-            <Route path={ROUTES.PROFILE} element={
-              <ProtectedRoute>
-                <MainLayout><Profile /></MainLayout>
-              </ProtectedRoute>
-            } />
+              {/* Protected Customer Routes */}
+              <Route path={ROUTES.CHECKOUT} element={
+                <ProtectedRoute>
+                  <MainLayout><Checkout /></MainLayout>
+                </ProtectedRoute>
+              } />
+              <Route path={ROUTES.PROFILE} element={
+                <ProtectedRoute>
+                  <MainLayout><Profile /></MainLayout>
+                </ProtectedRoute>
+              } />
 
-            {/* Admin Routes */}
-            <Route path={ROUTES.ADMIN} element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
-            <Route path={ROUTES.ADMIN_DASHBOARD} element={
-              <ProtectedRoute requireAdmin>
-                <AdminLayout><Dashboard /></AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path={ROUTES.ADMIN_PRODUCTS} element={
-              <ProtectedRoute requireAdmin>
-                <AdminLayout><AdminProducts /></AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path={ROUTES.ADMIN_ORDERS} element={
-              <ProtectedRoute requireAdmin>
-                <AdminLayout><AdminOrders /></AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path={ROUTES.ADMIN_USERS} element={
-              <ProtectedRoute requireAdmin>
-                <AdminLayout><AdminUsers /></AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path={ROUTES.ADMIN_CATEGORY} element={
-              <ProtectedRoute requireAdmin>
-                <AdminLayout><AdminCategories /></AdminLayout>
-              </ProtectedRoute>
-            } />
-          </Routes>
+              {/* Admin Routes */}
+              <Route path={ROUTES.ADMIN} element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
+              <Route path={ROUTES.ADMIN_DASHBOARD} element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><Dashboard /></AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path={ROUTES.ADMIN_PRODUCTS} element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminProducts /></AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path={ROUTES.ADMIN_ORDERS} element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminOrders /></AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path={ROUTES.ADMIN_USERS} element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminUsers /></AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path={ROUTES.ADMIN_CATEGORY} element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout><AdminCategories /></AdminLayout>
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </CartProvider>
         </AuthProvider>
       </Router>
     </QueryClientProvider>

@@ -12,6 +12,14 @@ module Api
 
       private
 
+      def set_product
+        @product = public_current_org.products.find(params[:id])
+      end
+
+      def public_current_org
+        Current.user&.organization || Organization.find_by(slug: 'lookz-men')
+      end
+
       def model_class
         Product
       end

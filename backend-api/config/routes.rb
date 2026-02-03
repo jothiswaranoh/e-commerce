@@ -16,6 +16,14 @@ Rails.application.routes.draw do
 
       # Cart (one per user)
       resource :cart, only: [:show] do
+        collection do
+          post 'add', to: 'carts#add_item'
+          get '', to: 'carts#show'
+          put 'update', to: 'carts#update_item'
+          delete 'remove', to: 'carts#remove_item'
+        end
+
+        # Legacy/Standard routes support
         post   :add_item
         patch  "items/:id", action: :update_item
         delete "items/:id", action: :remove_item
