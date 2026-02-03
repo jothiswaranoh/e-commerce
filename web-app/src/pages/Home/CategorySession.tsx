@@ -14,7 +14,8 @@ type Category = {
 
 
 export default function CategoriesSection() {
-  const { data: categories = [], isLoading } = useCategories();
+  const { data } = useCategories();
+  const categories = Array.isArray(data) ? data : [];
   return (
     <section className="py-16 bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

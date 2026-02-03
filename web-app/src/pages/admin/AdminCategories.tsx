@@ -7,6 +7,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { TableRowSkeleton } from '../../components/ui/Skeleton';
+import { CategoryPayload } from '../../api/category';
 
 import {
     useCategories,
@@ -35,17 +36,22 @@ export default function AdminCategories() {
        Handlers
     ========================= */
 
-    const handleCreate = async (payload: any) => {
+    const handleCreate = async (payload: CategoryPayload) => {
         try {
             await createMutation.mutateAsync(payload);
             toast.success('Category created');
             setIsCreateOpen(false);
         } catch (error) {
-            console.error('Failed to create category:', error);
-        }
+    const message =
+        error instanceof Error
+            ? error.message
+            : 'Failed to create category';
+
+    toast.error(message);
+}
     };
 
-    const handleUpdate = async (payload: any) => {
+    const handleUpdate = async (payload: Partial<CategoryPayload>) => {
         if (!selectedCategory) return;
         try {
             await updateMutation.mutateAsync({
@@ -56,8 +62,13 @@ export default function AdminCategories() {
             setIsEditOpen(false);
             setSelectedCategory(null);
         } catch (error) {
-            console.error('Failed to update category:', error);
-        }
+    const message =
+        error instanceof Error
+            ? error.message
+            : 'Failed to update category';
+
+    toast.error(message);
+}
     };
 
     const handleDelete = async () => {
@@ -68,8 +79,13 @@ export default function AdminCategories() {
             setIsDeleteOpen(false);
             setSelectedCategory(null);
         } catch (error) {
-            console.error('Failed to delete category:', error);
-        }
+    const message =
+        error instanceof Error
+            ? error.message
+            : 'Failed to delete category';
+
+    toast.error(message);
+}
     };
 
     /* =========================
@@ -102,7 +118,7 @@ export default function AdminCategories() {
                     </table>
                 ) : (
                     <CategoryTable
-                        categories={data || []}
+                        categories={Array.isArray(data) ? data : []}
                         onEdit={(cat) => {
                             setSelectedCategory(cat);
                             setIsEditOpen(true);

@@ -3,43 +3,19 @@ module Api
     class CategoriesController < ApplicationController
       include Authorization
       include ResponseRenderingConcern
+      include Crudable
 
+      allow_unauthenticated_access only: [:index, :show]
+      
       load_and_authorize_resource
-
-      # GET /api/v1/categories
-      def index
-        handle_response(@categories.order(:sort_order))
-      end
-
-      # GET /api/v1/categories/:id
-      def show
-        handle_response(@category)
-      end
-
-      # POST /api/v1/categories
-      def create
-        @category = Category.new(category_params)
-        @category.org_id = current_user.org_id
-
-        @category.save
-        handle_response(@category, "common.created", nil, :created)
-      end
-
-      # PATCH/PUT /api/v1/categories/:id
-      def update
-        @category.update(category_params)
-        handle_response(@category)
-      end
-
-      # DELETE /api/v1/categories/:id
-      def destroy
-        @category.destroy
-        handle_response(nil, "common.deleted", "Category deleted successfully")
-      end
 
       private
 
-      def category_params
+      def model_class
+        Category
+      end
+
+      def resource_params
         params.require(:category).permit(
           :name,
           :slug,
@@ -48,6 +24,12 @@ module Api
           :sort_order,
           :image
         )
+      end
+
+      def scoped_collection
+        scope = model_class.all
+        return scope unless current_user
+        scope.where(org_id: current_org&.id)
       end
     end
   end
