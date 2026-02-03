@@ -15,27 +15,36 @@ const CATEGORY_KEYS = {
 ========================= */
 
 export function useCategories() {
-    return useQuery({
+    return useQuery<Category[]>({
         queryKey: CATEGORY_KEYS.all,
         queryFn: async () => {
             const res = await CategoryAPI.list();
-            if (!res.success) throw res;
-            // API returns wrapped response { success: true, data: [...] }
-            return (res.data as any).data as Category[];
+
+            if (!res.success) {
+                throw new Error(res.message || 'Failed to fetch categories');
+            }
+
+            // 🔴 IMPORTANT: unwrap backend response
+            return Array.isArray(res.data?.data)
+                ? res.data.data
+                : [];
         },
     });
 }
 
 export function useCategory(id: number) {
-    return useQuery({
+    return useQuery<Category, Error>({
         queryKey: CATEGORY_KEYS.detail(id),
         queryFn: async () => {
             const res = await CategoryAPI.get(id);
-            if (!res.success) throw res;
-            // API returns wrapped response { success: true, data: {...} }
-            return (res.data as any).data as Category;
+
+            if (!res.success || !res.data) {
+                throw new Error(res.message || 'Failed to fetch category');
+            }
+
+            return res.data;
         },
-        enabled: !!id,
+        enabled: Boolean(id),
     });
 }
 
@@ -46,10 +55,14 @@ export function useCategory(id: number) {
 export function useCreateCategory() {
     const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (payload: CategoryPayload) => {
+    return useMutation<Category, Error, CategoryPayload>({
+        mutationFn: async (payload) => {
             const res = await CategoryAPI.create(payload);
-            if (!res.success) throw res;
+
+            if (!res.success || !res.data) {
+                throw new Error(res.message || 'Failed to create category');
+            }
+
             return res.data;
         },
         onSuccess: () => {
@@ -61,17 +74,15 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
     const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async ({
-            id,
-            payload,
-        }: {
-            id: number;
-            payload: Partial<CategoryPayload>;
-        }) => {
+    return useMutation<
+        Category,
+        Error,
+        { id: number; payload: Partial<CategoryPayload> }
+    >({
+        mutationFn: async ({ id, payload }) => {
             const res = await CategoryAPI.update(id, payload);
-            if (!res.success) throw res;
-            return res.data;
+            if (!res.success) throw new Error('Update failed');
+            return res.data as Category;
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: CATEGORY_KEYS.all });
@@ -85,10 +96,10 @@ export function useUpdateCategory() {
 export function useDeleteCategory() {
     const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (id: number) => {
+    return useMutation<boolean, Error, number>({
+        mutationFn: async (id) => {
             const res = await CategoryAPI.delete(id);
-            if (!res.success) throw res;
+            if (!res.success) throw new Error('Delete failed');
             return true;
         },
         onSuccess: () => {
