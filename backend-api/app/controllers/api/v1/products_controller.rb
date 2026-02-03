@@ -1,52 +1,22 @@
 module Api
   module V1
     class ProductsController < ApplicationController
-      before_action :set_product, only: [:show, :update, :destroy]
+      include Authorization
+      include ResponseRenderingConcern
+      include Crudable
 
-      # GET /api/v1/products
-      def index
-        products = current_org.products.includes(:variants, :product_attributes, :category)
-        render json: products, include: [:variants, :product_attributes, :category]
-      end
+      allow_unauthenticated_access only: [:index, :show]
+      before_action :authenticate_request!, except: [:index, :show]
 
-      # GET /api/v1/products/:id
-      def show
-        render json: @product, include: [:variants, :product_attributes, :category]
-      end
-
-      # POST /api/v1/products
-      def create
-        product = current_org.products.new(product_params)
-
-        if product.save
-          render json: product, include: [:variants, :product_attributes], status: :created
-        else
-          render json: { errors: product.errors.full_messages }, status: :unprocessable_entity
-        end
-      end
-
-      # PATCH/PUT /api/v1/products/:id
-      def update
-        if @product.update(product_params)
-          render json: @product, include: [:variants, :product_attributes]
-        else
-          render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
-        end
-      end
-
-      # DELETE /api/v1/products/:id
-      def destroy
-        @product.destroy
-        head :no_content
-      end
+      authorize_resource
 
       private
 
-      def set_product
-        @product = current_org.products.find(params[:id])
+      def model_class
+        Product
       end
 
-      def product_params
+      def resource_params
         params.require(:product).permit(
           :name,
           :slug,
@@ -57,6 +27,15 @@ module Api
           variants_attributes: [:id, :sku, :price, :stock, :_destroy],
           product_attributes_attributes: [:id, :key, :value, :_destroy]
         )
+      end
+
+      def scoped_collection
+        scope = model_class.all
+        scope = scope.includes(:variants, :product_attributes, :category)
+
+        return scope unless current_user
+
+        scope.where(org_id: current_org.id)
       end
     end
   end

@@ -31,3 +31,9 @@ en:
       conflict:
         message: "Conflict"
         status: :conflict
+      updated:
+        message: Resource updated successfully
+        status: 200
+      deleted:
+        message: Resource deleted successfully
+        status: 200
