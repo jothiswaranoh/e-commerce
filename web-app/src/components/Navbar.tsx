@@ -1,14 +1,16 @@
+
 import { ShoppingCart, Search, Menu, X, User as UserIcon, Heart, Package, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { ROUTES } from '../config/routes.constants';
 import { useAuth } from '../contexts/AuthContext';
-import { NAVBAR,BRAND } from '../config/ui.config';
+import { useCart } from '../contexts/CartContext';
+import { NAVBAR, BRAND } from '../config/ui.config';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [cartCount] = useState(0);
+  const { itemCount: cartCount } = useCart();
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);

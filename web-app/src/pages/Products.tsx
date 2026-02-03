@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { SlidersHorizontal, Grid3x3, List, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import { mockApi } from '../services/mockApi';
-import { Product } from '../types';
+import { productService } from '../services/productService';
+import { Product } from '../types/product';
 import Button from '../components/ui/Button';
 
 export default function Products() {
@@ -20,9 +20,13 @@ export default function Products() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const data = await mockApi.getAllProducts();
-        setProducts(data);
-        setFilteredProducts(data);
+        const response = await productService.getProducts();
+        if (response.success && response.data) {
+          setProducts(response.data);
+          setFilteredProducts(response.data);
+        } else {
+          console.error('Failed to load products', response.error);
+        }
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -37,13 +41,15 @@ export default function Products() {
     let result = [...products];
 
     if (selectedCategory) {
-      result = result.filter(p => p.category === selectedCategory);
+      result = result.filter(p => p.category?.name === selectedCategory);
     }
 
+    const getPrice = (p: Product) => p.variants?.[0]?.price || 0;
+
     if (sortBy === 'price-low') {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => getPrice(a) - getPrice(b));
     } else if (sortBy === 'price-high') {
-      result.sort((a, b) => b.price - a.price);
+      result.sort((a, b) => getPrice(b) - getPrice(a));
     } else if (sortBy === 'name') {
       result.sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -51,6 +57,7 @@ export default function Products() {
     setFilteredProducts(result);
   }, [selectedCategory, sortBy, products]);
 
+  // FilterSidebar Component
   const FilterSidebar = () => (
     <div className="bg-white rounded-xl shadow-md p-6">
       <div className="flex items-center justify-between mb-6">
@@ -160,8 +167,8 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`p-2 rounded-md transition-colors ${viewMode === 'grid'
-                          ? 'bg-white text-primary-600 shadow-sm'
-                          : 'text-neutral-600 hover:text-neutral-900'
+                        ? 'bg-white text-primary-600 shadow-sm'
+                        : 'text-neutral-600 hover:text-neutral-900'
                         }`}
                     >
                       <Grid3x3 className="w-5 h-5" />
@@ -169,8 +176,8 @@ export default function Products() {
                     <button
                       onClick={() => setViewMode('list')}
                       className={`p-2 rounded-md transition-colors ${viewMode === 'list'
-                          ? 'bg-white text-primary-600 shadow-sm'
-                          : 'text-neutral-600 hover:text-neutral-900'
+                        ? 'bg-white text-primary-600 shadow-sm'
+                        : 'text-neutral-600 hover:text-neutral-900'
                         }`}
                     >
                       <List className="w-5 h-5" />
@@ -219,11 +226,11 @@ export default function Products() {
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
-                    id={product.id}
+                    id={product.id.toString()}
                     name={product.name}
-                    price={product.price}
+                    price={product.variants?.[0]?.price || 0}
                     image={product.image}
-                    category={product.category}
+                    category={product.category?.name || 'Uncategorized'}
                   />
                 ))}
               </div>
@@ -233,15 +240,17 @@ export default function Products() {
       </div>
 
       {/* Mobile Filter Modal */}
-      {showMobileFilters && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobileFilters(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-white shadow-2xl overflow-y-auto animate-slide-in-right">
-            <FilterSidebar />
+      {
+        showMobileFilters && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobileFilters(false)} />
+            <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-white shadow-2xl overflow-y-auto animate-slide-in-right">
+              <FilterSidebar />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
 

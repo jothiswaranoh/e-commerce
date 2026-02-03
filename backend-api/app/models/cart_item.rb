@@ -11,8 +11,10 @@ class CartItem < ApplicationRecord
   private
 
   def set_price
-    return if price.present?
-    self.price = 0
+    # Ensure we use the variant's price.
+    # If for some reason product_variant is nil (legacy?), we might need a fallback,
+    # but strictly speaking a variant is required for price now.
+    self.price = product_variant&.price || 0
   end
 
   def calculate_total

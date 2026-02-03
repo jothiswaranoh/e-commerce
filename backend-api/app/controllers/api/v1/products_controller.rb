@@ -1,11 +1,12 @@
 module Api
   module V1
     class ProductsController < ApplicationController
+      allow_unauthenticated_access only: %i[index show]
       before_action :set_product, only: [:show, :update, :destroy]
 
       # GET /api/v1/products
       def index
-        products = current_org.products.includes(:variants, :product_attributes, :category)
+        products = public_current_org.products.includes(:variants, :product_attributes, :category)
         render json: products, include: [:variants, :product_attributes, :category]
       end
 
@@ -43,7 +44,11 @@ module Api
       private
 
       def set_product
-        @product = current_org.products.find(params[:id])
+        @product = public_current_org.products.find(params[:id])
+      end
+
+      def public_current_org
+        Current.user&.organization || Organization.find_by(slug: 'lookz-men')
       end
 
       def product_params

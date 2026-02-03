@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useCart } from '../contexts/CartContext';
 import { Link } from 'react-router-dom';
 import {
   CreditCard,
@@ -45,14 +46,9 @@ export default function Checkout() {
     { id: 'review' as CheckoutStep, label: 'Review', icon: CheckCircle2 },
   ];
 
-  const orderItems = [
-    { id: '1', name: 'Wireless Headphones', price: 2999, quantity: 1 },
-    { id: '2', name: 'Smart Watch', price: 4999, quantity: 2 },
-    { id: '3', name: 'Running Shoes', price: 3499, quantity: 1 },
-  ];
+  const { items, subtotal } = useCart();
 
-  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = 0; // Free shipping
+  const shipping = subtotal > 999 ? 0 : 50;
   const tax = subtotal * 0.18; // 18% GST
   const total = subtotal + shipping + tax;
 
@@ -68,7 +64,7 @@ export default function Checkout() {
 
   const handlePlaceOrder = () => {
     // Handle order placement
-    console.log('Order placed!', { shippingInfo, paymentInfo, orderItems });
+    console.log('Order placed!', { shippingInfo, paymentInfo, items });
   };
 
   const getCurrentStepIndex = () => steps.findIndex(s => s.id === currentStep);
@@ -97,10 +93,10 @@ export default function Checkout() {
                   <div className="flex flex-col items-center">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isCompleted
-                          ? 'bg-green-500 text-white'
-                          : isActive
-                            ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white'
-                            : 'bg-neutral-200 text-neutral-500'
+                        ? 'bg-green-500 text-white'
+                        : isActive
+                          ? 'bg-gradient-to-r from-primary-600 to-accent-600 text-white'
+                          : 'bg-neutral-200 text-neutral-500'
                         }`}
                     >
                       {isCompleted ? (
@@ -382,14 +378,14 @@ export default function Checkout() {
 
               {/* Order Items */}
               <div className="space-y-4 mb-6 pb-6 border-b border-neutral-200">
-                {orderItems.map((item) => (
+                {items.map((item) => (
                   <div key={item.id} className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-semibold text-neutral-900">{item.name}</p>
+                      <p className="font-semibold text-neutral-900">{item.product_name}</p>
                       <p className="text-sm text-neutral-600">Qty: {item.quantity}</p>
                     </div>
                     <p className="font-semibold text-neutral-900">
-                      ₹{(item.price * item.quantity).toLocaleString()}
+                      ₹{item.total.toLocaleString()}
                     </p>
                   </div>
                 ))}
