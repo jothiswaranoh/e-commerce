@@ -3,11 +3,10 @@ info:
   title: E-commerce API
   version: 1.0.0
   description: API for the E-commerce platform.
+
 servers:
   - url: http://localhost:3000/api/v1
     description: Development server
-
-
 
 components:
   securitySchemes:
@@ -51,6 +50,11 @@ components:
         sort_order:
           type: integer
           example: 1
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          example: https://cdn.example.com/categories/men.jpg
         created_at:
           type: string
           format: date-time
@@ -58,27 +62,178 @@ components:
           type: string
           format: date-time
 
-    CategoryInput:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        org_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Product
+        slug:
+          type: string
+          example: product
+        description:
+          type: string
+          example: product description
+        status:
+          type: string
+          enum: [active, inactive, archived]
+          example: active
+        category_id:
+          type: integer
+          example: 4
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        product_attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttribute'
+        category:
+          $ref: '#/components/schemas/Category'
+
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        sku:
+          type: string
+          example: IP15-BLK-128
+        price:
+          type: number
+          example: 500
+        stock:
+          type: integer
+          example: 25
+        _destroy:
+          type: boolean
+          example: false
+
+    ProductAttribute:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        key:
+          type: string
+          example: Color
+        value:
+          type: string
+          example: Black
+        _destroy:
+          type: boolean
+          example: false
+
+    # ===============================
+    # ✅ NEW CREATE-ONLY SCHEMAS
+    # ===============================
+
+    ProductVariantCreate:
+      type: object
+      required: [sku, price]
+      properties:
+        sku:
+          type: string
+          example: IP17-BLK-128
+        price:
+          type: number
+          example: 500
+        stock:
+          type: integer
+          example: 25
+
+    ProductAttributeCreate:
+      type: object
+      required: [key, value]
+      properties:
+        key:
+          type: string
+          example: Color
+        value:
+          type: string
+          example: Black
+
+    # ===============================
+    # ✅ MODIFIED INPUT (NO id usage)
+    # ===============================
+
+    ProductInput:
       type: object
       required:
         - name
-        - slug
+        - category_id
       properties:
         name:
           type: string
-          example: Men
+          example: iPhone 15
         slug:
           type: string
-          example: men
-        parent_id:
-          type: integer
-          nullable: true
-        is_active:
-          type: boolean
-          example: true
-        sort_order:
+          example: iphone-15
+        description:
+          type: string
+          example: Apple smartphone
+        status:
+          type: string
+          enum:
+            - active
+            - inactive
+            - archived
+          example: active
+        category_id:
           type: integer
           example: 1
+        variants_attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariantCreate'
+        product_attributes_attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttributeCreate'
+
+    ApiSuccessResponse:
+      type: object
+      required: [success, message, data]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation successful
+        data:
+          nullable: true
+
+    ApiErrorResponse:
+      type: object
+      required: [success, error, is_toast_display, data]
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Validation failed
+        is_toast_display:
+          type: boolean
+          example: true
+        data:
+          nullable: true
 
 security:
   - BearerAuth: []
@@ -87,8 +242,7 @@ paths:
   /login:
     post:
       summary: User Login
-      tags:
-        - Authentication
+      tags: [Authentication]
       requestBody:
         required: true
         content:
@@ -110,8 +264,7 @@ paths:
   /logout:
     delete:
       summary: User Logout
-      tags:
-        - Authentication
+      tags: [Authentication]
       responses:
         '200':
           description: Logged out
@@ -119,8 +272,7 @@ paths:
   /me:
     get:
       summary: Current User Info
-      tags:
-        - User
+      tags: [User]
       responses:
         '200':
           description: Success
@@ -139,9 +291,14 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Category'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Category'
 
     post:
       summary: Create a category
@@ -151,22 +308,41 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
-              required: [category]
               properties:
-                category:
-                  $ref: '#/components/schemas/CategoryInput'
+                category[name]:
+                  type: string
+                category[slug]:
+                  type: string
+                category[parent_id]:
+                  type: integer
+                category[is_active]:
+                  type: boolean
+                category[sort_order]:
+                  type: integer
+                category[image]:
+                  type: string
+                  format: binary
       responses:
         '201':
           description: Category created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Category'
         '422':
           description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
 
   /categories/{id}:
     get:
@@ -185,9 +361,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
-        '404':
-          description: Not found
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Category'
 
     put:
       summary: Update category
@@ -202,20 +381,27 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
-              required: [category]
               properties:
-                category:
-                  $ref: '#/components/schemas/CategoryInput'
+                category[name]:
+                  type: string
+                category[slug]:
+                  type: string
+                category[parent_id]:
+                  type: integer
+                  nullable: true
+                category[is_active]:
+                  type: boolean
+                category[sort_order]:
+                  type: integer
+                category[image]:
+                  type: string
+                  format: binary
       responses:
         '200':
           description: Category updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
         '422':
           description: Validation error
 
@@ -233,33 +419,108 @@ paths:
         '204':
           description: Category deleted
 
-  /signup:
+  /products:
+    get:
+      summary: List products
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+
     post:
-      summary: User Signup
-      tags:
-        - Authentication
+      summary: Create product
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [product]
               properties:
-                user:
-                  type: object
-                  properties:
-                    email_address:
-                      type: string
-                      format: email
-                    password:
-                      type: string
-                    password_confirmation:
-                      type: string
-                    org_id:
-                      type: integer
+                product:
+                  $ref: '#/components/schemas/ProductInput'
       responses:
         '201':
-          description: Created
-        '422':
-          description: Unprocessable Entity
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
 
+  /products/{id}:
+    get:
+      summary: Get product
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Product'
+
+    put:
+      summary: Update product
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product]
+              properties:
+                product:
+                  $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Product updated
+
+    delete:
+      summary: Delete product
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Product deleted
