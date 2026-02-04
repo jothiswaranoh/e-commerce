@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, TrendingUp, Shield, Truck } from 'lucide-react';
-import { mockApi } from '../services/mockApi';
-import { Product } from '../types';
 import { ROUTES } from '../config/routes.constants';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -12,28 +10,9 @@ import FeaturedProductsSection from './Home/FeaturedProductsSession';
 
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
 
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const data = await mockApi.getAllProducts();
-        setProducts(data.slice(0, 8));
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  
 
   const features = [
     {
@@ -74,7 +53,7 @@ export default function Home() {
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               {HOME.hero.title}
               <span className="block bg-gradient-to-r from-white to-accent-200 bg-clip-text text-transparent">
-                
+
               </span>
             </h1>
 
@@ -98,7 +77,7 @@ export default function Home() {
         </div>
       </section>
 
-     {/* Features */}
+      {/* Features */}
       <section className="bg-white py-12 border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

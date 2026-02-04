@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_01_110544) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -86,6 +86,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_01_110544) do
     t.integer "quantity", default: 1, null: false
     t.decimal "total", precision: 12, scale: 2, default: "0.0", null: false
     t.string "product_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["order_id", "product_id"], name: "index_order_items_on_order_id_and_product_id"
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
@@ -95,15 +97,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_01_110544) do
   create_table "orders", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
-    t.string "status"
     t.bigint "org_id", null: false
-    t.string "order_number", null: false
-    t.string "payment_status", default: "unpaid", null: false
-    t.decimal "subtotal", precision: 10, scale: 2, default: "0.0"
-    t.decimal "tax", precision: 10, scale: 2, default: "0.0"
-    t.decimal "shipping_fee", precision: 10, scale: 2, default: "0.0"
-    t.decimal "total", precision: 10, scale: 2, default: "0.0"
+    t.bigint "user_id", null: false
+    t.string "order_number"
+    t.string "status", default: "pending"
+    t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
+    t.decimal "tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "shipping_fee", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total", precision: 12, scale: 2, default: "0.0"
+    t.string "payment_status", default: "unpaid"
+    t.string "payment_method"
+    t.text "shipping_address"
+    t.text "billing_address"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["org_id"], name: "index_orders_on_org_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
@@ -162,6 +167,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_01_110544) do
     t.string "status", default: "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "image_url"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["org_id", "slug"], name: "index_products_on_org_id_and_slug", unique: true
     t.index ["org_id"], name: "index_products_on_org_id"

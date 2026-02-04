@@ -1,6 +1,7 @@
 import { ShoppingCart, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { useCart } from '../contexts/CartContext';
 
 interface ProductCardProps {
   id?: string;
@@ -20,6 +21,24 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const { addToCart } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation to product detail
+    e.stopPropagation();
+    if (isAdding) return;
+
+    try {
+      setIsAdding(true);
+      await addToCart(id, 1);
+    } catch (error: any) {
+      console.error('Failed to add to cart:', error);
+      alert(error.message || "Failed to add to cart");
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
@@ -78,9 +97,12 @@ export default function ProductCard({
             </span>
           </div>
 
-          <button className="group/btn bg-gradient-to-r from-primary-600 to-primary-500 text-white px-4 py-2.5 rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
+          <button
+            onClick={handleAddToCart}
+            disabled={isAdding}
+            className="group/btn bg-gradient-to-r from-primary-600 to-primary-500 text-white px-4 py-2.5 rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-75 disabled:cursor-not-allowed">
             <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-            <span className="font-semibold">Add</span>
+            <span className="font-semibold">{isAdding ? '...' : 'Add'}</span>
           </button>
         </div>
       </div>
