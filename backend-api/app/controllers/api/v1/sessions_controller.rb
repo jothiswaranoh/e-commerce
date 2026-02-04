@@ -13,8 +13,7 @@ module Api
       end
 
       def destroy
-        terminate_session
-        redirect_to new_session_path
+        render json: { success: true, message: "Logged out successfully" }
       end
 
       def refresh

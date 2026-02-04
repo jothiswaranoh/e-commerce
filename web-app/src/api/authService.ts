@@ -50,6 +50,7 @@ export const authService = {
                 method: 'post',
                 data: {
                     user: {
+                        name: userData.name,
                         email_address: userData.email,
                         password: userData.password,
                         password_confirmation: userData.password,
@@ -160,6 +161,14 @@ export const authService = {
 
     isAuthenticated: (): boolean => {
         return TokenManager.hasValidToken();
+    },
+
+    sendPasswordResetEmail: async (email: string): Promise<any> => {
+        return apiService.post('/passwords', { email });
+    },
+
+    resetPasswordWithToken: async (token: string, password: string): Promise<any> => {
+        return apiService.put(`/passwords/${token}`, { token, password, password_confirmation: password });
     },
 
     isAdmin: (user: User | null): boolean => {
