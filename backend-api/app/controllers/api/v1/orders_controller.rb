@@ -1,59 +1,70 @@
 module Api
   module V1
     class OrdersController < ApplicationController
+      include Authorization
+      include ResponseRenderingConcern
+
+      load_and_authorize_resource
+
+      # GET /api/v1/orders
       def index
-        orders = current_user.orders.order(created_at: :desc)
-        render json: orders.map { |o| order_json(o) }
+        orders = @orders.where(org_id: current_user.org_id)
+                        .order(created_at: :desc)
+
+        handle_response(orders)
       end
 
+      # GET /api/v1/orders/:id
       def show
-        order = current_user.orders.find_by(id: params[:id])
-        return render json: { success: false, error: "Order not found" }, status: :not_found unless order
-
-        render json: order_json(order)
+        handle_response(@order)
       end
 
+      # POST /api/v1/orders
       def create
-        cart = current_user.cart
-        return render json: { success: false, error: "Cart is empty" }, status: :unprocessable_entity if cart.nil? || cart.cart_items.empty?
+        @order = Order.new(order_params)
+        @order.org_id  = current_user.org_id
+        @order.user_id = current_user.id
 
-        order = nil
-
-        ActiveRecord::Base.transaction do
-          order = current_user.orders.create!
-
-          cart.cart_items.includes(:product).find_each do |ci|
-            order.order_items.create!(
-              product_id: ci.product_id,
-              quantity: ci.quantity,
-              unit_price: ci.product.price
-            )
-          end
-
-          cart.cart_items.destroy_all
+        if build_items(@order) && @order.save
+          handle_response(@order, "common.created", nil, :created)
+        else
+          handle_response(@order, "common.error", @order.errors.full_messages, :unprocessable_entity)
         end
+      end
 
-        render json: order_json(order), status: :created
+      # PATCH /api/v1/orders/:id
+      def update
+        @order.update(order_params)
+        handle_response(@order)
+      end
+
+      # DELETE /api/v1/orders/:id
+      def destroy
+        @order.destroy
+        handle_response(nil, "common.deleted", "Order deleted successfully")
       end
 
       private
 
-      def order_json(order)
-        order.reload
-        {
-          id: order.id,
-          status: order.status,
-          created_at: order.created_at,
-          items: order.order_items.includes(:product).map do |i|
-            {
-              product_id: i.product_id,
-              name: i.product.name,
-              quantity: i.quantity,
-              unit_price: i.unit_price,
-              line_total: i.quantity * i.unit_price
-            }
-          end
-        }
+      def order_params
+        params.require(:order).permit(
+          :status,
+          :payment_status,
+          :tax,
+          :shipping_fee
+        )
+      end
+
+      def build_items(order)
+        return order.errors.add(:base, "Items required") && false if params[:items].blank?
+
+        params[:items].each do |i|
+          order.order_items.build(
+            product_id: i[:product_id],
+            quantity: i[:quantity]
+          )
+        end
+        true
       end
     end
   end

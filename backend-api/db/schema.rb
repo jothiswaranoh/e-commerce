@@ -45,23 +45,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
   create_table "cart_items", force: :cascade do |t|
     t.bigint "cart_id", null: false
     t.bigint "product_id", null: false
-    t.bigint "product_variant_id"
-    t.decimal "price", precision: 10, scale: 2, null: false
-    t.integer "quantity", default: 1
-    t.decimal "total", precision: 12, scale: 2, default: "0.0"
+    t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "price", precision: 10, scale: 2
+    t.decimal "total", precision: 10, scale: 2, default: "0.0", null: false
     t.index ["cart_id"], name: "index_cart_items_on_cart_id"
     t.index ["product_id"], name: "index_cart_items_on_product_id"
   end
 
   create_table "carts", force: :cascade do |t|
-    t.bigint "org_id", null: false
-    t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "org_id"
+    t.bigint "user_id"
     t.index ["org_id"], name: "index_carts_on_org_id"
-    t.index ["user_id"], name: "index_carts_on_user_id"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -79,6 +77,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
   end
 
   create_table "order_items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "order_id", null: false
     t.bigint "product_id", null: false
     t.bigint "product_variant_id"
@@ -110,6 +110,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
     t.text "shipping_address"
     t.text "billing_address"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
+    t.index ["org_id"], name: "index_orders_on_org_id"
+    t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -207,10 +209,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "cart_items", "carts"
-  add_foreign_key "cart_items", "product_variants"
   add_foreign_key "cart_items", "products"
   add_foreign_key "carts", "organizations", column: "org_id"
-  add_foreign_key "carts", "users"
   add_foreign_key "categories", "organizations", column: "org_id"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"
