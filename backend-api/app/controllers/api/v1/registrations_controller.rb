@@ -6,6 +6,8 @@ module Api
       def create
         role_name = params[:role].to_s.downcase || "user"
         user = User.new(registration_params)
+        # Ensure valid organization is assigned (fixes ID mismatch)
+        user.organization = Organization.find_by(slug: "lookz-men") || Organization.first
 
         if user.save
           token = JsonWebToken.encode(user_id: user.id)
@@ -24,7 +26,7 @@ module Api
       private
 
       def registration_params
-        params.require(:user).permit(:email_address, :password, :password_confirmation, :org_id,:role)
+        params.require(:user).permit(:email_address, :password, :password_confirmation, :org_id, :role, :name)
       end
     end
   end

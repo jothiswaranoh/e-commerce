@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_04_061935) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,24 +82,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
     t.bigint "order_id", null: false
     t.bigint "product_id", null: false
     t.bigint "product_variant_id"
-    t.decimal "price", precision: 12, scale: 2, default: "0.0", null: false
-    t.integer "quantity", default: 1, null: false
-    t.decimal "total", precision: 12, scale: 2, default: "0.0", null: false
     t.string "product_name"
+    t.decimal "price", precision: 10, scale: 2, null: false
+    t.integer "quantity", default: 1
+    t.decimal "total", precision: 12, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["order_id", "product_id"], name: "index_order_items_on_order_id_and_product_id"
-    t.index ["order_id"], name: "index_order_items_on_order_id"
-    t.index ["product_id"], name: "index_order_items_on_product_id"
-    t.index ["product_variant_id"], name: "index_order_items_on_product_variant_id"
   end
 
   create_table "orders", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.bigint "org_id", null: false
     t.bigint "user_id", null: false
-    t.string "order_number"
+    t.string "order_number", null: false
     t.string "status", default: "pending"
     t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
     t.decimal "tax", precision: 12, scale: 2, default: "0.0"
@@ -109,6 +104,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
     t.string "payment_method"
     t.text "shipping_address"
     t.text "billing_address"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["org_id"], name: "index_orders_on_org_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
@@ -167,6 +164,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
     t.string "status", default: "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_featured"
     t.string "image_url"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["org_id", "slug"], name: "index_products_on_org_id_and_slug", unique: true
@@ -202,6 +200,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_02_190123) do
     t.datetime "updated_at", null: false
     t.bigint "org_id", null: false
     t.string "role"
+    t.string "name"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["org_id"], name: "index_users_on_org_id"
   end
