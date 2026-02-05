@@ -7,7 +7,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { TableRowSkeleton } from '../../components/ui/Skeleton';
-import { CategoryPayload } from '../../api/category';
+import { CategoryPayload, Category } from '../../api/category';
 
 import {
     useCategories,
@@ -18,10 +18,19 @@ import {
 
 import CategoryForm from '../../components/categories/CategoryForm';
 import CategoryTable from '../../components/categories/CategoryTable';
-import { Category } from '../../api/category';
+
+/* =========================
+   Helpers
+========================= */
+
+function extractErrorMessage(error: unknown, fallback: string) {
+    if (error instanceof Error) return error.message;
+    if (typeof error === 'string') return error;
+    return fallback;
+}
 
 export default function AdminCategories() {
-    const { data, isLoading } = useCategories();
+    const { data = [], isLoading } = useCategories();
 
     const createMutation = useCreateCategory();
     const updateMutation = useUpdateCategory();
@@ -42,17 +51,15 @@ export default function AdminCategories() {
             toast.success('Category created');
             setIsCreateOpen(false);
         } catch (error) {
-    const message =
-        error instanceof Error
-            ? error.message
-            : 'Failed to create category';
-
-    toast.error(message);
-}
+            toast.error(
+                extractErrorMessage(error, 'Failed to create category')
+            );
+        }
     };
 
     const handleUpdate = async (payload: Partial<CategoryPayload>) => {
         if (!selectedCategory) return;
+
         try {
             await updateMutation.mutateAsync({
                 id: selectedCategory.id,
@@ -62,30 +69,25 @@ export default function AdminCategories() {
             setIsEditOpen(false);
             setSelectedCategory(null);
         } catch (error) {
-    const message =
-        error instanceof Error
-            ? error.message
-            : 'Failed to update category';
-
-    toast.error(message);
-}
+            toast.error(
+                extractErrorMessage(error, 'Failed to update category')
+            );
+        }
     };
 
     const handleDelete = async () => {
         if (!selectedCategory) return;
+
         try {
             await deleteMutation.mutateAsync(selectedCategory.id);
             toast.success('Category deleted');
             setIsDeleteOpen(false);
             setSelectedCategory(null);
         } catch (error) {
-    const message =
-        error instanceof Error
-            ? error.message
-            : 'Failed to delete category';
-
-    toast.error(message);
-}
+            toast.error(
+                extractErrorMessage(error, 'Failed to delete category')
+            );
+        }
     };
 
     /* =========================
@@ -97,9 +99,14 @@ export default function AdminCategories() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-900">Categories</h1>
-                    <p className="text-neutral-600">Manage product categories</p>
+                    <h1 className="text-3xl font-bold text-neutral-900">
+                        Categories
+                    </h1>
+                    <p className="text-neutral-600">
+                        Manage product categories
+                    </p>
                 </div>
+
                 <Button onClick={() => setIsCreateOpen(true)}>
                     <Plus className="w-5 h-5" />
                     Add Category
@@ -131,7 +138,7 @@ export default function AdminCategories() {
                 )}
             </Card>
 
-            {/* Create */}
+            {/* Create Modal */}
             <Modal
                 isOpen={isCreateOpen}
                 onClose={() => setIsCreateOpen(false)}
@@ -144,7 +151,7 @@ export default function AdminCategories() {
                 />
             </Modal>
 
-            {/* Edit */}
+            {/* Edit Modal */}
             <Modal
                 isOpen={isEditOpen}
                 onClose={() => setIsEditOpen(false)}
@@ -160,7 +167,7 @@ export default function AdminCategories() {
                 )}
             </Modal>
 
-            {/* Delete */}
+            {/* Delete Confirm */}
             <ConfirmDialog
                 isOpen={isDeleteOpen}
                 onClose={() => setIsDeleteOpen(false)}
