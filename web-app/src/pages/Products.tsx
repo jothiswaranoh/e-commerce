@@ -37,25 +37,32 @@ export default function Products() {
     fetchProducts();
   }, []);
 
-  useEffect(() => {
-    let result = [...products];
+useEffect(() => {
+  if (!Array.isArray(products)) {
+    setFilteredProducts([]);
+    return;
+  }
 
-    if (selectedCategory) {
-      result = result.filter(p => p.category?.name === selectedCategory);
-    }
+  let result = [...products];
 
-    const getPrice = (p: Product) => p.variants?.[0]?.price || 0;
+  if (selectedCategory) {
+    result = result.filter(
+      p => p.category?.name === selectedCategory
+    );
+  }
 
-    if (sortBy === 'price-low') {
-      result.sort((a, b) => getPrice(a) - getPrice(b));
-    } else if (sortBy === 'price-high') {
-      result.sort((a, b) => getPrice(b) - getPrice(a));
-    } else if (sortBy === 'name') {
-      result.sort((a, b) => a.name.localeCompare(b.name));
-    }
+  const getPrice = (p: Product) => p.variants?.[0]?.price ?? 0;
 
-    setFilteredProducts(result);
-  }, [selectedCategory, sortBy, products]);
+  if (sortBy === 'price-low') {
+    result.sort((a, b) => getPrice(a) - getPrice(b));
+  } else if (sortBy === 'price-high') {
+    result.sort((a, b) => getPrice(b) - getPrice(a));
+  } else if (sortBy === 'name') {
+    result.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  setFilteredProducts(result);
+}, [selectedCategory, sortBy, products]);
 
   // FilterSidebar Component
   const FilterSidebar = () => (
@@ -222,18 +229,25 @@ export default function Products() {
                 </div>
               </div>
             ) : (
-              <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id.toString()}
-                    name={product.name}
-                    price={product.variants?.[0]?.price || 0}
-                    image={product.image}
-                    category={product.category?.name || 'Uncategorized'}
-                  />
-                ))}
-              </div>
+              <div
+  className={`grid ${
+    viewMode === 'grid'
+      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+      : 'grid-cols-1'
+  } gap-6`}
+>
+  {Array.isArray(filteredProducts) &&
+  filteredProducts.map(product => (
+    <ProductCard
+      key={product.id}
+      id={product.id.toString()}
+      name={product.name}
+      price={product.variants?.[0]?.price ?? 0}
+      image={product.image}
+      category={product.category?.name ?? 'Uncategorized'}
+    />
+  ))}
+</div>
             )}
           </div>
         </div>
@@ -253,4 +267,3 @@ export default function Products() {
     </div >
   );
 }
-

@@ -36,7 +36,7 @@ export default function CategoriesSection() {
               className="group relative h-64 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
             >
               <img
-                src={category.image}
+                src={category.image_url}
                 alt={category.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />

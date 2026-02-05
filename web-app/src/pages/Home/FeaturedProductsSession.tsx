@@ -15,6 +15,7 @@ export default function FeaturedProductsSection() {
     const fetchProducts = async () => {
       try {
         const response = await productService.getProducts();
+        debugger;
         if (response.success && response.data) {
           setProducts(response.data.slice(0, 8));
         } else {

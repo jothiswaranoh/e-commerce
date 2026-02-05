@@ -145,18 +145,25 @@ export default function AdminProducts() {
         setIsDeleteDialogOpen(true);
     };
 
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = !selectedCategory || product.category_id === selectedCategory.value;
-        const mainVariant = product.variants[0];
-        const stock = mainVariant?.stock || 0;
+  const filteredProducts = Array.isArray(products)
+    ? products.filter(product => {
+        const matchesSearch = product.name
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase());
+
+        const matchesCategory =
+            !selectedCategory || product.category_id === selectedCategory.value;
+
+        const mainVariant = product.variants?.[0];
+        const stock = mainVariant?.stock ?? 0;
 
         const matchesStatus =
             selectedStatus.value === 'all' ||
             product.status === selectedStatus.value;
 
         return matchesSearch && matchesCategory && matchesStatus;
-    });
+    })
+    : [];
 
     const ProductForm = ({ onSubmit, submitText }: { onSubmit: () => void; submitText: string }) => (
         <form
