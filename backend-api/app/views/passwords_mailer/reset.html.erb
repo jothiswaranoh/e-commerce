@@ -1,4 +1,4 @@
 <p>
   You can reset your password within the next 15 minutes on
-  <%= link_to "this password reset page", "http://localhost:5173/reset-password/#{@token}" %>.
+  <%= link_to "this password reset page", "#{Rails.configuration.client_url}/reset-password/#{@token}" %>.
 </p>

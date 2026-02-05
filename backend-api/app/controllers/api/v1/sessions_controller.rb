@@ -13,7 +13,7 @@ module Api
       end
 
       def destroy
-        render json: { success: true, message: "Logged out successfully" }
+        handle_response(success: true, message: "Logged out successfully")
       end
 
       def refresh
@@ -37,12 +37,12 @@ module Api
         @user = User.find_by(email_address: params[:email_address] || params[:email])
 
         if @user.nil?
-          render json: { success: false, error: "User not found" }, status: :not_found
+          handle_response(success: false, error: "User not found", status: :not_found)
           return false
         end
 
         unless @user.authenticate(params[:password])
-          render json: { success: false, error: "Invalid email or password" }, status: :unauthorized
+          handle_response(success: false, error: "Invalid email or password", status: :unauthorized)
           return false
         end
 
@@ -50,7 +50,7 @@ module Api
       end
 
       def render_unauthorized(message)
-        render json: { success: false, error: message }, status: :unauthorized
+        handle_response(success: false, error: message, status: :unauthorized)
       end
 
       def token_payload
@@ -62,7 +62,7 @@ module Api
 
       def generate_token_response
         token = JsonWebToken.encode(token_payload)
-        render json: { success: true, token: token }
+        handle_response(success: true, data: { token: token })
       end
     end
   end
