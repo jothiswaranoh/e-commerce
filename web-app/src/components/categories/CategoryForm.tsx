@@ -1,61 +1,161 @@
 import { useState } from 'react';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
-import { Category } from '../../api/category';
+import { Category, CategoryPayload } from '../../api/category';
+import { useCategories } from '../../hooks/useCategory';
 
 interface Props {
     initialData?: Category;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: CategoryPayload) => void;
     submitText: string;
     isLoading?: boolean;
 }
+
+type FormErrors = {
+    name?: string;
+    slug?: string;
+    sort_order?: string;
+};
 
 export default function CategoryForm({
     initialData,
     onSubmit,
     submitText,
-    isLoading,
+    isLoading = false,
 }: Props) {
-    const [form, setForm] = useState({
-        name: initialData?.name || '',
-        slug: initialData?.slug || '',
+    const { data: categories = [] } = useCategories();
+
+    const [form, setForm] = useState<CategoryPayload>({
+        name: initialData?.name ?? '',
+        slug: initialData?.slug ?? '',
+        parent_id: initialData?.parent_id ?? null,
         is_active: initialData?.is_active ?? true,
         sort_order: initialData?.sort_order ?? 0,
     });
 
+    const [errors, setErrors] = useState<FormErrors>({});
+
+    /* =========================
+       Validation
+    ========================= */
+
+    const validate = (): boolean => {
+        const nextErrors: FormErrors = {};
+
+        if (!form.name.trim()) {
+            nextErrors.name = 'Name is required';
+        } else if (form.name.trim().length < 2) {
+            nextErrors.name = 'Name must be at least 2 characters';
+        } else if (form.name.trim().length > 50) {
+            nextErrors.name = 'Name cannot exceed 50 characters';
+        }
+
+        if (!form.slug.trim()) {
+            nextErrors.slug = 'Description is required';
+        }
+
+        if (form.sort_order === undefined || Number.isNaN(form.sort_order)) {
+            nextErrors.sort_order = 'Sort order must be a number';
+        } else if (form.sort_order < 0) {
+            nextErrors.sort_order = 'Sort order cannot be negative';
+        }
+
+        setErrors(nextErrors);
+        return Object.keys(nextErrors).length === 0;
+    };
+
+    /* =========================
+       Handlers
+    ========================= */
+
+    const handleChange = <K extends keyof CategoryPayload>(
+        key: K,
+        value: CategoryPayload[K]
+    ) => {
+        setForm((prev) => ({ ...prev, [key]: value }));
+        setErrors((prev) => ({ ...prev, [key]: undefined }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validate()) return;
+        onSubmit(form);
+    };
+
+    /* =========================
+       Render
+    ========================= */
+
     return (
-        <form
-            onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit(form);
-            }}
-            className="space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
             <Input
                 label="Name"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => handleChange('name', e.target.value)}
+                error={errors.name}
                 required
             />
 
+            {/* Description */}
             <Input
                 label="Description"
                 value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                onChange={(e) => handleChange('slug', e.target.value)}
+                error={errors.slug}
                 required
             />
 
+            {/* Parent Category */}
+            <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                    Parent Category
+                </label>
+                <select
+                    value={form.parent_id ?? ''}
+                    onChange={(e) =>
+                        handleChange(
+                            'parent_id',
+                            e.target.value ? Number(e.target.value) : null
+                        )
+                    }
+                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg
+                               focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                    <option value="">No parent (top-level)</option>
+
+                    {categories
+                        .filter(
+                            (cat) =>
+                                !initialData || cat.id !== initialData.id
+                        )
+                        .map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                                {cat.name}
+                            </option>
+                        ))}
+                </select>
+            </div>
+
+            {/* Sort Order */}
             <Input
                 label="Sort Order"
                 type="number"
                 value={form.sort_order}
                 onChange={(e) =>
-                    setForm({ ...form, sort_order: Number(e.target.value) })
+                    handleChange('sort_order', Number(e.target.value))
                 }
+                error={errors.sort_order}
             />
 
+            {/* Submit */}
             <div className="flex gap-3 pt-4">
-                <Button type="submit" fullWidth isLoading={isLoading}>
+                <Button
+                    type="submit"
+                    fullWidth
+                    isLoading={isLoading}
+                    disabled={isLoading}
+                >
                     {submitText}
                 </Button>
             </div>
