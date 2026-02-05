@@ -1,4 +1,5 @@
 class Product < ApplicationRecord
+  include Rails.application.routes.url_helpers
   belongs_to :organization,class_name:"Organization",foreign_key: :org_id
   belongs_to :category
 
@@ -17,13 +18,4 @@ class Product < ApplicationRecord
   validates :category_id, presence: true
   validates :status, inclusion: { in: %w[active inactive archived], message: "%{value} is not a valid status" }
 
-  def image
-    image_url
-  end
-
-  def as_json(options = {})
-    super(options).merge({
-      "image" => image
-    })
-  end
 end

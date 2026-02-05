@@ -11,6 +11,8 @@ class ProductBlueprint < Blueprinter::Base
          :updated_at
 
   association :category, blueprint: CategoryBlueprint
+  association :variants, blueprint: ::ProductVariantBlueprint
+  association :product_attributes, blueprint: ::ProductAttributeBlueprint
 
   field :images do |product|
     product.images.map do |image|

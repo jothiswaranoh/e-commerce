@@ -139,10 +139,6 @@ components:
           type: boolean
           example: false
 
-    # ===============================
-    # ✅ NEW CREATE-ONLY SCHEMAS
-    # ===============================
-
     ProductVariantCreate:
       type: object
       required: [sku, price]
@@ -167,10 +163,6 @@ components:
         value:
           type: string
           example: Black
-
-    # ===============================
-    # ✅ MODIFIED INPUT (NO id usage)
-    # ===============================
 
     ProductInput:
       type: object
@@ -459,13 +451,37 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
-              required: [product]
               properties:
-                product:
-                  $ref: '#/components/schemas/ProductInput'
+                product[name]:
+                  type: string
+                product[slug]:
+                  type: string
+                product[description]:
+                  type: string
+                product[status]:
+                  type: string
+                  enum: [active, inactive, archived]
+                product[category_id]:
+                  type: integer
+
+                product[images][]:
+                  type: string
+                  format: binary
+
+                product[variants_attributes][0][sku]:
+                  type: string
+                product[variants_attributes][0][price]:
+                  type: number
+                product[variants_attributes][0][stock]:
+                  type: integer
+
+                product[product_attributes_attributes][0][key]:
+                  type: string
+                product[product_attributes_attributes][0][value]:
+                  type: string
       responses:
         '201':
           description: Product created
@@ -511,13 +527,37 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
-              required: [product]
               properties:
-                product:
-                  $ref: '#/components/schemas/ProductInput'
+                product[name]:
+                  type: string
+                product[slug]:
+                  type: string
+                product[description]:
+                  type: string
+                product[status]:
+                  type: string
+                  enum: [active, inactive, archived]
+                product[category_id]:
+                  type: integer
+
+                product[images][]:
+                  type: string
+                  format: binary
+
+                product[variants_attributes][0][sku]:
+                  type: string
+                product[variants_attributes][0][price]:
+                  type: number
+                product[variants_attributes][0][stock]:
+                  type: integer
+
+                product[product_attributes_attributes][0][key]:
+                  type: string
+                product[product_attributes_attributes][0][value]:
+                  type: string
       responses:
         '200':
           description: Product updated

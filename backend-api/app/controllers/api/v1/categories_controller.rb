@@ -2,7 +2,6 @@ module Api
   module V1
     class CategoriesController < ApplicationController
       include Authorization
-      include ResponseRenderingConcern
       include Crudable
 
       allow_unauthenticated_access only: [:index, :show]
