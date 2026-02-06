@@ -4,6 +4,7 @@ import Button from '../ui/Button';
 import { Category, CategoryPayload } from '../../api/category';
 import { useCategories } from '../../hooks/useCategory';
 
+
 interface Props {
     initialData?: Category;
     onSubmit: (data: CategoryPayload) => void;
@@ -34,6 +35,11 @@ export default function CategoryForm({
     });
 
     const [errors, setErrors] = useState<FormErrors>({});
+    
+    const [image, setImage] = useState<File | null>(null);
+    const [preview, setPreview] = useState<string | null>(
+    initialData?.image ?? null
+);
 
     /* =========================
        Validation
@@ -79,7 +85,18 @@ export default function CategoryForm({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
-        onSubmit(form);
+        onSubmit({
+            ...form,
+            image,
+        });
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setImage(file);
+        setPreview(URL.createObjectURL(file));
     };
 
     /* =========================
@@ -147,7 +164,32 @@ export default function CategoryForm({
                 }
                 error={errors.sort_order}
             />
+            {/* Category Image */}
+            <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                    Category Image
+                </label>
 
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="block w-full text-sm text-neutral-600
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-lg file:border-0
+                            file:text-sm file:font-medium
+                            file:bg-neutral-100 file:text-neutral-700
+                            hover:file:bg-neutral-200"
+                />
+
+                {preview && (
+                    <img
+                        src={preview}
+                        alt="Preview"
+                        className="mt-3 w-20 h-20 object-cover rounded-lg border"
+                    />
+                )}
+            </div>
             {/* Submit */}
             <div className="flex gap-3 pt-4">
                 <Button
