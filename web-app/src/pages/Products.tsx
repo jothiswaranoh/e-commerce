@@ -14,18 +14,24 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const categories = ['Electronics', 'Fashion', 'Home', 'Sports'];
+  const categories = Array.isArray(products)
+  ? Array.from(
+      new Set(products.map(p => p.category?.name).filter(Boolean))
+    )
+  : [];
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
         const response = await productService.getProducts();
-        if (response.success && response.data) {
+        if (response?.success && Array.isArray(response.data)) {
           setProducts(response.data);
           setFilteredProducts(response.data);
         } else {
-          console.error('Failed to load products', response.error);
+          setProducts([]);
+          setFilteredProducts([]);
+          console.error('Unexpected products response', response);
         }
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -242,8 +248,8 @@ useEffect(() => {
       key={product.id}
       id={product.id.toString()}
       name={product.name}
-      price={product.variants?.[0]?.price ?? 0}
-      image={product.image}
+      price={Number(product.variants?.[0]?.price ?? 0)}
+      image={product.images?.[0]}
       category={product.category?.name ?? 'Uncategorized'}
     />
   ))}

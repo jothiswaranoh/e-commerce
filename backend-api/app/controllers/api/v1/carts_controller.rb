@@ -83,7 +83,15 @@ module Api
         quantity: item.quantity,
         price: item.price.to_f,     
         total: item.total.to_f,     
-        image: item.product&.image  
+        image: (
+          if item.product&.images&.attached?
+            Rails.application.routes.url_helpers.rails_blob_url(
+              item.product.images.first
+            )
+          else
+            nil
+          end
+        )
       }
     end
   }

@@ -16,7 +16,7 @@ export default function FeaturedProductsSection() {
       try {
         const response = await productService.getProducts();
         debugger;
-        if (response.success && response.data) {
+        if (response.success && Array.isArray(response.data)) {
           setProducts(response.data.slice(0, 8));
         } else {
           console.error('Failed to load featured products', response.error);

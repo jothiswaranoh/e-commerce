@@ -27,10 +27,19 @@ export const useProduct = (id: string | number) => {
 
 export const useCreateProduct = () => {
     const queryClient = useQueryClient();
+
     return useMutation({
-        mutationFn: (data: ProductFormData) => productService.createProduct(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['products'] });
+        mutationFn: async (data: ProductFormData) => {
+            const res = await productService.createProduct(data);
+            if (!res.success) {
+                throw new Error(res.message || 'Failed to create product');
+            }
+            return res.data;
+        },
+
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['products'] });
+            await queryClient.refetchQueries({ queryKey: ['products'] });
         },
     });
 };
