@@ -28,7 +28,7 @@ export interface Product {
     };
     variants: ProductVariant[];
     product_attributes: ProductAttribute[];
-    image?: string;
+    images?: string[];
 }
 
 export interface ProductFormData extends Omit<Product, 'id' | 'variants' | 'product_attributes' | 'category'> {

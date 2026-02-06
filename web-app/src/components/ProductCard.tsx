@@ -47,12 +47,17 @@ export default function ProductCard({
         {!isImageLoaded && (
           <div className="absolute inset-0 animate-shimmer" />
         )}
-        <img
+       <img
           src={image}
           alt={name}
-          className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${isImageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+          loading="lazy"
           onLoad={() => setIsImageLoaded(true)}
+          onError={(e) => {
+            e.currentTarget.src =
+              'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
+            setIsImageLoaded(true);
+          }}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
 
         {/* Category Badge */}

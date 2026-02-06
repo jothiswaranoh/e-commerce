@@ -54,11 +54,15 @@ module Crudable
 
   # DELETE /resources/:id
   def destroy
-    @resource.destroy
+  if @resource.destroy
     render_success(nil, delete_response_key)
+  else
+    render json: {
+      error: "Cannot delete resource",
+      details: @resource.errors.full_messages
+    }, status: :unprocessable_entity
   end
-
-  private
+end
 
   # 🔒 Org-safe scoping
   def scoped_collection

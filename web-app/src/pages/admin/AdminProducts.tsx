@@ -10,11 +10,9 @@ import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '../../hooks/useProduct';
 import { Product, ProductFormData } from '../../types';
+import { useCategories } from '../../hooks/useCategory';
 
-const categoryOptions = [
-    { value: 1, label: 'Electronics' },
-    { value: 2, label: 'Fashion' },
-];
+
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -25,6 +23,7 @@ const statusOptions = [
 
 export default function AdminProducts() {
     const { data: products = [] } = useProducts();
+    const { data: categories = [] } = useCategories();
     const createMutation = useCreateProduct();
     const updateMutation = useUpdateProduct();
     const deleteMutation = useDeleteProduct();
@@ -47,6 +46,11 @@ export default function AdminProducts() {
         description: '',
         status: 'active' as const,
     });
+
+    const categoryOptions = categories.map(cat => ({
+        value: cat.id,
+        label: cat.name,
+    }));
 
     const isLoading = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
@@ -145,136 +149,25 @@ export default function AdminProducts() {
         setIsDeleteDialogOpen(true);
     };
 
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = !selectedCategory || product.category_id === selectedCategory.value;
-        const mainVariant = product.variants[0];
-        const stock = mainVariant?.stock || 0;
+  const filteredProducts = Array.isArray(products)
+    ? products.filter(product => {
+        const matchesSearch = product.name
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase());
+
+        const matchesCategory =
+            !selectedCategory || product.category_id === selectedCategory.value;
+
+        const mainVariant = product.variants?.[0];
+        const stock = mainVariant?.stock ?? 0;
 
         const matchesStatus =
             selectedStatus.value === 'all' ||
             product.status === selectedStatus.value;
 
         return matchesSearch && matchesCategory && matchesStatus;
-    });
-
-    const ProductForm = ({ onSubmit, submitText }: { onSubmit: () => void; submitText: string }) => (
-        <form
-            onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit();
-            }}
-            className="space-y-5"
-        >
-            <div className="grid grid-cols-2 gap-4">
-                <Input
-                    label="Product Name"
-                    placeholder="Enter product name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                />
-                <Input
-                    label="Slug (optional)"
-                    placeholder="product-slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">Category</label>
-                    <Select
-                        options={categoryOptions}
-                        value={categoryOptions.find(opt => opt.value === Number(formData.category_id))}
-                        onChange={(option) => setFormData({ ...formData, category_id: String(option?.value || '') })}
-                        placeholder="Select category"
-                        className="react-select-container"
-                        classNamePrefix="react-select"
-                        styles={{
-                            control: (base) => ({
-                                ...base,
-                                borderColor: '#d4d4d4',
-                                '&:hover': { borderColor: '#7c3aed' },
-                                boxShadow: 'none',
-                            }),
-                            option: (base, state) => ({
-                                ...base,
-                                backgroundColor: state.isSelected ? '#7c3aed' : state.isFocused ? '#f5f3ff' : 'white',
-                                color: state.isSelected ? 'white' : '#171717',
-                            }),
-                        }}
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">Status</label>
-                    <Select
-                        options={statusOptions.filter(opt => opt.value !== 'all')}
-                        value={statusOptions.find(opt => opt.value === formData.status)}
-                        onChange={(option: any) => setFormData({ ...formData, status: option?.value || 'active' })}
-                        placeholder="Select status"
-                        styles={{
-                            control: (base) => ({
-                                ...base,
-                                borderColor: '#d4d4d4',
-                                '&:hover': { borderColor: '#7c3aed' },
-                                boxShadow: 'none',
-                            }),
-                        }}
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <Input
-                    label="Price (₹)"
-                    type="number"
-                    placeholder="0"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    required
-                />
-                <Input
-                    label="Initial Stock"
-                    type="number"
-                    placeholder="0"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    required
-                />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">Description</label>
-                <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter product description"
-                    rows={3}
-                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-                />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-                <Button
-                    type="button"
-                    variant="outline"
-                    fullWidth
-                    onClick={() => {
-                        setIsAddModalOpen(false);
-                        setIsEditModalOpen(false);
-                        setFormData({ name: '', slug: '', category_id: '', price: '', stock: '', description: '', status: 'active' });
-                    }}
-                >
-                    Cancel
-                </Button>
-                <Button type="submit" fullWidth isLoading={isLoading}>
-                    {submitText}
-                </Button>
-            </div>
-        </form>
-    );
+    })
+    : [];
 
     return (
         <div className="space-y-6">
@@ -376,17 +269,35 @@ export default function AdminProducts() {
                                 <tr key={product.id} className="hover:bg-neutral-50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-neutral-100 rounded-lg"></div>
+                                            <img
+                                                src={product.images?.[0] || '/placeholder.png'}
+                                                alt={product.name}
+                                                className="w-12 h-12 rounded-lg object-cover bg-neutral-100"
+                                                />  
                                             <div>
                                                 <p className="font-semibold text-neutral-900">{product.name}</p>
                                                 <p className="text-sm text-neutral-500">ID: {product.id}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-neutral-700">{product.category}</td>
-                                    <td className="px-6 py-4 font-semibold text-neutral-900">₹{product.price.toLocaleString()}</td>
-                                    <td className="px-6 py-4 text-neutral-700">{product.stock} units</td>
-                                    <td className="px-6 py-4">{getStatusBadge(product.status, product.stock)}</td>
+                                    <td className="px-6 py-4 text-neutral-700">
+                                        {product.category?.name ?? 'Uncategorized'}
+                                        </td>
+
+                                        <td className="px-6 py-4 font-semibold text-neutral-900">
+                                        ₹{product.variants?.[0]?.price?.toLocaleString() ?? 0}
+                                        </td>
+
+                                        <td className="px-6 py-4 text-neutral-700">
+                                        {product.variants?.[0]?.stock ?? 0} units
+                                        </td>
+
+                                        <td className="px-6 py-4">
+                                        {getStatusBadge(
+                                            product.status,
+                                            product.variants?.[0]?.stock ?? 0
+                                        )}
+                                        </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end gap-2">
                                             <button
@@ -440,7 +351,14 @@ export default function AdminProducts() {
                 onClose={() => setIsAddModalOpen(false)}
                 title="Add New Product"
             >
-                <ProductForm onSubmit={handleAddProduct} submitText="Add Product" />
+                <ProductForm
+                    formData={formData}
+                    setFormData={setFormData}
+                    onSubmit={handleAddProduct}
+                    submitText="Add Product"
+                    isLoading={isLoading}
+                    categoryOptions={categoryOptions}
+                    />
             </Modal>
 
             {/* Edit Product Modal */}
@@ -449,7 +367,14 @@ export default function AdminProducts() {
                 onClose={() => setIsEditModalOpen(false)}
                 title="Edit Product"
             >
-                <ProductForm onSubmit={handleEditProduct} submitText="Update Product" />
+                <ProductForm
+                    formData={formData}
+                    setFormData={setFormData}
+                    onSubmit={handleEditProduct}
+                    submitText="Update Product"
+                    isLoading={isLoading}
+                    categoryOptions={categoryOptions}
+                />
             </Modal>
 
             {/* View Product Modal */}
@@ -507,4 +432,133 @@ export default function AdminProducts() {
             />
         </div>
     );
+}
+function ProductForm({
+  formData,
+  setFormData,
+  onSubmit,
+  submitText,
+  isLoading,
+  categoryOptions
+}: {
+  formData: any;
+  setFormData: React.Dispatch<React.SetStateAction<any>>;
+  onSubmit: () => void;
+  submitText: string;
+  isLoading: boolean;
+  categoryOptions: { value: number; label: string }[];
+}) {
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+      className="space-y-5"
+    >
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="Product Name"
+          placeholder="Enter product name"
+          value={formData.name}
+          onChange={(e) =>
+            setFormData((prev: any) => ({ ...prev, name: e.target.value }))
+          }
+          required
+        />
+        <Input
+          label="Slug (optional)"
+          placeholder="product-slug"
+          value={formData.slug}
+          onChange={(e) =>
+            setFormData((prev: any) => ({ ...prev, slug: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Category
+          </label>
+          <Select
+            options={categoryOptions}
+            value={categoryOptions.find(
+              (opt) => opt.value === Number(formData.category_id)
+            )}
+            onChange={(option) =>
+              setFormData((prev: any) => ({
+                ...prev,
+                category_id: String(option?.value || ''),
+              }))
+            }
+            placeholder="Select category"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Status
+          </label>
+          <Select
+            options={statusOptions.filter((opt) => opt.value !== 'all')}
+            value={statusOptions.find(
+              (opt) => opt.value === formData.status
+            )}
+            onChange={(option: any) =>
+              setFormData((prev: any) => ({
+                ...prev,
+                status: option?.value || 'active',
+              }))
+            }
+            placeholder="Select status"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="Price (₹)"
+          type="number"
+          value={formData.price}
+          onChange={(e) =>
+            setFormData((prev: any) => ({ ...prev, price: e.target.value }))
+          }
+          required
+        />
+        <Input
+          label="Initial Stock"
+          type="number"
+          value={formData.stock}
+          onChange={(e) =>
+            setFormData((prev: any) => ({ ...prev, stock: e.target.value }))
+          }
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-neutral-700 mb-2">
+          Description
+        </label>
+        <textarea
+          value={formData.description}
+          onChange={(e) =>
+            setFormData((prev: any) => ({
+              ...prev,
+              description: e.target.value,
+            }))
+          }
+          rows={3}
+          className="w-full px-4 py-2.5 border rounded-lg"
+        />
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <Button type="submit" fullWidth isLoading={isLoading}>
+          {submitText}
+        </Button>
+      </div>
+    </form>
+  );
 }

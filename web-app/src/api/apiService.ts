@@ -107,10 +107,11 @@ export async function service<T = any>(
 ): Promise<ApiResponse<T>> {
     try {
         const response = await apiClient(config);
+        const backend = response.data;
 
         return {
-            success: true,
-            data: response.data,
+            success: backend?.success ?? true,
+            data: backend?.data ?? backend,
             status: response.status,
             headers: response.headers,
         };
@@ -122,10 +123,17 @@ export async function service<T = any>(
                 error: error.response?.data,
                 status: error.response?.status,
                 headers: error.response?.headers,
-                message: error.response?.data?.message || error.response?.data?.error || error.message,
+                message: error.response?.data?.message ||
+                error.response?.data?.error ||
+                error.message,
             };
         }
-        return { success: false, error, status: 500, message: 'Network error' };
+        return {
+            success: false,
+            error,
+            status: 500,
+            message: 'Network error'
+        };
     }
 }
 
