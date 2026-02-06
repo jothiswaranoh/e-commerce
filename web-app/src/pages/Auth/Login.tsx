@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Package, Shield, Sparkles } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Package, Shield, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
 import { UI_CONFIG } from '../../config/ui.config';
 import Button from '../../components/ui/Button';
@@ -13,6 +13,7 @@ const { auth, brand, messages, images } = UI_CONFIG;
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,24 +73,31 @@ export default function Login() {
             />
 
             <div>
-              <Input
-                type="password"
-                label={auth.register.fields.password.label}
-                placeholder={auth.register.fields.password.placeholder}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                leftIcon={<Lock className="w-5 h-5" />}
-                required
-              />
-              <div className="flex justify-end mt-1">
-                <Link
-                  to={ROUTES.FORGOT_PASSWORD}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  {auth.login.forgotPassword}
-                </Link>
-              </div>
-            </div>
+             <Input
+  type={showPassword ? 'text' : 'password'}
+  label={auth.register.fields.password.label}
+  placeholder={auth.register.fields.password.placeholder}
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  leftIcon={<Lock className="w-5 h-5" />}
+  rightIcon={
+    <button
+      type="button"
+      onClick={() => setShowPassword(prev => !prev)}
+      className="focus:outline-none"
+      aria-label={showPassword ? 'Hide password' : 'Show password'}
+    >
+      {showPassword ? (
+        <EyeOff className="w-5 h-5 text-neutral-500 hover:text-neutral-700" />
+      ) : (
+        <Eye className="w-5 h-5 text-neutral-500 hover:text-neutral-700" />
+      )}
+    </button>
+  }
+  required
+/>
+
+</div>
 
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">

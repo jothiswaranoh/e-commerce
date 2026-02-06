@@ -16,6 +16,7 @@ export interface ProductVariant {
 export interface Product {
     id: number | string;
     name: string;
+    price:number;
     slug: string;
     description?: string;
     status: 'active' | 'inactive' | 'archived';
