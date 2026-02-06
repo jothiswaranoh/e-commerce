@@ -28,13 +28,7 @@ export default function Login() {
         toast.success(messages.success.loginSuccess);
 
         // Redirect based on user role
-        const userResult = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/me`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('shophub_auth_token')}`
-          }
-        }).then(res => res.json());
-
-        if (userResult.user?.role === 'admin') {
+        if (response.user?.role === 'admin') {
           navigate(ROUTES.ADMIN_DASHBOARD, { replace: true });
         } else {
           navigate(from === ROUTES.LOGIN ? ROUTES.HOME : from, { replace: true });

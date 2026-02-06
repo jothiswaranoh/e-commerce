@@ -16,6 +16,8 @@ export interface Category {
     sort_order: number;
     created_at: string;
     updated_at: string;
+    image?: string | null;
+    count?: string | number;
 }
 
 export interface CategoryPayload {
@@ -41,7 +43,7 @@ export const CategoryAPI = {
      * GET /api/v1/categories
      */
     list() {
-        return apiService.get<Category[]>(BASE_PATH);
+    return apiService.get<{ data: Category[] }>(BASE_PATH);
     },
 
     /**

@@ -1,61 +1,34 @@
 module Api
   module V1
     class CategoriesController < ApplicationController
-      before_action :set_category, only: [:show, :update, :destroy]
+      include Authorization
+      include Crudable
 
-      # GET /api/v1/categories
-      def index
-        categories = current_org.categories.order(:sort_order)
-
-        render json: categories
-      end
-
-      # GET /api/v1/categories/:id
-      def show
-        render json: @category
-      end
-
-      # POST /api/v1/categories
-      def create
-        category = current_org.categories.new(category_params)
-
-        if category.save
-          render json: category, status: :created
-        else
-          render json: { errors: category.errors.full_messages }, status: :unprocessable_entity
-        end
-      end
-
-      # PATCH/PUT /api/v1/categories/:id
-      def update
-        if @category.update(category_params)
-          render json: @category
-        else
-          render json: { errors: @category.errors.full_messages }, status: :unprocessable_entity
-        end
-      end
-
-      # DELETE /api/v1/categories/:id
-      def destroy
-        @category.destroy
-        head :no_content
-      end
+      allow_unauthenticated_access only: [:index, :show]
+      
+      load_and_authorize_resource
 
       private
 
-      # 🔐 Org-scoped lookup (NO DATA LEAKS)
-      def set_category
-        @category = current_org.categories.find(params[:id])
+      def model_class
+        Category
       end
 
-      def category_params
+      def resource_params
         params.require(:category).permit(
           :name,
           :slug,
           :parent_id,
           :is_active,
-          :sort_order
+          :sort_order,
+          :image
         )
+      end
+
+      def scoped_collection
+        scope = model_class.all
+        return scope unless current_user
+        scope.where(org_id: current_org&.id)
       end
     end
   end

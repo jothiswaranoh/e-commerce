@@ -1,6 +1,9 @@
 en:
   responses:
     common:
+      created:
+        message: "Created successfully"
+        status: :created
       not_found:
         message: "Record not found"
         status: :not_found
@@ -24,7 +27,13 @@ en:
         status: 201
       unauthorized:
         message: "Unauthorized"
-        status: :unauthorized
+        status: :unauthorized\d categories;
       conflict:
         message: "Conflict"
         status: :conflict
+      updated:
+        message: Resource updated successfully
+        status: 200
+      deleted:
+        message: Resource deleted successfully
+        status: 200
