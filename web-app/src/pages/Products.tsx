@@ -4,6 +4,8 @@ import ProductCard from '../components/ProductCard';
 import { productService } from '../services/productService';
 import { Product } from '../types/product';
 import Button from '../components/ui/Button';
+import { useCategories } from '../hooks/useCategory';
+import type { Category } from '../api/category';
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,11 +16,9 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const categories = Array.isArray(products)
-  ? Array.from(
-      new Set(products.map(p => p.category?.name).filter(Boolean))
-    )
-  : [];
+  // Fetch categories dynamically
+  const { data: categoryList } = useCategories();
+  const categories: Category[] = categoryList || [];
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -106,18 +106,18 @@ useEffect(() => {
             </label>
             {categories.map((cat) => (
               <label
-                key={cat}
+                key={cat.id}
                 className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer hover:bg-neutral-50 p-2 rounded-lg transition-colors"
               >
                 <input
                   type="radio"
                   name="category"
-                  value={cat}
-                  checked={selectedCategory === cat}
+                  value={cat.name}
+                  checked={selectedCategory === cat.name}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-4 h-4 text-primary-600 focus:ring-primary-500"
                 />
-                {cat}
+                {cat.name}
               </label>
             ))}
           </div>

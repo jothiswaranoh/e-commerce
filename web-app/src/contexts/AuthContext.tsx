@@ -29,6 +29,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
         };
         loadUser();
+
+        // Listen for force logout events (e.g. 401 from API)
+        const handleAuthLogout = () => {
+            setUser(null);
+            // Optionally clear any other local state if needed
+        };
+        
+        window.addEventListener('auth-logout', handleAuthLogout);
+        
+        return () => {
+            window.removeEventListener('auth-logout', handleAuthLogout);
+        };
     }, []);
 
     const login = async (email: string, password: string) => {

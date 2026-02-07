@@ -3,19 +3,10 @@ import { ROUTES } from '../../config/routes.constants';
 import { HOME } from '../../config/ui.config';
 import { useCategories } from '../../hooks/useCategory';
 
-type Category = {
-  name: string;
-  image: string;
-  count: string;
-};
-
-
-
-
-
 export default function CategoriesSection() {
-  const { data } = useCategories();
+  const { data, isLoading } = useCategories();
   const categories = Array.isArray(data) ? data : [];
+
   return (
     <section className="py-16 bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,8 +36,27 @@ export default function CategoriesSection() {
                 <h3 className="text-2xl font-bold mb-1">{category.name}</h3>
                 <p className="text-sm text-white/80">{category.count}</p>
               </div>
-            </Link>
-          ))}
+            ))
+          ) : (
+            categories.map((category, index) => (
+              <Link
+                key={index}
+                to={ROUTES.PRODUCTS}
+                className="group relative h-64 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+              >
+                <img
+                  src={category.image || 'https://via.placeholder.com/400x300?text=No+Image'}
+                  alt={category.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <h3 className="text-2xl font-bold mb-1">{category.name}</h3>
+                  <p className="text-sm text-white/80">{category.count || 0} Products</p>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </section>
