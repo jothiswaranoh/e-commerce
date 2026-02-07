@@ -20,11 +20,21 @@ export default function CategoriesSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {isLoading ? (
-            // Skeleton Loader
-            [...Array(4)].map((_, index) => (
-              <div key={index} className="h-64 rounded-2xl bg-white shadow-lg overflow-hidden animate-pulse">
-                <div className="h-full bg-neutral-200" />
+          {categories.map((category, index) => (
+            <Link
+              key={index}
+              to={ROUTES.PRODUCTS}
+              className="group relative h-64 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+            >
+              <img
+                src={category.image_url}
+                alt={category.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <h3 className="text-2xl font-bold mb-1">{category.name}</h3>
+                <p className="text-sm text-white/80">{category.count}</p>
               </div>
             ))
           ) : (

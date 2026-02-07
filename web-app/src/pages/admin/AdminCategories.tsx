@@ -23,10 +23,14 @@ import CategoryTable from '../../components/categories/CategoryTable';
    Helpers
 ========================= */
 
-function extractErrorMessage(error: unknown, fallback: string) {
-    if (error instanceof Error) return error.message;
-    if (typeof error === 'string') return error;
-    return fallback;
+function extractApiError(error: any, fallback: string) {
+    return (
+        error?.response?.data?.details?.[0] ||
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        fallback
+    );
 }
 
 export default function AdminCategories() {
@@ -52,7 +56,7 @@ export default function AdminCategories() {
             setIsCreateOpen(false);
         } catch (error) {
             toast.error(
-                extractErrorMessage(error, 'Failed to create category')
+                extractApiError(error, 'Failed to create category')
             );
         }
     };
@@ -70,7 +74,7 @@ export default function AdminCategories() {
             setSelectedCategory(null);
         } catch (error) {
             toast.error(
-                extractErrorMessage(error, 'Failed to update category')
+                extractApiError(error, 'Failed to update category')
             );
         }
     };
@@ -85,7 +89,7 @@ export default function AdminCategories() {
             setSelectedCategory(null);
         } catch (error) {
             toast.error(
-                extractErrorMessage(error, 'Failed to delete category')
+                extractApiError(error, 'Failed to delete category')
             );
         }
     };

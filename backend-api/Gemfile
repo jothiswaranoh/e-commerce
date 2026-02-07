@@ -54,6 +54,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   gem "blueprinter"
+  gem "kaminari"
 end
 
 

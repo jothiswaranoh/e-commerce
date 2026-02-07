@@ -443,6 +443,28 @@ paths:
                         items:
                           $ref: '#/components/schemas/Product'
 
+
+  /products:
+    get:
+      summary: List products
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+
     post:
       summary: Create product
       tags: [Products]
@@ -471,17 +493,17 @@ paths:
                   type: string
                   format: binary
 
-                product[variants_attributes][0][sku]:
-                  type: string
-                product[variants_attributes][0][price]:
-                  type: number
-                product[variants_attributes][0][stock]:
-                  type: integer
+                product[variants_attributes]:
+                  type: array
+                  description: Optional product variants
+                  items:
+                    $ref: '#/components/schemas/ProductVariantCreate'
 
-                product[product_attributes_attributes][0][key]:
-                  type: string
-                product[product_attributes_attributes][0][value]:
-                  type: string
+                product[product_attributes_attributes]:
+                  type: array
+                  description: Optional product attributes
+                  items:
+                    $ref: '#/components/schemas/ProductAttributeCreate'
       responses:
         '201':
           description: Product created
@@ -513,6 +535,8 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/Product'
+
+    
 
     put:
       summary: Update product
@@ -547,17 +571,18 @@ paths:
                   type: string
                   format: binary
 
-                product[variants_attributes][0][sku]:
-                  type: string
-                product[variants_attributes][0][price]:
-                  type: number
-                product[variants_attributes][0][stock]:
-                  type: integer
+                product[variants_attributes]:
+                  type: array
+                  description: Optional product variants
+                  items:
+                    $ref: '#/components/schemas/ProductVariantCreate'
 
-                product[product_attributes_attributes][0][key]:
-                  type: string
-                product[product_attributes_attributes][0][value]:
-                  type: string
+                product[product_attributes_attributes]:
+                  type: array
+                  description: Optional product attributes
+                  items:
+                    $ref: '#/components/schemas/ProductAttributeCreate'
+
       responses:
         '200':
           description: Product updated

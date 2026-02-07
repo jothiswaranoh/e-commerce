@@ -1,54 +1,66 @@
-import { Edit, Trash2 } from 'lucide-react';
-import { Category } from '../../api/category';
+import { Fragment } from "react";
+import { Edit, Trash2 } from "lucide-react";
 
-interface Props {
+type Category = {
+    id: number;
+    name: string;
+    slug: string;
+    image_url?: string | null;
+    is_active: boolean;
+    parent_id: number | null;
+    count?: number;
+};
+
+type Props = {
     categories: Category[];
-    onEdit: (category: Category) => void;
-    onDelete: (category: Category) => void;
-}
+    onEdit: (cat: Category) => void;
+    onDelete: (cat: Category) => void;
+};
 
-/* =========================
-   Helpers
-========================= */
-
-// Build parent → children map
 function buildCategoryTree(categories: Category[]) {
     const map = new Map<number | null, Category[]>();
 
     categories.forEach((cat) => {
         const key = cat.parent_id ?? null;
-        if (!map.has(key)) {
-            map.set(key, []);
-        }
+        if (!map.has(key)) map.set(key, []);
         map.get(key)!.push(cat);
     });
-
     return map;
 }
 
-export default function CategoryTable({ categories, onEdit, onDelete }: Props) {
+export default function CategoryTable({
+    categories,
+    onEdit,
+    onDelete,
+}: Props) {
     const tree = buildCategoryTree(categories);
-    const parents = tree.get(null) || [];
+    const parents = categories;
 
     const renderRow = (cat: Category, depth = 0) => (
         <tr key={cat.id} className="hover:bg-neutral-50">
-            {/* Image */}
             <td className="px-6 py-4">
-                {cat.image ? (
+                {cat.image_url ? (
                     <img
-                        src={cat.image}
+                        src={cat.image_url}
                         alt={cat.name}
                         className="w-10 h-10 object-cover rounded-lg bg-neutral-100"
                     />
                 ) : (
-                    <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center text-neutral-400" />
+                    <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center text-neutral-400 text-xs">
+                        No Image
+                    </div>
                 )}
             </td>
 
-            {/* Name (indented for children) */}
+            {/* Name */}
             <td className="px-6 py-4 font-medium">
-                <span style={{ paddingLeft: depth * 16 }}>
-                    {depth > 0 && '↳ '}
+                <span
+                    className="flex items-center"
+                    style={{ paddingLeft: depth * 16 }}
+                >
+                    {depth > 0 && (
+                        <span className="mr-1 text-neutral-400">↳</span>
+                    )}
                     {cat.name}
                 </span>
             </td>
@@ -57,18 +69,19 @@ export default function CategoryTable({ categories, onEdit, onDelete }: Props) {
             <td className="px-6 py-4 text-neutral-600">{cat.slug}</td>
 
             {/* Products */}
-            <td className="px-6 py-4 text-neutral-600">{cat.count || 0}</td>
+            <td className="px-6 py-4 text-neutral-600">
+                {cat.count ?? 0}
+            </td>
 
             {/* Status */}
             <td className="px-6 py-4">
                 <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        cat.is_active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-neutral-100 text-neutral-800'
-                    }`}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cat.is_active
+                        ? "bg-green-100 text-green-800"
+                        : "bg-neutral-100 text-neutral-800"
+                        }`}
                 >
-                    {cat.is_active ? 'Active' : 'Inactive'}
+                    {cat.is_active ? "Active" : "Inactive"}
                 </span>
             </td>
 
@@ -90,6 +103,15 @@ export default function CategoryTable({ categories, onEdit, onDelete }: Props) {
                 </div>
             </td>
         </tr>
+    );
+
+    const renderTree = (cat: Category, depth = 0) => (
+        <Fragment key={cat.id}>
+            {renderRow(cat, depth)}
+            {(tree.get(cat.id) || []).map((child) =>
+                renderTree(child, depth + 1)
+            )}
+        </Fragment>
     );
 
     return (
@@ -119,14 +141,7 @@ export default function CategoryTable({ categories, onEdit, onDelete }: Props) {
                 </thead>
 
                 <tbody className="divide-y">
-                    {parents.map((parent) => (
-                        <>
-                            {renderRow(parent, 0)}
-                            {(tree.get(parent.id) || []).map((child) =>
-                                renderRow(child, 1)
-                            )}
-                        </>
-                    ))}
+                    {parents.map((parent) => renderTree(parent))}
                 </tbody>
             </table>
         </div>

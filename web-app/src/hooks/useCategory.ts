@@ -25,9 +25,7 @@ export function useCategories() {
             }
 
             // 🔴 IMPORTANT: unwrap backend response
-            return Array.isArray(res.data?.data)
-                ? res.data.data
-                : [];
+            return Array.isArray(res.data) ? res.data : [];
         },
     });
 }
