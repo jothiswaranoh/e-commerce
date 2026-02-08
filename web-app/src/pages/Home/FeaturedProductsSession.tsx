@@ -1,3 +1,4 @@
+// src/pages/Home/FeaturedProductsSection.tsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
@@ -14,15 +15,18 @@ export default function FeaturedProductsSection() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await productService.getProducts();
-        debugger;
-        if (response.success && Array.isArray(response.data)) {
-          setProducts(response.data.slice(0, 8));
+        const res = await productService.getProducts({
+          page: 1,
+          per_page: 8,
+        });
+
+        if (res.success && Array.isArray(res.data?.data)) {
+          setProducts(res.data.data);
         } else {
-          console.error('Failed to load featured products', response.error);
+          console.error('Invalid products response', res);
         }
-      } catch (error) {
-        console.error('Error fetching featured products:', error);
+      } catch (err) {
+        console.error('Failed to fetch featured products', err);
       } finally {
         setLoading(false);
       }
@@ -31,45 +35,47 @@ export default function FeaturedProductsSection() {
     fetchProducts();
   }, []);
 
+  if (loading) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-96 bg-neutral-100 rounded-xl animate-shimmer" />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h2 className="text-4xl font-bold text-neutral-900 mb-2">
-              {HOME.sections.featured.title}
-            </h2>
-            <p className="text-lg text-neutral-600">
-              {HOME.sections.featured.subtitle}
-            </p>
+            <h2 className="text-4xl font-bold">{HOME.sections.featured.title}</h2>
+            <p className="text-neutral-600">{HOME.sections.featured.subtitle}</p>
           </div>
+
           <Link to={ROUTES.PRODUCTS}>
-            <Button variant="outline">
-              View All
-            </Button>
+            <Button variant="outline">View All</Button>
           </Link>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-neutral-100 rounded-xl h-96 animate-shimmer" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map(product => (
-              <ProductCard
-                key={product.id}
-                id={product.id.toString()}
-                name={product.name}
-                price={product.variants?.[0]?.price || 0}
-                image={product.image}
-                category={product.category?.name || 'Uncategorized'}
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              id={String(product.id)}
+              name={product.name}
+              price={product.variants?.[0]?.price ?? 0}
+              category={product.category?.name ?? 'Uncategorized'}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
