@@ -19,15 +19,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Check for existing session on mount
+    // Restore session ONCE on mount
     useEffect(() => {
         const loadUser = async () => {
-            const result = await authService.getCurrentUser();
-            if (result?.user) {
-                setUser(result.user);
+            try {
+                const result = await authService.getCurrentUser();
+                if (result?.user) {
+                    setUser(result.user);
+                } else {
+                    setUser(null);
+                }
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
+
         loadUser();
 
         // Listen for force logout events (e.g. 401 from API)
@@ -72,8 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         setIsLoading(true);
         try {
-            await authService.logoutUser();
-            setUser(null);
+            await authService.logoutUser(); // clears token
+            setUser(null);                 // 🔥 THIS is the real logout
         } finally {
             setIsLoading(false);
         }
@@ -85,17 +91,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return (
         <AuthContext.Provider
-            value={{
-                user,
-                isAuthenticated: authService.isAuthenticated(),
-                isAdmin: authService.isAdmin(user),
-                isLoading,
-                login,
-                register,
-                logout,
-                updateUser,
-            }}
-        >
+    value={{
+        user,
+        isAuthenticated: !!user,   // 🔥 FIX
+        isAdmin: authService.isAdmin(user),
+        isLoading,
+        login,
+        register,
+        logout,
+        updateUser,
+    }}
+> 
             {children}
         </AuthContext.Provider>
     );
@@ -103,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
     const context = useContext(AuthContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;

@@ -54,7 +54,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   gem "blueprinter"
-  gem "kaminari"
+  gem 'will_paginate', '~> 3.3'
 end
 
 

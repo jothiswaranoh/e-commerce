@@ -2,47 +2,63 @@ module Api
   module V1
     class ProductsController < ApplicationController
       include Authorization
-      include ResponseRenderingConcern
       include Crudable
 
       allow_unauthenticated_access only: [:index, :show]
-      before_action :authenticate_request!, except: [:index, :show]
+      load_and_authorize_resource
 
-      authorize_resource
+      def index
+        products = scoped_collection
+                     .paginate(
+                       page: params[:page] || 1,
+                       per_page: params[:per_page] || 10
+                     )
+
+        render_success(
+          {
+            data: ProductBlueprint.render_as_json(products),
+            meta: {
+              current_page: products.current_page,
+              per_page: products.per_page,
+              total_pages: products.total_pages,
+              total_count: products.total_entries
+            }
+          },
+          success_response_key
+        )
+      end
 
       private
-
-      def set_product
-        @product = public_current_org.products.find(params[:id])
-      end
-
-      def public_current_org
-        Current.user&.organization || Organization.find_by(slug: 'lookz-men')
-      end
 
       def model_class
         Product
       end
 
+      # ✅ THIS IS WHAT WAS MISSING
       def resource_params
-        params.require(:product).permit(
-          :name,
-          :slug,
-          :description,
-          :status,
-          :category_id,
-          images: [],
-          variants_attributes: [:id, :sku, :price, :stock, :_destroy],
-          product_attributes_attributes: [:id, :key, :value, :_destroy]
-        )
-      end
+  params.require(:product).permit(
+    :name,
+    :slug,
+    :category_id,
+    :status,
+    :description,
+    images: [], # 👈 THIS IS THE KEY
+    variants_attributes: [
+      :id,
+      :sku,
+      :price,
+      :stock,
+      :_destroy
+    ]
+  )
+end
 
       def scoped_collection
-        scope = model_class.all
-        scope = scope.includes(:variants, :product_attributes, :category)
+        scope = model_class
+                  .includes(:variants, :category)
+                  .order(created_at: :desc)
 
         return scope unless current_user
-
         scope.where(org_id: current_org.id)
       end
     end

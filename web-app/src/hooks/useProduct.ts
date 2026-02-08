@@ -1,67 +1,98 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productService } from '../services/productService';
-import { ProductFormData } from '../types/product';
+import { ProductFormData, Product } from '../types/product';
 
-export const useProducts = () => {
-    return useQuery({
-        queryKey: ['products'],
-        queryFn: async () => {
-            const response = await productService.getProducts();
-            if (!response.success) throw new Error(response.message);
-            return response.data || [];
-        },
-    });
-};
+export interface ProductsResponse {
+  products: Product[];
+  meta: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    per_page: number;
+  };
+}
 
-export const useProduct = (id: string | number) => {
-    return useQuery({
-        queryKey: ['products', id],
-        queryFn: async () => {
-            const response = await productService.getProduct(id);
-            if (!response.success) throw new Error(response.message);
-            return response.data;
+/* ───────── GET PRODUCTS ───────── */
+
+export function useProducts(page = 1, perPage = 10) {
+  return useQuery<{
+    data: Product[];
+    meta: {
+      current_page: number;
+      per_page: number;
+      total_pages: number;
+      total_count: number;
+    };
+  }>({
+    queryKey: ['products', page, perPage],
+    queryFn: async () => {
+      const res = await productService.getProducts({
+        page,
+        per_page: perPage,
+      });
+
+      if (!res.success) {
+        throw new Error(res.message || 'Failed to fetch products');
+      }
+
+      return {
+        data: res.data?.data ?? [],
+        meta: res.data?.meta ?? {
+          current_page: page,
+          per_page: perPage,
+          total_pages: 1,
+          total_count: 0,
         },
-        enabled: !!id,
-    });
-};
+      };
+    },
+    keepPreviousData: true,
+  });
+}
+
+/* ───────── GET SINGLE ───────── */
+
+export const useProduct = (id: string | number) =>
+  useQuery({
+    queryKey: ['products', id],
+    queryFn: async () => {
+      const res = await productService.getProduct(id);
+      if (!res.success) throw new Error(res.message);
+      return res.data;
+    },
+    enabled: !!id,
+  });
+
+/* ───────── CREATE ───────── */
 
 export const useCreateProduct = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (data: ProductFormData) => {
-            const res = await productService.createProduct(data);
-            if (!res.success) {
-                throw new Error(res.message || 'Failed to create product');
-            }
-            return res.data;
-        },
-
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['products'] });
-            await queryClient.refetchQueries({ queryKey: ['products'] });
-        },
-    });
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ProductFormData) =>
+      productService.createProduct(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+  });
 };
+
+/* ───────── UPDATE ───────── */
 
 export const useUpdateProduct = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ id, data }: { id: string | number; data: ProductFormData }) =>
-            productService.updateProduct(id, data),
-        onSuccess: (response, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-            queryClient.invalidateQueries({ queryKey: ['products', variables.id] });
-        },
-    });
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: any) =>
+      productService.updateProduct(id, data),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['products', vars.id] });
+    },
+  });
 };
 
+/* ───────── DELETE ───────── */
+
 export const useDeleteProduct = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (id: string | number) => productService.deleteProduct(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-        },
-    });
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => productService.deleteProduct(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+  });
 };

@@ -135,21 +135,21 @@ export default function Navbar() {
 
                     <div className="py-1">
                       <Link
-                        to={ROUTES.PROFILE}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
-                        onClick={() => setIsUserMenuOpen(false)}
+                      to={ROUTES.PROFILE}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600" onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <UserIcon className="w-4 h-4" />
-                        {NAVBAR.menu.myOrders}
-                      </Link>
-                      <Link
-                        to="/profile?tab=orders"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <Package className="w-4 h-4" />
-                        {NAVBAR.menu.adminDashboard}
-                      </Link>
+                    <UserIcon className="w-4 h-4" />
+                  {NAVBAR.menu.myProfile}
+                  </Link>
+
+<Link
+  to="/profile?tab=orders"
+  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+  onClick={() => setIsUserMenuOpen(false)}
+>
+  <Package className="w-4 h-4" />
+  {NAVBAR.menu.myOrders}
+</Link>
                       {user.role === 'admin' && (
                         <Link
                           to={ROUTES.ADMIN_DASHBOARD}
