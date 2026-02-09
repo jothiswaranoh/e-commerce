@@ -1,30 +1,32 @@
 module Api
   module V1
     class CartsController < ApplicationController
+      include ResponseRenderingConcern
+
       def show
         cart = find_or_create_cart
-        render json: cart_json(cart)
+        render_success(cart_json(cart))
       end
 
       def add_item
         cart = find_or_create_cart
 
         product = Product.find_by(id: params[:product_id])
-        return render json: { success: false, error: "Product not found" }, status: :not_found unless product
+        return render_error("common.not_found", "Product not found", :not_found) unless product
 
         # Determine variant: provided ID or default (first active)
         variant_id = params[:product_variant_id]
         if variant_id
           variant = product.variants.find_by(id: variant_id)
-          return render json: { success: false, error: "Variant not found" }, status: :not_found unless variant
+          return render_error("common.not_found", "Variant not found", :not_found) unless variant
         else
           # Fallback to first active variant
           variant = product.variants.where(is_active: true).order(:id).first
-          return render json: { success: false, error: "Product has no active variants" }, status: :unprocessable_entity unless variant
+          return render_error("common.operation_failed", "Product has no active variants", :unprocessable_entity) unless variant
         end
 
         qty = params[:quantity].to_i
-        return render json: { success: false, error: "Quantity must be >= 1" }, status: :unprocessable_entity if qty < 1
+        return render_error("common.validation_error", "Quantity must be >= 1", :unprocessable_entity) if qty < 1
 
         item = cart.cart_items.find_or_initialize_by(product_id: product.id, product_variant_id: variant.id)
         
@@ -32,7 +34,7 @@ module Api
         item.price = variant.price
         item.save!
 
-        render json: cart_json(cart.reload), status: :ok
+        render_success(cart_json(cart.reload))
       end
 
       def update_item
@@ -40,13 +42,13 @@ module Api
 
         id = params[:id] || params[:item_id]
         item = cart.cart_items.find_by(id: id)
-        return render json: { success: false, error: "Item not found" }, status: :not_found unless item
+        return render_error("common.not_found", "Item not found", :not_found) unless item
 
         qty = params[:quantity].to_i
-        return render json: { success: false, error: "Quantity must be >= 1" }, status: :unprocessable_entity if qty < 1
+        return render_error("common.validation_error", "Quantity must be >= 1", :unprocessable_entity) if qty < 1
 
         item.update!(quantity: qty)
-        render json: cart_json(cart.reload), status: :ok
+        render_success(cart_json(cart.reload))
       end
 
       def remove_item
@@ -54,10 +56,10 @@ module Api
 
         id = params[:id] || params[:item_id]
         item = cart.cart_items.find_by(id: id)
-        return render json: { success: false, error: "Item not found" }, status: :not_found unless item
+        return render_error("common.not_found", "Item not found", :not_found) unless item
 
         item.destroy
-        render json: cart_json(cart.reload), status: :ok
+        render_success(cart_json(cart.reload))
       end
 
       private
