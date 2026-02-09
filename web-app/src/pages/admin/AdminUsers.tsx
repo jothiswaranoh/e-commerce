@@ -8,7 +8,7 @@ import Badge from '../../components/ui/Badge';
 import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-
+import UserForm from './UserForm'
 interface User {
     id: string;
     name: string;

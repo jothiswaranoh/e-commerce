@@ -1,3 +1,4 @@
+# app/controllers/api/v1/orders_controller.rb
 module Api
   module V1
     class OrdersController < ApplicationController
@@ -6,64 +7,70 @@ module Api
 
       load_and_authorize_resource
 
-      # GET /api/v1/orders
       def index
-        orders = @orders.where(org_id: current_user.org_id)
-                        .order(created_at: :desc)
+        orders = Order.where(
+          org_id: current_user.org_id,
+          user_id: current_user.id
+        ).order(created_at: :desc)
 
         handle_response(orders)
       end
 
-      # GET /api/v1/orders/:id
-      def show
-        handle_response(@order)
-      end
-
-      # POST /api/v1/orders
       def create
         @order = Order.new(order_params)
         @order.org_id  = current_user.org_id
         @order.user_id = current_user.id
 
-        if build_items(@order) && @order.save
+        unless build_items
+          return handle_response(
+            @order,
+            "common.error",
+            @order.errors.full_messages,
+            :unprocessable_entity
+          )
+        end
+
+        if @order.save
           handle_response(@order, "common.created", nil, :created)
         else
-          handle_response(@order, "common.error", @order.errors.full_messages, :unprocessable_entity)
+          handle_response(
+            @order,
+            "common.error",
+            @order.errors.full_messages,
+            :unprocessable_entity
+          )
         end
-      end
-
-      # PATCH /api/v1/orders/:id
-      def update
-        @order.update(order_params)
-        handle_response(@order)
-      end
-
-      # DELETE /api/v1/orders/:id
-      def destroy
-        @order.destroy
-        handle_response(nil, "common.deleted", "Order deleted successfully")
       end
 
       private
 
       def order_params
-        params.require(:order).permit(
-          :status,
-          :payment_status,
-          :tax,
-          :shipping_fee
-        )
+        params.require(:order).permit(:tax, :shipping_fee)
       end
 
-      def build_items(order)
-        return order.errors.add(:base, "Items required") && false if params[:items].blank?
+      def build_items
+        items = params[:items]
 
-        params[:items].each do |i|
-          order.order_items.build(
-            product_id: i[:product_id],
-            quantity: i[:quantity]
+        if items.blank?
+          @order.errors.add(:base, "Items required")
+          return false
+        end
+
+        items.each do |item|
+          product = Product.find_by(id: item[:product_id])
+          return false unless product
+
+          variant = product.variants.first
+          return false unless variant
+
+          @order.order_items.build(
+            product_id: product.id,
+            product_variant_id: variant.id,
+            price: variant.price,
+            quantity: item[:quantity]
           )
         end
+
         true
       end
     end

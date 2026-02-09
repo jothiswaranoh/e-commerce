@@ -12,6 +12,7 @@ export const ROUTES = {
     CHECKOUT: '/checkout',
     LOGIN: '/login',
     REGISTER: '/register',
+    ORDERS: '/profile?tab=orders',
     FORGOT_PASSWORD: '/forgot-password',
     RESET_PASSWORD: '/reset-password/:token',
     VERIFY_EMAIL: '/verify-email/:token',
