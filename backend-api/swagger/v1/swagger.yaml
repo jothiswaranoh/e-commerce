@@ -227,6 +227,114 @@ components:
         data:
           nullable: true
 
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        product_id:
+          type: integer
+          example: 10
+        product_name:
+          type: string
+          example: iPhone 15
+        variant_name:
+          type: string
+          example: IP15-BLK-128
+        quantity:
+          type: integer
+          example: 2
+        price:
+          type: number
+          example: 999.99
+        total:
+          type: number
+          example: 1999.98
+        image:
+          type: string
+          nullable: true
+          example: https://example.com/image.jpg
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 101
+        order_number:
+          type: string
+          example: ORD-17000000-XYZ
+        status:
+          type: string
+          example: pending
+        payment_status:
+          type: string
+          example: unpaid
+        subtotal:
+          type: number
+          example: 100.0
+        tax:
+          type: number
+          example: 10.0
+        shipping_fee:
+          type: number
+          example: 5.0
+        total:
+          type: number
+          example: 115.0
+        created_at:
+          type: string
+          format: date-time
+        order_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        product_name:
+          type: string
+          example: T-Shirt
+        quantity:
+          type: integer
+          example: 1
+        price:
+          type: number
+          example: 100.0
+        total:
+          type: number
+          example: 100.0
+
+    OrderInput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+        payment_status:
+          type: string
+          enum: [unpaid, paid, refunded]
+        tax:
+          type: number
+        shipping_fee:
+          type: number
+
 security:
   - BearerAuth: []
 
@@ -422,28 +530,6 @@ paths:
         '204': { description: Category deleted }
         '404': { description: Not found }
 
-  /cart:
-    get:
-      summary: Get current cart
-      tags: [Cart]
-      parameters:
-        - $ref: '#/components/parameters/XOrgSlug'
-      responses:
-        '200':
-          description: List of products
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/ApiSuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Product'
-
-
   /products:
     get:
       summary: List products
@@ -488,20 +574,15 @@ paths:
                   enum: [active, inactive, archived]
                 product[category_id]:
                   type: integer
-
                 product[images][]:
                   type: string
                   format: binary
-
                 product[variants_attributes]:
                   type: array
-                  description: Optional product variants
                   items:
                     $ref: '#/components/schemas/ProductVariantCreate'
-
                 product[product_attributes_attributes]:
                   type: array
-                  description: Optional product attributes
                   items:
                     $ref: '#/components/schemas/ProductAttributeCreate'
       responses:
@@ -521,8 +602,7 @@ paths:
         - name: id
           in: path
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
       responses:
         '200':
           description: Product details
@@ -536,8 +616,6 @@ paths:
                       data:
                         $ref: '#/components/schemas/Product'
 
-    
-
     put:
       summary: Update product
       tags: [Products]
@@ -546,8 +624,7 @@ paths:
         - name: id
           in: path
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
       requestBody:
         required: true
         content:
@@ -566,23 +643,17 @@ paths:
                   enum: [active, inactive, archived]
                 product[category_id]:
                   type: integer
-
                 product[images][]:
                   type: string
                   format: binary
-
                 product[variants_attributes]:
                   type: array
-                  description: Optional product variants
                   items:
                     $ref: '#/components/schemas/ProductVariantCreate'
-
                 product[product_attributes_attributes]:
                   type: array
-                  description: Optional product attributes
                   items:
                     $ref: '#/components/schemas/ProductAttributeCreate'
-
       responses:
         '200':
           description: Product updated
@@ -595,8 +666,229 @@ paths:
         - name: id
           in: path
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
       responses:
         '204':
           description: Product deleted
+
+  /cart:
+    get:
+      summary: Get current cart
+      tags: [Cart]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      responses:
+        '200':
+          description: Cart details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
+
+  /cart/add:
+    post:
+      summary: Add item to cart
+      tags: [Cart]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id, quantity]
+              properties:
+                product_id:
+                  type: integer
+                  example: 1
+                product_variant_id:
+                  type: integer
+                  example: 1
+                quantity:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Item added to cart
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
+        '404':
+          description: Product or variant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /cart/update:
+    put:
+      summary: Update cart item
+      tags: [Cart]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [item_id, quantity]
+              properties:
+                item_id:
+                  type: integer
+                  example: 1
+                quantity:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Cart item updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
+        '404':
+          description: Item not found
+        '422':
+          description: Validation error
+
+  /cart/remove:
+    delete:
+      summary: Remove item from cart
+      tags: [Cart]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [item_id]
+              properties:
+                item_id:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Item removed from cart
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Cart'
+        '404':
+          description: Item not found
+
+  /orders:
+    get:
+      summary: List orders
+      tags: [Orders]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Order'
+
+    post:
+      summary: Create order
+      tags: [Orders]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  $ref: '#/components/schemas/OrderInput'
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id:
+                        type: integer
+                      quantity:
+                        type: integer
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Order'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /orders/{id}:
+    get:
+      summary: Get order
+      tags: [Orders]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Order'
