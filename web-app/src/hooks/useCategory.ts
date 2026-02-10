@@ -45,8 +45,7 @@ export function useCategories(page = 1, perPage = 10) {
           total_count: 0,
         },
       };
-    },
-    keepPreviousData: true,
+    }
   });
 }
 

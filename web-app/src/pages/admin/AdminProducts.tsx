@@ -1,322 +1,311 @@
-import { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { useState } from "react";
+import { Package } from "lucide-react";
+import { toast } from "react-toastify";
 
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import Modal from '../../components/ui/Modal';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-
-import ProductForm from './ProductForm';
+import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import { TableRowSkeleton } from "../../components/ui/Skeleton";
 
 import {
   useProducts,
   useCreateProduct,
   useUpdateProduct,
   useDeleteProduct,
-} from '../../hooks/useProduct';
+} from "../../hooks/useProduct";
 
-import { useCategories } from '../../hooks/useCategory';
-import { Product, ProductFormData } from '../../types';
+import { useCategories } from "../../hooks/useCategory";
 
-const PER_PAGE = 10;
+import ProductForm from "../../components/products/ProductForm";
+import ProductDataGrid from "../../components/products/ProductDataGrid";
+import ProductViewModal from "../../components/products/ProductViewModal";
 
 export default function AdminProducts() {
-  /* =========================
-     PAGINATION STATE
-  ========================= */
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   /* =========================
      DATA
   ========================= */
-  const { data, isLoading } = useProducts(page, PER_PAGE);
+  const { data, isLoading } = useProducts(page, pageSize);
 
-  const products = data?.data ?? [];
-  const meta = data?.meta;
+  const products = (data as any)?.data ?? [];
+  const meta = (data as any)?.meta;
 
-  const totalPages = meta?.total_pages ?? 1;
+  const { data: categoriesResponse } = useCategories(1, 100);
+  const categories = (categoriesResponse as any)?.data ?? [];
 
-  const { data: categoriesResponse } = useCategories();
-  const categories = Array.isArray(categoriesResponse)
-    ? categoriesResponse
-    : categoriesResponse?.data ?? [];
-
-  /* =========================
-     MUTATIONS
-  ========================= */
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
 
-  /* =========================
-     UI STATE
-  ========================= */
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    category_id: '',
-    price: '',
-    stock: '',
-    description: '',
-    status: 'active' as const,
-  });
-
-  /* =========================
-     HELPERS
-  ========================= */
-  const getStatusBadge = (status: string, stock: number) => {
-    if (status === 'archived') return <Badge variant="neutral">Archived</Badge>;
-    if (stock === 0) return <Badge variant="error">Out of Stock</Badge>;
-    if (stock < 20) return <Badge variant="warning">Low Stock</Badge>;
-    return <Badge variant="success">In Stock</Badge>;
-  };
-
-  /* =========================
-     CREATE
-  ========================= */
-  const handleAddProduct = async () => {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [viewProduct, setViewProduct] = useState<any>(null);
+  const [modalMode, setModalMode] = useState<"view" | "edit">("view");
+  const handleCreate = async (payload: any) => {
     try {
-      const payload: ProductFormData = {
-        name: formData.name,
-        slug:
-          formData.slug ||
-          formData.name.toLowerCase().replace(/\s+/g, '-'),
-        category_id: Number(formData.category_id),
-        status: formData.status,
-        description: formData.description,
-        variants_attributes: [
-          {
-            sku: `${formData.name.slice(0, 3).toUpperCase()}-${Date.now()}`,
-            price: Number(formData.price),
-            stock: Number(formData.stock),
-          },
-        ],
-      };
-
       await createMutation.mutateAsync(payload);
-      toast.success('Product added');
-      setIsAddModalOpen(false);
+      toast.success("Product created");
+      setIsCreateOpen(false);
     } catch {
-      toast.error('Failed to add product');
+      toast.error("Failed to create product");
     }
   };
 
-  /* =========================
-     EDIT
-  ========================= */
-  const openEditModal = (product: Product) => {
-    const v = product.variants?.[0];
-
-    setSelectedProduct(product);
-    setFormData({
-      name: product.name,
-      slug: product.slug,
-      category_id: String(product.category_id),
-      price: String(v?.price ?? ''),
-      stock: String(v?.stock ?? ''),
-      description: product.description || '',
-      status: product.status as any,
-    });
-    setIsEditModalOpen(true);
-  };
-
-  const handleEditProduct = async () => {
-    if (!selectedProduct) return;
+  const handleUpdate = async (payload: any) => {
+    const productId = payload.id || viewProduct?.id;
+    if (!productId) return;
 
     try {
       await updateMutation.mutateAsync({
-        id: selectedProduct.id,
-        data: {
-          name: formData.name,
-          slug: formData.slug,
-          category_id: Number(formData.category_id),
-          status: formData.status,
-          description: formData.description,
-          variants_attributes:
-            selectedProduct.variants?.map(v => ({
-              id: v.id,
-              sku: v.sku,
-              price: Number(formData.price),
-              stock: Number(formData.stock),
-            })) ?? [],
-        },
+        id: productId,
+        data: payload,
       });
-
-      toast.success('Product updated');
-      setIsEditModalOpen(false);
+      toast.success("Product updated");
+      setIsViewOpen(false);
+      setViewProduct(null);
     } catch {
-      toast.error('Update failed');
+      toast.error("Failed to update product");
     }
   };
 
-  /* =========================
-     DELETE
-  ========================= */
-  const handleDeleteProduct = async () => {
+  const handleView = (product: any) => {
+    setViewProduct(product);
+    setModalMode("view");
+    setIsViewOpen(true);
+  };
+
+  const handleEdit = (product: any) => {
+    setViewProduct(product);
+    setModalMode("edit");
+    setIsViewOpen(true);
+  };
+
+  const handleDelete = async () => {
     if (!selectedProduct) return;
 
     try {
       await deleteMutation.mutateAsync(selectedProduct.id);
-      toast.success('Product deleted');
-      setIsDeleteDialogOpen(false);
+      toast.success("Product deleted");
+      setIsDeleteOpen(false);
+      setSelectedProduct(null);
     } catch {
-      toast.error('Delete failed');
+      toast.error("Failed to delete product");
     }
   };
 
-  /* =========================
-     RENDER
-  ========================= */
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPage(1);
+  };
+
+  // Calculate statistics
+  const activeProducts = products.filter((p: any) => p?.status === "active").length;
+  const lowStockProducts = products.filter((p: any) => {
+    const stock = p?.variants?.[0]?.stock;
+    return stock !== undefined && stock !== null && stock < 20 && stock > 0;
+  }).length;
+  const outOfStockProducts = products.filter((p: any) => {
+    const stock = p?.variants?.[0]?.stock;
+    return stock === 0 || stock === undefined || stock === null;
+  }).length;
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Products</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="w-5 h-5" />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-neutral-900">Products</h1>
+          <p className="text-neutral-600 mt-1">
+            Manage your product catalog
+          </p>
+        </div>
+
+        <Button onClick={() => setIsCreateOpen(true)}>
+          <Package className="w-5 h-5" />
           Add Product
         </Button>
       </div>
 
+      {meta && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-600">Total Products</p>
+                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                  {meta.total_count}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-primary-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-600">Active</p>
+                <p className="text-2xl font-bold text-green-700 mt-1">
+                  {activeProducts}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-600">Low Stock</p>
+                <p className="text-2xl font-bold text-amber-700 mt-1">
+                  {lowStockProducts}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-amber-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-600">Out of Stock</p>
+                <p className="text-2xl font-bold text-red-700 mt-1">
+                  {outOfStockProducts}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <Card padding="none">
         {isLoading ? (
-          <div className="p-6 text-center text-neutral-500">
-            Loading products…
-          </div>
-        ) : products.length === 0 ? (
-          <div className="p-6 text-center text-neutral-500">
-            No products found
+          <div className="p-6">
+            <table className="w-full">
+              <tbody>
+                {[...Array(pageSize)].map((_, i) => (
+                  <TableRowSkeleton key={i} columns={5} />
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="px-6 py-3 text-left">Product</th>
-                <th className="px-6 py-3">Category</th>
-                <th className="px-6 py-3">Price</th>
-                <th className="px-6 py-3">Stock</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map(product => {
-                const v = product.variants?.[0];
-                return (
-                  <tr key={product.id} className="border-b hover:bg-neutral-50">
-                    <td className="px-6 py-4 font-medium">{product.name}</td>
-                    <td className="px-6 py-4">
-                      {product.category?.name ?? '-'}
-                    </td>
-                    <td className="px-6 py-4">₹{v?.price ?? '-'}</td>
-                    <td className="px-6 py-4">{v?.stock ?? '-'}</td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(product.status, v?.stock ?? 0)}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <button onClick={() => openEditModal(product)}>
-                        <Edit className="w-4 h-4 text-primary-600" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedProduct(product);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-
-        {/* PAGINATION */}
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center px-6 py-4">
-            <p className="text-sm">
-              Page {page} of {totalPages}
-            </p>
-
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-              >
-                Previous
-              </Button>
-
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={page >= totalPages}
-                onClick={() => setPage(p => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+          <ProductDataGrid
+            autoHeight
+            rows={products}
+            page={page}
+            pageSize={pageSize}
+            rowCount={meta?.total_count ?? 0}
+            loading={isLoading}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEdit}
+            onDelete={(product) => {
+              setSelectedProduct(product);
+              setIsDeleteOpen(true);
+            }}
+            onView={handleView}
+          />
         )}
       </Card>
 
-      {/* MODALS */}
       <Modal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        title="Add Product"
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        title="Add New Product"
       >
         <ProductForm
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={handleAddProduct}
-          submitText="Add Product"
+          categories={categories}
+          submitText="Create Product"
           isLoading={createMutation.isPending}
-          categoryOptions={categories.map(c => ({
-            value: c.id,
-            label: c.name,
-          }))}
+          onSubmit={handleCreate}
         />
       </Modal>
 
-      <Modal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        title="Edit Product"
-      >
-        <ProductForm
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={handleEditProduct}
-          submitText="Update Product"
-          isLoading={updateMutation.isPending}
-          categoryOptions={categories.map(c => ({
-            value: c.id,
-            label: c.name,
-          }))}
-        />
-      </Modal>
 
       <ConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDeleteProduct}
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDelete}
         title="Delete Product"
-        message={`Delete "${selectedProduct?.name}"?`}
+        message={`Delete "${selectedProduct?.name}"? This action cannot be undone.`}
         confirmText="Delete"
         variant="danger"
         isLoading={deleteMutation.isPending}
       />
+
+      <ProductViewModal
+        isOpen={isViewOpen}
+        onClose={() => {
+          setIsViewOpen(false);
+          setViewProduct(null);
+        }}
+        product={viewProduct}
+        categories={categories}
+        initialMode={modalMode}
+        onSave={handleUpdate}
+      />
+
     </div>
   );
 }

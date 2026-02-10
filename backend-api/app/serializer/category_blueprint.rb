@@ -12,11 +12,12 @@ class CategoryBlueprint < Blueprinter::Base
 
   field :image_url do |category|
     next unless category.image.attached?
-
-    Rails.application.routes.url_helpers.rails_blob_url(
-      category.image,
-      host: Rails.application.config.action_mailer.default_url_options[:host]
-    )
+    
+Rails.application.routes.url_helpers.rails_blob_url(
+  category.image,
+  host: "localhost",
+  port: 3000
+)
   end
 
   # ✅ ADD THIS

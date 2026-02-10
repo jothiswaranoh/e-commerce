@@ -7,9 +7,8 @@ class Ability
     return unless user
 
     if user.admin?
-      can :manage, [Category, Product], org_id: user.org_id
-      can :create, Order
-      can :read, Order, org_id: user.org_id
+      can :manage, [Category, Product, Order], org_id: user.org_id
+      can :manage, User
     elsif user.customer?
       can :read, [Category, Product], org_id: user.org_id
       can :create, Order
