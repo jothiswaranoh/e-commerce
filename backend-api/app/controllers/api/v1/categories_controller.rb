@@ -4,37 +4,39 @@ module Api
       include Authorization
       include Crudable
 
-      allow_unauthenticated_access only: [:index, :show]
+      allow_unauthenticated_access only: %i[index show]
       load_and_authorize_resource
+
+      DEFAULT_PAGE     = 1
+      DEFAULT_PER_PAGE = 10
 
       def index
         categories = scoped_collection
-                       .includes(:products) # ✅ IMPORTANT
+                       .includes(:products)
+                       .order(updated_at: :desc)
                        .paginate(
-                         page: params[:page] || 1,
-                         per_page: params[:per_page] || 10
+                         page: page_param,
+                         per_page: per_page_param
                        )
 
         render_success(
-          {
-            data: CategoryBlueprint.render_as_json(categories),
-            meta: {
-              current_page: categories.current_page,
-              per_page: categories.per_page,
-              total_pages: categories.total_pages,
-              total_count: categories.total_entries
-            }
-          },
+          categories_response(categories),
           success_response_key
         )
       end
 
       private
 
+      # --------------------
+      # Model
+      # --------------------
       def model_class
         Category
       end
 
+      # --------------------
+      # Strong params
+      # --------------------
       def resource_params
         params.require(:category).permit(
           :name,
@@ -46,10 +48,44 @@ module Api
         )
       end
 
+      # --------------------
+      # Query scope
+      # --------------------
       def scoped_collection
         scope = model_class.all
         return scope unless current_user
+
         scope.where(org_id: current_org.id)
+      end
+
+      # --------------------
+      # Pagination helpers
+      # --------------------
+      def page_param
+        params.fetch(:page, DEFAULT_PAGE)
+      end
+
+      def per_page_param
+        params.fetch(:per_page, DEFAULT_PER_PAGE)
+      end
+
+      # --------------------
+      # Response helpers
+      # --------------------
+      def categories_response(categories)
+        {
+          data: CategoryBlueprint.render_as_json(categories),
+          meta: pagination_meta(categories)
+        }
+      end
+
+      def pagination_meta(collection)
+        {
+          current_page: collection.current_page,
+          per_page: collection.per_page,
+          total_pages: collection.total_pages,
+          total_count: collection.total_entries
+        }
       end
     end
   end

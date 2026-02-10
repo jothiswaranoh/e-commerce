@@ -30,11 +30,13 @@ Rails.application.routes.draw do
       end
 
       # Orders
-      resources :orders, only: [:index, :show, :create]
+      resources :orders, only: [:index, :show, :create, :update]
 
       # Catalog
       resources :categories
       resources :products
+      resources :users
+      get 'dashboard', to: 'dashboard#index'
     end
   end
 

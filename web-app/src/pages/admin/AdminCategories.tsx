@@ -16,14 +16,14 @@ import {
 } from "../../hooks/useCategory";
 
 import CategoryForm from "../../components/categories/CategoryForm";
-import CategoryTable from "../../components/categories/CategoryTable";
 import { Category, CategoryPayload } from "../../api/category";
+import CategoryDataGrid from "../../components/categories/CategoryDataGrid";
 
 export default function AdminCategories() {
   const [page, setPage] = useState(1);
-  const PER_PAGE = 5;
+  const [pageSize, setPageSize] = useState(10);
 
-  const { data, isLoading } = useCategories(page, PER_PAGE);
+  const { data, isLoading } = useCategories(page, pageSize);
 
   const categories = data?.data ?? [];
   const meta = data?.meta;
@@ -77,12 +77,19 @@ export default function AdminCategories() {
     }
   };
 
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPage(1); // Reset to first page when page size changes
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Categories</h1>
-          <p className="text-neutral-600">Manage product categories</p>
+          <h1 className="text-3xl font-semibold text-neutral-900">Categories</h1>
+          <p className="text-sm text-neutral-500">
+            Manage product categories and hierarchy
+          </p>
         </div>
 
         <Button onClick={() => setIsCreateOpen(true)}>
@@ -91,18 +98,83 @@ export default function AdminCategories() {
         </Button>
       </div>
 
+      {meta && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-600">Total Categories</p>
+                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                  {meta.total_count}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-primary-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-600">Active Categories</p>
+                <p className="text-2xl font-bold text-green-700 mt-1">
+                  {categories.filter((c) => c.is_active).length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <Card padding="none">
         {isLoading ? (
-          <table className="w-full">
-            <tbody>
-              {[...Array(5)].map((_, i) => (
-                <TableRowSkeleton key={i} columns={5} />
-              ))}
-            </tbody>
-          </table>
+          <div className="p-6">
+            <table className="w-full">
+              <tbody>
+                {[...Array(5)].map((_, i) => (
+                  <TableRowSkeleton key={i} columns={5} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <CategoryTable
-            categories={categories}
+          <CategoryDataGrid
+            rows={categories}
+            page={page}
+            pageSize={pageSize}
+            rowCount={meta?.total_count ?? 0}
+            loading={isLoading}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
             onEdit={(cat) => {
               setSelectedCategory(cat);
               setIsEditOpen(true);
@@ -114,30 +186,6 @@ export default function AdminCategories() {
           />
         )}
       </Card>
-
-      {meta && meta.total_pages > 1 && (
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </Button>
-
-          <span className="px-3 py-2 text-sm">
-            Page {meta.current_page} of {meta.total_pages}
-          </span>
-
-          <Button
-            variant="outline"
-            disabled={page === meta.total_pages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      )}
 
       <Modal
         isOpen={isCreateOpen}
