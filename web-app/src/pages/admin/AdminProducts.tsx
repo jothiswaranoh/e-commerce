@@ -5,9 +5,10 @@ import { toast } from 'react-toastify';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
-import ProductForm from './ProductForm';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+
+import ProductForm from './ProductForm';
 
 import {
   useProducts,
@@ -19,44 +20,58 @@ import {
 import { useCategories } from '../../hooks/useCategory';
 import { Product, ProductFormData } from '../../types';
 
+const PER_PAGE = 10;
+
 export default function AdminProducts() {
+  /* =========================
+     PAGINATION STATE
+  ========================= */
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useProducts(page, 10);
+  /* =========================
+     DATA
+  ========================= */
+  const { data, isLoading } = useProducts(page, PER_PAGE);
+
   const products = data?.data ?? [];
-  const totalPages = data?.meta?.total_pages ?? 1;
+  const meta = data?.meta;
+
+  const totalPages = meta?.total_pages ?? 1;
 
   const { data: categoriesResponse } = useCategories();
   const categories = Array.isArray(categoriesResponse)
     ? categoriesResponse
     : categoriesResponse?.data ?? [];
 
-  const categoryOptions = categories.map(cat => ({
-    value: cat.id,
-    label: cat.name,
-  }));
-
+  /* =========================
+     MUTATIONS
+  ========================= */
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
 
+  /* =========================
+     UI STATE
+  ========================= */
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState({
     name: '',
     slug: '',
     category_id: '',
     price: '',
     stock: '',
     description: '',
-    status: 'active',
-    images: [],
+    status: 'active' as const,
   });
 
+  /* =========================
+     HELPERS
+  ========================= */
   const getStatusBadge = (status: string, stock: number) => {
     if (status === 'archived') return <Badge variant="neutral">Archived</Badge>;
     if (stock === 0) return <Badge variant="error">Out of Stock</Badge>;
@@ -64,14 +79,19 @@ export default function AdminProducts() {
     return <Badge variant="success">In Stock</Badge>;
   };
 
+  /* =========================
+     CREATE
+  ========================= */
   const handleAddProduct = async () => {
     try {
       const payload: ProductFormData = {
-        ...formData,
+        name: formData.name,
         slug:
           formData.slug ||
           formData.name.toLowerCase().replace(/\s+/g, '-'),
         category_id: Number(formData.category_id),
+        status: formData.status,
+        description: formData.description,
         variants_attributes: [
           {
             sku: `${formData.name.slice(0, 3).toUpperCase()}-${Date.now()}`,
@@ -84,23 +104,26 @@ export default function AdminProducts() {
       await createMutation.mutateAsync(payload);
       toast.success('Product added');
       setIsAddModalOpen(false);
-    } catch (e: any) {
-      toast.error(e.message || 'Create failed');
+    } catch {
+      toast.error('Failed to add product');
     }
   };
 
+  /* =========================
+     EDIT
+  ========================= */
   const openEditModal = (product: Product) => {
     const v = product.variants?.[0];
+
     setSelectedProduct(product);
     setFormData({
       name: product.name,
       slug: product.slug,
       category_id: String(product.category_id),
-      price: v?.price ?? '',
-      stock: v?.stock ?? '',
+      price: String(v?.price ?? ''),
+      stock: String(v?.stock ?? ''),
       description: product.description || '',
-      status: product.status,
-      images: [],
+      status: product.status as any,
     });
     setIsEditModalOpen(true);
   };
@@ -112,94 +135,175 @@ export default function AdminProducts() {
       await updateMutation.mutateAsync({
         id: selectedProduct.id,
         data: {
-          ...formData,
+          name: formData.name,
+          slug: formData.slug,
           category_id: Number(formData.category_id),
-          variants_attributes: selectedProduct.variants.map(v => ({
-            id: v.id,
-            sku: v.sku,
-            price: Number(formData.price),
-            stock: Number(formData.stock),
-          })),
+          status: formData.status,
+          description: formData.description,
+          variants_attributes:
+            selectedProduct.variants?.map(v => ({
+              id: v.id,
+              sku: v.sku,
+              price: Number(formData.price),
+              stock: Number(formData.stock),
+            })) ?? [],
         },
       });
 
       toast.success('Product updated');
       setIsEditModalOpen(false);
-    } catch (e: any) {
-      toast.error(e.message || 'Update failed');
+    } catch {
+      toast.error('Update failed');
     }
   };
 
+  /* =========================
+     DELETE
+  ========================= */
   const handleDeleteProduct = async () => {
     if (!selectedProduct) return;
-    await deleteMutation.mutateAsync(selectedProduct.id);
-    toast.success('Product deleted');
-    setIsDeleteDialogOpen(false);
+
+    try {
+      await deleteMutation.mutateAsync(selectedProduct.id);
+      toast.success('Product deleted');
+      setIsDeleteDialogOpen(false);
+    } catch {
+      toast.error('Delete failed');
+    }
   };
 
+  /* =========================
+     RENDER
+  ========================= */
   return (
     <div className="space-y-6">
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Products</h1>
         <Button onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="w-5 h-5" /> Add Product
+          <Plus className="w-5 h-5" />
+          Add Product
         </Button>
       </div>
 
       <Card padding="none">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="px-6 py-3 text-left">Product</th>
-              <th className="px-6 py-3">Category</th>
-              <th className="px-6 py-3">Price</th>
-              <th className="px-6 py-3">Stock</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(p => {
-              const v = p.variants?.[0];
-              return (
-                <tr key={p.id} className="border-b">
-                  <td className="px-6 py-4">{p.name}</td>
-                  <td className="px-6 py-4">{p.category?.name}</td>
-                  <td className="px-6 py-4">₹{v?.price}</td>
-                  <td className="px-6 py-4">{v?.stock}</td>
-                  <td className="px-6 py-4">{getStatusBadge(p.status, v?.stock)}</td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button onClick={() => openEditModal(p)}>
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => { setSelectedProduct(p); setIsDeleteDialogOpen(true); }}>
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {isLoading ? (
+          <div className="p-6 text-center text-neutral-500">
+            Loading products…
+          </div>
+        ) : products.length === 0 ? (
+          <div className="p-6 text-center text-neutral-500">
+            No products found
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="px-6 py-3 text-left">Product</th>
+                <th className="px-6 py-3">Category</th>
+                <th className="px-6 py-3">Price</th>
+                <th className="px-6 py-3">Stock</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map(product => {
+                const v = product.variants?.[0];
+                return (
+                  <tr key={product.id} className="border-b hover:bg-neutral-50">
+                    <td className="px-6 py-4 font-medium">{product.name}</td>
+                    <td className="px-6 py-4">
+                      {product.category?.name ?? '-'}
+                    </td>
+                    <td className="px-6 py-4">₹{v?.price ?? '-'}</td>
+                    <td className="px-6 py-4">{v?.stock ?? '-'}</td>
+                    <td className="px-6 py-4">
+                      {getStatusBadge(product.status, v?.stock ?? 0)}
+                    </td>
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <button onClick={() => openEditModal(product)}>
+                        <Edit className="w-4 h-4 text-primary-600" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+
+        {/* PAGINATION */}
+        {totalPages > 1 && (
+          <div className="flex justify-between items-center px-6 py-4">
+            <p className="text-sm">
+              Page {page} of {totalPages}
+            </p>
+
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+              >
+                Previous
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
-      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Product">
+      {/* MODALS */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add Product"
+      >
         <ProductForm
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleAddProduct}
           submitText="Add Product"
-          categoryOptions={categoryOptions}
+          isLoading={createMutation.isPending}
+          categoryOptions={categories.map(c => ({
+            value: c.id,
+            label: c.name,
+          }))}
         />
       </Modal>
 
-      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Product">
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Product"
+      >
         <ProductForm
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleEditProduct}
           submitText="Update Product"
-          categoryOptions={categoryOptions}
+          isLoading={updateMutation.isPending}
+          categoryOptions={categories.map(c => ({
+            value: c.id,
+            label: c.name,
+          }))}
         />
       </Modal>
 
@@ -209,6 +313,9 @@ export default function AdminProducts() {
         onConfirm={handleDeleteProduct}
         title="Delete Product"
         message={`Delete "${selectedProduct?.name}"?`}
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
       />
     </div>
   );

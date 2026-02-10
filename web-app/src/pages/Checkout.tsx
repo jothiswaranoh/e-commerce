@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { orderService } from '../services/orderService';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   CreditCard,
   Truck,
@@ -62,11 +66,30 @@ export default function Checkout() {
     setCurrentStep('review');
   };
 
-  const handlePlaceOrder = () => {
-    // Handle order placement
-    console.log('Order placed!', { shippingInfo, paymentInfo, items });
-  };
+  const navigate = useNavigate();
 
+const handlePlaceOrder = async () => {
+  try {
+    const payload = {
+      order: {
+        tax,
+        shipping_fee: shipping,
+      },
+      items: items.map(item => ({
+        product_id: item.product_id, // 🔥 OR item.product.id
+        quantity: item.quantity,
+      })),
+    };
+
+    await orderService.placeOrder(payload);
+
+    toast.success('Order placed successfully');
+    navigate('/profile?tab=orders');
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to place order');
+  }
+};
   const getCurrentStepIndex = () => steps.findIndex(s => s.id === currentStep);
 
   return (
