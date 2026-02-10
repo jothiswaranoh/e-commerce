@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Eye, Download, Edit, Trash2 } from 'lucide-react';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
@@ -8,6 +8,7 @@ import Badge from '../../components/ui/Badge';
 import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import { apiService } from '../../api/apiService';
 
 interface Order {
     id: string;
@@ -19,6 +20,12 @@ interface Order {
     date: string;
     address?: string;
     phone?: string;
+}
+
+
+interface StatusOption {
+    value: string;
+    label: string;
 }
 
 const statusOptions = [
@@ -39,22 +46,33 @@ const updateStatusOptions = [
 ];
 
 export default function AdminOrders() {
-    const [orders, setOrders] = useState<Order[]>([
-        { id: '#ORD-001', customer: 'John Doe', email: 'john@example.com', total: 2499, items: 3, status: 'completed', date: '2025-12-03', address: '123 Main St, Mumbai', phone: '+91 98765 43210' },
-        { id: '#ORD-002', customer: 'Jane Smith', email: 'jane@example.com', total: 1299, items: 1, status: 'pending', date: '2025-12-03', address: '456 Park Ave, Delhi', phone: '+91 98765 43211' },
-        { id: '#ORD-003', customer: 'Bob Johnson', email: 'bob@example.com', total: 3999, items: 2, status: 'processing', date: '2025-12-02', address: '789 Oak Rd, Bangalore', phone: '+91 98765 43212' },
-        { id: '#ORD-004', customer: 'Alice Williams', email: 'alice@example.com', total: 899, items: 1, status: 'completed', date: '2025-12-02', address: '321 Elm St, Chennai', phone: '+91 98765 43213' },
-        { id: '#ORD-005', customer: 'Charlie Brown', email: 'charlie@example.com', total: 5499, items: 4, status: 'cancelled', date: '2025-12-01', address: '654 Pine Ln, Pune', phone: '+91 98765 43214' },
-        { id: '#ORD-006', customer: 'Diana Prince', email: 'diana@example.com', total: 2199, items: 2, status: 'shipped', date: '2025-12-01', address: '987 Maple Dr, Hyderabad', phone: '+91 98765 43215' },
-    ]);
+    const [orders, setOrders] = useState<Order[]>([]);
+
+    const fetchOrders = async () => {
+        try {
+            const response = await apiService.getOrders();
+            if (response.success && response.data) {
+                setOrders(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch orders:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders(); // Initial fetch
+        const interval = setInterval(fetchOrders, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(interval);
+    }, []);
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedStatus, setSelectedStatus] = useState<any>(statusOptions[0]);
+    const [selectedStatus, setSelectedStatus] = useState<StatusOption>(statusOptions[0]);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [newStatus, setNewStatus] = useState<any>(null);
+    const [newStatus, setNewStatus] = useState<StatusOption | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         customer: '',
@@ -81,15 +99,23 @@ export default function AdminOrders() {
     const handleUpdateStatus = () => {
         if (!selectedOrder || !newStatus) return;
 
-        setOrders(orders.map(order =>
+        // Optimistic update
+        const updatedOrders = orders.map(order =>
             order.id === selectedOrder.id
                 ? { ...order, status: newStatus.value }
                 : order
-        ));
+        );
+        setOrders(updatedOrders);
+
+        // TODO: Call API to update status
+        // await apiService.updateOrderStatus(selectedOrder.id, newStatus.value);
 
         toast.success(`Order ${selectedOrder.id} status updated to ${newStatus.label}`);
         setIsViewModalOpen(false);
         setNewStatus(null);
+
+        // Refresh orders to ensure sync
+        fetchOrders();
     };
 
     const handleEditOrder = () => {
@@ -210,7 +236,7 @@ export default function AdminOrders() {
                         <Select
                             options={statusOptions}
                             value={selectedStatus}
-                            onChange={setSelectedStatus}
+                            onChange={(option) => option && setSelectedStatus(option)}
                             placeholder="Status"
                             styles={{
                                 control: (base) => ({
@@ -388,7 +414,7 @@ export default function AdminOrders() {
                                     <Select
                                         options={updateStatusOptions}
                                         value={newStatus}
-                                        onChange={setNewStatus}
+                                        onChange={(option) => setNewStatus(option)}
                                         placeholder="Select new status"
                                         styles={{
                                             control: (base) => ({

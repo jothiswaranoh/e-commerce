@@ -129,8 +129,8 @@ export async function service<T = any>(
                 status: error.response?.status,
                 headers: error.response?.headers,
                 message: error.response?.data?.message ||
-                error.response?.data?.error ||
-                error.message,
+                    error.response?.data?.error ||
+                    error.message,
             };
         }
         return {
@@ -152,6 +152,9 @@ export const apiService = {
     patch: <T = any>(url: string, data?: any) =>
         service<T>({ url, method: 'patch', data }),
     delete: <T = any>(url: string) => service<T>({ url, method: 'delete' }),
+    getOrders: async () => {
+        return service<any[]>({ url: '/orders', method: 'get' });
+    }
 };
 
 export default service;
