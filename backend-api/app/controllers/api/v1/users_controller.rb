@@ -6,9 +6,15 @@ module Api
 
       load_and_authorize_resource
 
+      # 🔥 IMPORTANT: Skip Crudable's set_resource for :me
+      skip_before_action :set_resource, only: [:me]
+
       DEFAULT_PAGE     = 1
       DEFAULT_PER_PAGE = 10
 
+      # -----------------------------------
+      # GET /api/v1/users
+      # -----------------------------------
       def index
         users = scoped_collection
                   .order(created_at: :desc)
@@ -23,7 +29,20 @@ module Api
         )
       end
 
-      # Inherited from Crudable: show, create, update, destroy
+      # -----------------------------------
+      # GET /api/v1/me
+      # -----------------------------------
+      def me
+        return render_unauthorized unless current_user
+
+        render_success(
+          UserBlueprint.render_as_json(current_user),
+          success_response_key
+        )
+      end
+
+      # show, create, update, destroy
+      # inherited from Crudable
 
       private
 
