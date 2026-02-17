@@ -101,63 +101,38 @@ export const authService = {
     },
 
     getCurrentUser: async (): Promise<{ success: boolean; user?: User } | null> => {
-        try {
-            // First check if we have cached user
-            const cachedUser = localStorage.getItem('shophub_current_user');
-            const hasToken = await TokenManager.hasValidToken();
+    try {
+        const hasToken = await TokenManager.hasValidToken();
+        if (!hasToken) return null;
 
-            if (!hasToken) {
-                return null;
-            }
+        const response = await apiService.get('/me');
 
-            const response = await apiService.get('/me');
+        if (response.success && response.data) {
+            const userData = response.data; // 🔥 FIXED HERE
 
-            if (response.success && response.data?.user) {
-                const userData = response.data.user;
+            const user: User = {
+                id: userData.id.toString(),
+                name: userData.name || userData.email_address?.split('@')[0] || 'User',
+                email: userData.email_address,
+                role: userData.role || 'customer',
+                emailVerified: true,
+                createdAt: userData.created_at || new Date().toISOString()
+            };
 
-                const user: User = {
-                    id: userData.id.toString(),
-                    name: userData.email_address?.split('@')[0] || 'User',
-                    email: userData.email_address,
-                    role: userData.role || 'customer',
-                    emailVerified: true,
-                    createdAt: userData.created_at || new Date().toISOString()
-                };
+            localStorage.setItem('shophub_current_user', JSON.stringify(user));
 
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('shophub_current_user', JSON.stringify(user));
-                }
-
-                return {
-                    success: true,
-                    user: user
-                };
-            }
-
-            // If API fails but we have cached user and valid token, return cached
-            if (cachedUser) {
-                return {
-                    success: true,
-                    user: JSON.parse(cachedUser)
-                };
-            }
-
-            return null;
-        } catch (error) {
-            console.error('Error fetching current user:', error);
-
-            // Fallback to cached user if available
-            const cachedUser = localStorage.getItem('shophub_current_user');
-            if (cachedUser) {
-                return {
-                    success: true,
-                    user: JSON.parse(cachedUser)
-                };
-            }
-
-            return null;
+            return {
+                success: true,
+                user
+            };
         }
-    },
+
+        return null;
+    } catch (error) {
+        console.error('Error fetching current user:', error);
+        return null;
+    }
+},
 
     isAuthenticated: (): boolean => {
         return TokenManager.hasValidToken();
