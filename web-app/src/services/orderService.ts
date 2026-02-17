@@ -7,6 +7,7 @@ export interface PlaceOrderPayload {
   };
   items: {
     product_id: number;
+    product_variant_id: number;
     quantity: number;
   }[];
 }
@@ -17,6 +18,13 @@ export const orderService = {
       url: '/orders',
       method: 'post',
       data: payload,
+    });
+  },
+
+  getOrders() {
+    return api({
+      url: '/orders',
+      method: 'get',
     });
   },
 };

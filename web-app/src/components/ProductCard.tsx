@@ -5,6 +5,7 @@ import { useCart } from '../contexts/CartContext';
 
 interface ProductCardProps {
   id?: string;
+  variantId?: string | number;
   name?: string;
   price?: number;
   image?: string;
@@ -14,6 +15,7 @@ interface ProductCardProps {
 
 export default function ProductCard({
   id = '1',
+  variantId,   
   name = "Product Name",
   price = 999,
   image = "https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400",
@@ -32,11 +34,10 @@ export default function ProductCard({
 
     try {
       setIsAdding(true);
-      await addToCart(id, 1);
-    } catch (error: any) {
-      console.error('Failed to add to cart:', error);
-      alert(error.message || "Failed to add to cart");
-    } finally {
+      await addToCart(id, 1, variantId);
+    }catch (error: any) {
+      // Toast already handled by apiService
+    }finally {
       setIsAdding(false);
     }
   };

@@ -50,7 +50,7 @@ export default function Checkout() {
     { id: 'review' as CheckoutStep, label: 'Review', icon: CheckCircle2 },
   ];
 
-  const { items, subtotal } = useCart();
+  const { items, subtotal, refreshCart } = useCart();
 
   const shipping = subtotal > 999 ? 0 : 50;
   const tax = subtotal * 0.18; // 18% GST
@@ -72,19 +72,22 @@ const handlePlaceOrder = async () => {
   try {
     const payload = {
       order: {
-        tax,
         shipping_fee: shipping,
       },
       items: items.map(item => ({
-        product_id: item.product_id, // 🔥 OR item.product.id
+        product_id: item.product_id,
+        product_variant_id: item.product_variant_id, // 🔥 ADD THIS
         quantity: item.quantity,
       })),
     };
 
-    await orderService.placeOrder(payload);
+    const res = await orderService.placeOrder(payload);
 
-    toast.success('Order placed successfully');
-    navigate('/profile?tab=orders');
+    if (res.success) {
+      toast.success('Order placed successfully');
+      await refreshCart();
+      navigate('/profile?tab=orders');
+    }
   } catch (error) {
     console.error(error);
     toast.error('Failed to place order');

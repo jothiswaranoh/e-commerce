@@ -89,7 +89,7 @@ export default function Cart() {
         {/* Error */}
         {error && (
           <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
-            {error}
+            {typeof error === "string" ? error : error?.message || JSON.stringify(error)}
           </div>
         )}
 

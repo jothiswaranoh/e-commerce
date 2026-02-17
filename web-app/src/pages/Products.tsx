@@ -219,6 +219,7 @@ export default function Products() {
                 <div className="w-full h-full flex">
                   <ProductCard
                     id={product.id.toString()}
+                    variantId={product.variants?.[0]?.id}
                     name={product.name}
                     price={product.variants?.[0]?.price ?? 0}
                     image={
