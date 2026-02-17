@@ -2,17 +2,18 @@ module Api
   module V1
     class DashboardController < ApplicationController
       include Authorization
+      include Crudable   # ✅ THIS WAS MISSING
 
       def index
-        render json: {
-          success: true,
-          data: {
+        render_success(
+          {
             users_count: User.count,
             products_count: Product.count,
             orders_count: Order.count,
             categories_count: Category.count
-          }
-        }, status: :ok
+          },
+          success_response_key
+        )
       end
     end
   end
