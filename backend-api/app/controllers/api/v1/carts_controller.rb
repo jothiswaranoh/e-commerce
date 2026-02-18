@@ -14,24 +14,33 @@ module Api
         product = Product.find_by(id: params[:product_id])
         return render_error("common.not_found", "Product not found", :not_found) unless product
 
-        # Determine variant: provided ID or default (first active)
         variant_id = params[:product_variant_id]
-        if variant_id
-          variant = product.variants.find_by(id: variant_id)
-          return render_error("common.not_found", "Variant not found", :not_found) unless variant
-        else
-          # Fallback to first active variant
-          variant = product.variants.where(is_active: true).order(:id).first
-          return render_error("common.operation_failed", "Product has no active variants", :unprocessable_entity) unless variant
-        end
+        return render_error("common.validation_error", "Variant is required", :unprocessable_entity) unless variant_id
+
+        variant = product.variants.find_by(id: variant_id)
+        return render_error("common.not_found", "Variant not found", :not_found) unless variant
+
+        return render_error("common.operation_failed", "Out of stock", :unprocessable_entity) if variant.stock <= 0
 
         qty = params[:quantity].to_i
         return render_error("common.validation_error", "Quantity must be >= 1", :unprocessable_entity) if qty < 1
 
-        item = cart.cart_items.find_or_initialize_by(product_id: product.id, product_variant_id: variant.id)
-        
-        item.quantity = (item.persisted? ? item.quantity : 0) + qty
-        item.price = variant.price
+        item = cart.cart_items.find_or_initialize_by(
+          product_id: product.id,
+          product_variant_id: variant.id
+        )
+
+        new_quantity = (item.persisted? ? item.quantity : 0) + qty
+
+        if new_quantity > variant.stock
+          return render_error(
+            "common.operation_failed",
+            "Only #{variant.stock} items available",
+            :unprocessable_entity
+          )
+        end
+
+        item.quantity = new_quantity
         item.save!
 
         render_success(cart_json(cart.reload))
@@ -46,6 +55,17 @@ module Api
 
         qty = params[:quantity].to_i
         return render_error("common.validation_error", "Quantity must be >= 1", :unprocessable_entity) if qty < 1
+
+        variant = item.product_variant
+        return render_error("common.operation_failed", "Variant missing", :unprocessable_entity) unless variant
+
+        if qty > variant.stock
+          return render_error(
+            "common.operation_failed",
+            "Only #{variant.stock} items available",
+            :unprocessable_entity
+          )
+        end
 
         item.update!(quantity: qty)
         render_success(cart_json(cart.reload))
@@ -74,30 +94,31 @@ module Api
       end
 
       def cart_json(cart)
-  {
-    id: cart.id,
-    items: cart.cart_items.includes(:product, :product_variant).map do |item|
-      {
-        id: item.id,
-        product_id: item.product_id,
-        product_name: item.product&.name,
-        variant_name: item.product_variant&.sku, # Or add a name field to variant if it exists, using SKU for now or construct a name
-        quantity: item.quantity,
-        price: item.price.to_f,     
-        total: item.total.to_f,     
-        image: (
-          if item.product&.images&.attached?
-            Rails.application.routes.url_helpers.rails_blob_url(
-              item.product.images.first
-            )
-          else
-            nil
+        {
+          id: cart.id,
+          items: cart.cart_items.includes(:product, :product_variant).map do |item|
+            {
+              id: item.id,
+              product_id: item.product_id,
+              product_variant_id: item.product_variant_id,   # 🔥 THIS MUST EXIST
+              product_name: item.product&.name,
+              variant_name: item.product_variant&.name,
+              quantity: item.quantity,
+              price: item.price.to_f,
+              total: item.total.to_f,
+              image: (
+                if item.product&.images&.attached?
+                  Rails.application.routes.url_helpers.rails_blob_url(
+                    item.product.images.first
+                  )
+                else
+                  nil
+                end
+              )
+            }
           end
-        )
-      }
-    end
-  }
-end
+        }
+      end
     end
   end
 end

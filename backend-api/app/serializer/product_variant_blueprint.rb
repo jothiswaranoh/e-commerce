@@ -1,5 +1,5 @@
 class ProductVariantBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :sku, :price, :stock
+  fields :name, :sku, :price, :stock
 end

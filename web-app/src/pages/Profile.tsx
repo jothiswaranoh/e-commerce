@@ -21,7 +21,7 @@ import { toast } from 'react-toastify';
 import { validatePassword } from '../utils/validators';
 import PasswordStrengthIndicator from '../components/auth/PasswordStrengthIndicator';
 import authService from '../api/authService';
-
+import { orderService } from '../services/orderService';
 type Tab = 'profile' | 'security' | 'orders';
 
 export default function Profile() {
@@ -32,9 +32,34 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [orders, setOrders] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
   useEffect(() => {
     setSearchParams({ tab: activeTab });
   }, [activeTab, setSearchParams]);
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const res = await orderService.getOrders();
+      console.log('ORDERS:', res);
+
+      if (res.success) {
+        setOrders(res.data?.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
 
   if (!user) return null;
 
@@ -181,15 +206,34 @@ export default function Profile() {
           {activeTab === 'orders' && (
             <Card variant="elevated" padding="lg">
               <h3 className="text-lg font-bold mb-6">Orders</h3>
-              <div className="text-center py-12 text-neutral-500">
-                <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No orders yet</p>
-                <Link to={ROUTES.PRODUCTS}>
-                  <Button variant="outline" className="mt-4">
-                    Start Shopping
-                  </Button>
-                </Link>
-              </div>
+
+              {ordersLoading ? (
+                <p className="text-neutral-500">Loading...</p>
+              ) : orders.length === 0 ? (
+                <div className="text-center py-12 text-neutral-500">
+                  <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No orders yet</p>
+                  <Link to={ROUTES.PRODUCTS}>
+                    <Button variant="outline" className="mt-4">
+                      Start Shopping
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {orders.map((order: any) => (
+                    <div key={order.id} className="border rounded-lg p-4">
+                      <p className="font-semibold">Order #{order.order_number}</p>
+                      <p className="text-sm text-neutral-600">
+                        Status: {order.status}
+                      </p>
+                      <p className="text-sm text-neutral-600">
+                        Total: ₹{order.total}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           )}
         </div>

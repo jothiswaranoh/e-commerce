@@ -7,6 +7,7 @@ export interface ProductAttribute {
 
 export interface ProductVariant {
     id?: number | string;
+    name: string;
     sku: string;
     price: number;
     stock: number;

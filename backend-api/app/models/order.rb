@@ -14,7 +14,7 @@ class Order < ApplicationRecord
 
   before_validation :set_defaults, on: :create
   before_validation :generate_order_number, on: :create
-  before_save :recalculate_totals
+  after_save :recalculate_totals
 
   private
 
@@ -29,8 +29,15 @@ class Order < ApplicationRecord
 
   def recalculate_totals
     self.subtotal = order_items.sum(:total)
-    self.tax ||= 0
     self.shipping_fee ||= 0
-    self.total = subtotal.to_f + tax.to_f + shipping_fee.to_f
-  end
+    self.tax = (subtotal * 0.18).round(2)
+    self.total = (subtotal + tax + shipping_fee).round(2)
+
+    update_columns(
+      subtotal: subtotal,
+      tax: tax,
+      shipping_fee: shipping_fee,
+      total: total
+    )
+end
 end

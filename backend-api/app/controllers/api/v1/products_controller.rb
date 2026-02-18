@@ -45,9 +45,11 @@ module Api
     images: [], # 👈 THIS IS THE KEY
     variants_attributes: [
       :id,
+      :name,
       :sku,
       :price,
       :stock,
+      :is_active,
       :_destroy
     ]
   )

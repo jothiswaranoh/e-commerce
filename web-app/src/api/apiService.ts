@@ -5,6 +5,7 @@ import axios, {
     InternalAxiosRequestConfig,
 } from 'axios';
 import { TokenManager } from '../services/TokenManager';
+import { toast } from 'react-toastify';
 
 // --------------------
 // API Response Types
@@ -123,16 +124,31 @@ export async function service<T = any>(
 
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
+
+            const backendError = error.response?.data;
+
+            const message =
+                backendError?.message ||
+                backendError?.error ||
+                error.message ||
+                'Something went wrong';
+
+            // 🔥 AUTO TOAST IF BACKEND WANTS IT
+            if (backendError?.is_toast_display) {
+                toast.error(message);
+            }
+
             return {
                 success: false,
-                error: error.response?.data,
+                error: backendError,
                 status: error.response?.status,
                 headers: error.response?.headers,
-                message: error.response?.data?.message ||
-                error.response?.data?.error ||
-                error.message,
+                message,
             };
         }
+
+        toast.error('Network error');
+
         return {
             success: false,
             error,

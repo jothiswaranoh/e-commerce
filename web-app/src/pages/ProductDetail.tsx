@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart, ArrowLeft, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productService } from '../services/productService';
-import { Product } from '../types/product';
+import { Product, ProductVariant } from '../types/product';
 import { useCart } from '../contexts/CartContext';
 import Button from '../components/ui/Button';
 
@@ -15,6 +15,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -25,6 +26,16 @@ export default function ProductDetail() {
         if (response.success && response.data) {
           setProduct(response.data);
           setCurrentImageIndex(0);
+
+          const variants = response.data.variants || [];
+
+          if (variants.length > 0) {
+            const cheapest = [...variants].sort(
+              (a, b) => a.price - b.price
+            )[0];
+
+            setSelectedVariant(cheapest);
+          }
         }
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -37,9 +48,10 @@ export default function ProductDetail() {
   }, [id]);
 
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!product || !selectedVariant) return;
+
     try {
-      await addToCart(product.id, quantity);
+      await addToCart(product.id, quantity, selectedVariant.id);
     } catch (error) {
       console.error("Failed to add to cart", error);
     }
@@ -162,8 +174,37 @@ export default function ProductDetail() {
           </h1>
 
           <div className="text-3xl font-bold text-gray-900 mb-6">
-            {product.formatted_price || "Price on Selection"}
+           {selectedVariant ? `₹${selectedVariant.price}` : "Unavailable"}
           </div>
+
+          {product.variants && product.variants.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                Options
+              </h3>
+
+              <div className="flex gap-3 flex-wrap">
+                {product.variants.map((variant) => {
+                  const isSelected = selectedVariant?.id === variant.id;
+                  const isOutOfStock = variant.stock === 0;
+
+                  return (
+                    <button
+                      key={variant.id}
+                      disabled={isOutOfStock}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition
+                        ${isSelected ? "border-primary-600 bg-primary-50 text-primary-700" : "border-gray-300"}
+                        ${isOutOfStock ? "opacity-50 cursor-not-allowed" : "hover:border-gray-900"}
+                      `}
+                    >
+                      {variant.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div
             dangerouslySetInnerHTML={{ __html: product.description || '' }}
@@ -198,7 +239,11 @@ export default function ProductDetail() {
           <div className="flex gap-4">
             <Button
               onClick={handleAddToCart}
-              disabled={isCartLoading}
+              disabled={
+                isCartLoading ||
+                !selectedVariant ||
+                selectedVariant.stock === 0
+              }
               className="flex-1 py-3 flex items-center justify-center gap-2"
               size="lg"
             >

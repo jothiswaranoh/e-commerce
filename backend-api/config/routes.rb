@@ -9,21 +9,20 @@ Rails.application.routes.draw do
       post   "signup", to: "registrations#create"
       post   "login",  to: "sessions#create"
       delete "logout", to: "sessions#destroy"
-      get "me", to: "users#me"
+      get    "me",     to: "users#me"
 
       resource :session, only: [:create, :destroy]
       resources :passwords, param: :token
 
-      # Cart (one per user)
+      # Cart
       resource :cart, only: [:show] do
         collection do
-          post 'add', to: 'carts#add_item'
-          get '', to: 'carts#show'
-          put 'update', to: 'carts#update_item'
+          post   'add',    to: 'carts#add_item'
+          get    '',       to: 'carts#show'
+          put    'update', to: 'carts#update_item'
           delete 'remove', to: 'carts#remove_item'
         end
 
-        # Legacy/Standard routes support
         post   :add_item
         patch  "items/:id", action: :update_item
         delete "items/:id", action: :remove_item
@@ -34,8 +33,13 @@ Rails.application.routes.draw do
 
       # Catalog
       resources :categories
-      resources :products
+
+      resources :products do
+        resources :variants, controller: "product_variants"
+      end
+
       resources :users
+
       get 'dashboard', to: 'dashboard#index'
     end
   end

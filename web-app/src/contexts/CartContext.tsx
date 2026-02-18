@@ -78,13 +78,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 setCart(response.data);
                 setError(null);
             } else {
-                throw new Error(response.message || 'Failed to add item');
+                throw new Error(
+                    typeof response.message === 'string'
+                        ? response.message
+                        : typeof response.error === 'string'
+                        ? response.error
+                        : 'Failed to add item'
+                    );
             }
         } catch (err: any) {
-            const msg = err.message || err.response?.data?.error || 'Failed to add item to cart';
+            const msg = err?.message || 'Failed to add item to cart';
             setError(msg);
             throw new Error(msg);
-        } finally {
+        }finally {
             setIsLoading(false);
         }
     };
