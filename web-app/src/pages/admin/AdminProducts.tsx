@@ -17,7 +17,6 @@ import {
 
 import { useCategories } from "../../hooks/useCategory";
 
-import ProductForm from "../../components/products/ProductForm";
 import ProductDataGrid from "../../components/products/ProductDataGrid";
 import ProductViewModal from "../../components/products/ProductViewModal";
 
@@ -46,30 +45,40 @@ export default function AdminProducts() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [viewProduct, setViewProduct] = useState<any>(null);
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
+
   const handleCreate = async (payload: any) => {
     try {
-      await createMutation.mutateAsync(payload);
-      toast.success("Product created");
-      setIsCreateOpen(false);
-    } catch {
-      toast.error("Failed to create product");
-    }
-  };
+    await createMutation.mutateAsync(payload);
+    toast.success("Product created");
+    setIsCreateOpen(false);
+  } catch (err: any) {
+    const message = err?.message || "Validation failed";
+    message.split(",").forEach((msg: string) => {
+      toast.error(msg.trim());
+    });
+  }
+};
 
   const handleUpdate = async (payload: any) => {
-    const productId = payload.id || viewProduct?.id;
-    if (!productId) return;
+    if (!payload?.id) {
+      toast.error("Missing product ID");
+      return;
+    }
 
     try {
       await updateMutation.mutateAsync({
-        id: productId,
+        id: payload.id,
         data: payload,
       });
+
       toast.success("Product updated");
       setIsViewOpen(false);
       setViewProduct(null);
-    } catch {
-      toast.error("Failed to update product");
+    } catch (err: any) {
+      const message = err?.message || "Validation failed";
+      message.split(",").forEach((msg: string) => {
+        toast.error(msg.trim());
+      });
     }
   };
 
@@ -87,15 +96,16 @@ export default function AdminProducts() {
 
   const handleDelete = async () => {
     if (!selectedProduct) return;
+    const res = await deleteMutation.mutateAsync(selectedProduct.id);
 
-    try {
-      await deleteMutation.mutateAsync(selectedProduct.id);
-      toast.success("Product deleted");
-      setIsDeleteOpen(false);
-      setSelectedProduct(null);
-    } catch {
-      toast.error("Failed to delete product");
+    if (!res?.success) {
+      toast.error(res?.message || "Failed to delete product");
+      return;
     }
+
+    toast.success("Product deleted");
+    setIsDeleteOpen(false);
+    setSelectedProduct(null);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
@@ -103,16 +113,39 @@ export default function AdminProducts() {
     setPage(1);
   };
 
+  const [formData, setFormData] = useState({
+    name: '',
+    slug: '',
+    category_id: '',
+    description: '',
+    images: [],
+    variants: [
+      { sku: '', price: '', stock: '' }
+    ],
+  });
+
   // Calculate statistics
-  const activeProducts = products.filter((p: any) => p?.status === "active").length;
-  const lowStockProducts = products.filter((p: any) => {
-    const stock = p?.variants?.[0]?.stock;
-    return stock !== undefined && stock !== null && stock < 20 && stock > 0;
-  }).length;
-  const outOfStockProducts = products.filter((p: any) => {
-    const stock = p?.variants?.[0]?.stock;
-    return stock === 0 || stock === undefined || stock === null;
-  }).length;
+const activeProducts = products.filter(
+  (p: any) => p?.status === "active"
+).length;
+
+const lowStockProducts = products.filter((p: any) => {
+  const totalStock =
+    p?.variants?.reduce(
+      (sum: number, v: any) => sum + (v?.stock ?? 0),
+      0
+    ) ?? 0;
+
+  return totalStock > 0 && totalStock < 20;
+}).length;
+
+const outOfStockProducts = products.filter((p: any) => {
+  const variants = p?.variants ?? [];
+
+  if (variants.length === 0) return true;
+
+  return variants.every((v: any) => (v?.stock ?? 0) === 0);
+}).length;
 
   return (
     <div className="space-y-6">
@@ -269,18 +302,27 @@ export default function AdminProducts() {
         )}
       </Card>
 
-      <Modal
+      <ProductViewModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Add New Product"
-      >
-        <ProductForm
-          categories={categories}
-          submitText="Create Product"
-          isLoading={createMutation.isPending}
-          onSubmit={handleCreate}
-        />
-      </Modal>
+        product={{
+          name: "",
+          slug: "",
+          description: "",
+          status: "active",
+          images: [],
+          variants: [
+            {
+              price: "",
+              sku: "",
+              stock: "",
+            }
+          ],
+        }}
+        categories={categories}
+        initialMode="edit"
+        onSave={handleCreate}
+      />
 
 
       <ConfirmDialog

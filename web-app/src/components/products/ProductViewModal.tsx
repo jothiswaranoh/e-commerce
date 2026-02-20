@@ -9,10 +9,12 @@ import {
    Types
 ───────────────────────────────────────── */
 type Variant = {
-  id: number;
+  id?: number;
+  name?: string; 
   price: string;
   sku: string;
   stock: number;
+  _destroy?: boolean;
 };
 
 type Product = {
@@ -67,7 +69,6 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
 
   if (!isOpen || !product || !draft) return null;
 
-  const variant = draft.variants?.[0];
   const isEdit = mode === "edit";
 
   const handleClose = () => {
@@ -87,6 +88,52 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
       variants: p.variants?.map((v, i) => i === 0 ? { ...v, [key]: val } : v),
     } : p);
 
+
+  const addVariant = () => {
+  setDraft(p => p ? {
+    ...p,
+    variants: [
+      ...(p.variants || []),
+      {
+        price: "",
+        sku: "",
+        stock: 0,
+      }
+    ]
+  } : p);
+};
+
+const updateVariant = (index: number, key: keyof Variant, value: any) => {
+  setDraft(p => p ? {
+    ...p,
+    variants: p.variants?.map((v, i) =>
+      i === index ? { ...v, [key]: value } : v
+    )
+  } : p);
+};
+
+const deleteVariant = (index: number) => {
+  setDraft(p => {
+    if (!p || !p.variants) return p;
+
+    const variant = p.variants[index];
+
+    if (variant.id) {
+      return {
+        ...p,
+        variants: p.variants.map((v, i) =>
+          i === index ? { ...v, _destroy: true } : v
+        ),
+      };
+    }
+
+    return {
+      ...p,
+      variants: p.variants.filter((_, i) => i !== index),
+    };
+  });
+};
+
   const handleSave = () => {
     if (!draft) return;
     const payload: any = {
@@ -99,13 +146,19 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
     if (draft.variants && draft.variants.length > 0) {
       payload.variants_attributes = draft.variants.map(v => ({
         id: v.id,
+        name: (v as any).name || "Default",
         sku: v.sku,
         price: parseFloat(v.price),
-        stock: v.stock
+        stock: v.stock,
+        _destroy: v._destroy || false
       }));
     }
+    console.log("Saving draft:", draft);
 
-    onSave?.(payload);
+    onSave?.({
+      ...payload,
+      id: draft.id,
+    });
     setMode("view");
   };
 
@@ -167,12 +220,22 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-1">
-                {isEdit ? "Editing Product" : "Product Details"}
+                {draft?.id ? "Editing Product" : "Creating Product"}
               </p>
               {isEdit ? (
                 <input
                   value={draft.name}
-                  onChange={e => set("name", e.target.value)}
+                  onChange={e => {
+                    const value = e.target.value;
+                    set("name", value);
+                    set("slug",
+                      value
+                        .toLowerCase()
+                        .trim()
+                        .replace(/\s+/g, "-")
+                        .replace(/[^a-z0-9-]/g, "")
+                    );
+                  }}
                   className="text-xl font-semibold text-gray-900 bg-transparent border-b-2 border-indigo-300 focus:outline-none focus:border-indigo-500 min-w-[240px]"
                 />
               ) : (
@@ -420,57 +483,103 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
                 </div>
               </section>
 
-              {/* Pricing & Inventory */}
+              {/* Variants */}
               <section>
-                <SectionLabel>Pricing & Inventory</SectionLabel>
-                <div className="grid grid-cols-3 gap-3">
-                  <InfoCard label="Price" icon={<span className="text-xs font-bold text-gray-400">₹</span>}>
-                    {isEdit ? (
-                      <input
-                        type="number"
-                        value={variant?.price ?? ""}
-                        onChange={e => setVariant("price", e.target.value)}
-                        className={inputCls}
-                      />
-                    ) : (
-                      <p className="text-base font-bold text-gray-900 mt-0.5">
-                        {variant ? `₹${parseFloat(variant.price).toLocaleString("en-IN")}` : "—"}
-                      </p>
-                    )}
-                  </InfoCard>
+                <SectionLabel>Variants</SectionLabel>
 
-                  <InfoCard label="Stock" icon={<Layers className="w-3.5 h-3.5" />}>
-                    {isEdit ? (
-                      <input
-                        type="number"
-                        value={variant?.stock ?? ""}
-                        onChange={e => setVariant("stock", Number(e.target.value))}
-                        className={inputCls}
-                      />
-                    ) : (
-                      <p className="text-base font-bold text-gray-900 mt-0.5">
-                        {variant?.stock ?? "—"}
-                        {variant && (
-                          <span className="ml-1.5 text-xs font-normal text-gray-400">units</span>
-                        )}
-                      </p>
-                    )}
-                  </InfoCard>
+                {draft.variants && draft.variants.length > 0 ? (
+                  <div className="space-y-3">
+                    {draft.variants.map((v, realIndex) => {
+                      if (v._destroy) return null;
 
-                  <InfoCard label="SKU" icon={<Hash className="w-3.5 h-3.5" />}>
-                    {isEdit ? (
-                      <input
-                        value={variant?.sku ?? ""}
-                        onChange={e => setVariant("sku", e.target.value)}
-                        className={inputCls}
-                      />
-                    ) : (
-                      <p className="text-xs font-semibold font-mono text-gray-700 break-all mt-0.5">
-                        {variant?.sku ?? "—"}
-                      </p>
-                    )}
-                  </InfoCard>
-                </div>
+                      const visibleIndex =
+                        draft.variants?.filter(x => !x._destroy).indexOf(v) ?? 0;
+
+                      return (
+                        <div
+                          key={v.id ?? realIndex}
+                          className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3"
+                        >
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm font-semibold text-gray-700">
+                              Variant #{visibleIndex + 1}
+                            </p>
+
+                            {isEdit && (
+                              <button
+                                onClick={() => deleteVariant(realIndex)}
+                                className="text-red-500 hover:text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-4 gap-3">
+                            <input
+                              placeholder="Variant Name"
+                              value={(v as any).name || ""}
+                              disabled={!isEdit}
+                              onChange={e =>
+                                updateVariant(realIndex, "name" as any, e.target.value)
+                              }
+                              className={inputCls}
+                            />
+                            <input
+                              type="number"
+                              placeholder="Price"
+                              value={v.price}
+                              disabled={!isEdit}
+                              onChange={e =>
+                                updateVariant(realIndex, "price", e.target.value)
+                              }
+                              className={inputCls}
+                            />
+
+                            <input
+                              type="number"
+                              placeholder="Stock"
+                              value={v.stock ?? ""}
+                              disabled={!isEdit}
+                              onChange={e =>
+                                updateVariant(
+                                  realIndex,
+                                  "stock",
+                                  e.target.value === "" ? "" : Number(e.target.value)
+                                )
+                              }
+                              className={inputCls}
+                            />
+
+                            <input
+                              placeholder="SKU"
+                              value={v.sku}
+                              disabled={!isEdit}
+                              onChange={e =>
+                                updateVariant(realIndex, "sku", e.target.value)
+                              }
+                              className={inputCls}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">
+                    No variants yet.
+                  </p>
+                )}
+
+                {isEdit && (
+                  <button
+                    onClick={addVariant}
+                    className="mt-4 flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Variant
+                  </button>
+                )}
               </section>
 
               {/* Slug */}

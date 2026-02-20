@@ -28,6 +28,22 @@ module Api
         )
       end
 
+      def destroy
+        product = model_class.find(params[:id])
+
+        if product.variants.joins(:order_items).exists?
+          render json: {
+            success: false,
+            message: "Cannot delete product with active orders"
+          }, status: :unprocessable_entity
+          return
+        end
+
+        product.destroy
+
+        render_success({}, success_response_key)
+      end
+
       private
 
       def model_class

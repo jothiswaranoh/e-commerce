@@ -1,5 +1,6 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Edit, Trash2, Package, Image as ImageIcon } from "lucide-react";
+import { SPACING } from "../../config/theme.constants";
 
 type Product = {
     id: number;
@@ -100,13 +101,32 @@ export default function ProductDataGrid({
         {
             field: "price",
             headerName: "Price",
-            width: 120,
+            width: 170,
             renderCell: (params) => {
-                const variant = params.row.variants?.[0];
-                const price = variant?.price;
+                const variants = params.row.variants || [];
+
+                if (!variants.length) {
+                    return <span className="text-neutral-400">N/A</span>;
+                }
+
+                const prices = variants.map((v: any) => Number(v.price));
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+
+                const format = (val: number) =>
+                    `₹${val.toLocaleString("en-IN", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                    })}`;
+
+                const display =
+                    min === max
+                        ? format(min)
+                        : `${format(min)} - ${format(max)}`;
+
                 return (
                     <span className="font-semibold text-neutral-900">
-                        {price !== undefined && price !== null ? `₹${Number(price).toFixed(2)}` : "N/A"}
+                        {display}
                     </span>
                 );
             },
@@ -114,23 +134,27 @@ export default function ProductDataGrid({
         {
             field: "stock",
             headerName: "Stock",
-            width: 140,
+            width: 160,
             renderCell: (params) => {
-                const variant = params.row.variants?.[0];
-                const stock = variant?.stock ?? 0;
+                const variants = params.row.variants || [];
+
+                const totalStock = variants.reduce(
+                    (sum: number, v: any) => sum + Number(v.stock || 0),
+                    0
+                );
 
                 let badgeClass = "";
                 let badgeText = "";
 
-                if (stock <= 0) {
+                if (totalStock <= 0) {
                     badgeClass = "bg-red-100 text-red-700 border-red-200";
                     badgeText = "Out of Stock";
-                } else if (stock < 20) {
+                } else if (totalStock < 20) {
                     badgeClass = "bg-amber-100 text-amber-700 border-amber-200";
-                    badgeText = `Low (${stock})`;
+                    badgeText = `Low (${totalStock})`;
                 } else {
                     badgeClass = "bg-green-100 text-green-700 border-green-200";
-                    badgeText = `In Stock (${stock})`;
+                    badgeText = `In Stock (${totalStock})`;
                 }
 
                 return (

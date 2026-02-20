@@ -44,7 +44,7 @@ module Api
       private
 
       def set_product
-        @product = Product.find(params[:product_id])
+        @product = Product.accessible_by(current_ability).find(params[:product_id])
       end
 
       def set_variant
