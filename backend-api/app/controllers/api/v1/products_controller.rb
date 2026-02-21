@@ -32,10 +32,11 @@ module Api
         product = model_class.find(params[:id])
 
         if product.variants.joins(:order_items).exists?
-          render json: {
-            success: false,
-            message: "Cannot delete product with active orders"
-          }, status: :unprocessable_entity
+          render_error(
+            "common.operation_failed",
+            "Cannot delete product with active orders",
+            :unprocessable_entity
+          )
           return
         end
 

@@ -103,13 +103,13 @@ export default function ProductDataGrid({
             headerName: "Price",
             width: 170,
             renderCell: (params) => {
-                const variants = params.row.variants || [];
+                const variants = params.row?.variants;
 
                 if (!variants.length) {
                     return <span className="text-neutral-400">N/A</span>;
                 }
 
-                const prices = variants.map((v: any) => Number(v.price));
+                const prices = variants?.map((v: any) => Number(v.price)) || [];
                 const min = Math.min(...prices);
                 const max = Math.max(...prices);
 

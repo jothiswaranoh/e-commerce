@@ -153,7 +153,6 @@ const deleteVariant = (index: number) => {
         _destroy: v._destroy || false
       }));
     }
-    console.log("Saving draft:", draft);
 
     onSave?.({
       ...payload,
