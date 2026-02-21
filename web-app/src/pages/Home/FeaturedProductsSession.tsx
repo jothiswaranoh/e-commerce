@@ -67,14 +67,15 @@ export default function FeaturedProductsSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              id={String(product.id)}
-              name={product.name}
-              price={product.variants?.[0]?.price ?? 0}
-              category={product.category?.name ?? 'Uncategorized'}
-            />
-          ))}
+  <ProductCard
+    key={product.id}
+    id={String(product.id)}
+    name={product.name}
+    price={product.variants?.[0]?.price ?? 0}
+    category={product.category?.name ?? 'Uncategorized'}
+    images={product.images}   // ✅ THIS IS THE FIX
+  />
+))}
         </div>
       </div>
     </section>
