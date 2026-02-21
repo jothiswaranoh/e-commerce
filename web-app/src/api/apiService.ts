@@ -129,14 +129,11 @@ export async function service<T = any>(
 
             const message =
                 backendError?.message ||
+                backendError?.data?.message ||
                 backendError?.error ||
+                error.response?.statusText ||
                 error.message ||
                 'Something went wrong';
-
-            // 🔥 AUTO TOAST IF BACKEND WANTS IT
-            if (backendError?.is_toast_display) {
-                toast.error(message);
-            }
 
             return {
                 success: false,

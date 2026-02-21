@@ -19,6 +19,33 @@ export default function ProductForm({
   isLoading,
   categoryOptions,
 }: Props) {
+
+  const addVariant = () => {
+    setFormData((p: any) => ({
+      ...p,
+      variants: [
+        ...(p.variants || []),
+        { sku: '', price: '', stock: '' }
+      ],
+    }));
+  };
+
+  const updateVariant = (index: number, key: string, value: any) => {
+    setFormData((p: any) => ({
+      ...p,
+      variants: p.variants.map((v: any, i: number) =>
+        i === index ? { ...v, [key]: value } : v
+      ),
+    }));
+  };
+
+  const removeVariant = (index: number) => {
+    setFormData((p: any) => ({
+      ...p,
+      variants: p.variants.filter((_: any, i: number) => i !== index),
+    }));
+  };
+
   return (
     <form
       onSubmit={(e) => {
@@ -58,25 +85,62 @@ export default function ProductForm({
         }
       />
 
-      <Input
-        label="Price"
-        type="number"
-        value={formData.price}
-        onChange={(e) =>
-          setFormData((p: any) => ({ ...p, price: e.target.value }))
-        }
-        required
-      />
+      {/* 🔥 VARIANTS SECTION */}
+      <div className="space-y-3">
+        <label className="block text-sm font-medium">
+          Variants
+        </label>
 
-      <Input
-        label="Stock"
-        type="number"
-        value={formData.stock}
-        onChange={(e) =>
-          setFormData((p: any) => ({ ...p, stock: e.target.value }))
-        }
-        required
-      />
+        {formData.variants?.map((variant: any, index: number) => (
+          <div key={index} className="grid grid-cols-3 gap-2 items-end">
+            <Input
+              label="SKU"
+              value={variant.sku}
+              onChange={(e) =>
+                updateVariant(index, 'sku', e.target.value)
+              }
+              required
+            />
+
+            <Input
+              label="Price"
+              type="number"
+              value={variant.price}
+              onChange={(e) =>
+                updateVariant(index, 'price', e.target.value)
+              }
+              required
+            />
+
+            <div className="flex gap-2 items-end">
+              <Input
+                label="Stock"
+                type="number"
+                value={variant.stock}
+                onChange={(e) =>
+                  updateVariant(index, 'stock', e.target.value)
+                }
+                required
+              />
+              <button
+                type="button"
+                onClick={() => removeVariant(index)}
+                className="text-red-600 text-sm"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={addVariant}
+          className="text-sm text-blue-600"
+        >
+          + Add Variant
+        </button>
+      </div>
 
       <textarea
         className="w-full border rounded px-3 py-2"

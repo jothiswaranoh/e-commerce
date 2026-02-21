@@ -66,10 +66,20 @@ export const useProduct = (id: string | number) =>
 
 export const useCreateProduct = () => {
   const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (data: ProductFormData) =>
-      productService.createProduct(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    mutationFn: async (data: ProductFormData) => {
+      const res = await productService.createProduct(data);
+
+      if (!res.success) {
+        throw new Error(res.message || "Create failed");
+      }
+
+      return res;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+    },
   });
 };
 
@@ -77,9 +87,17 @@ export const useCreateProduct = () => {
 
 export const useUpdateProduct = () => {
   const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: ({ id, data }: any) =>
-      productService.updateProduct(id, data),
+    mutationFn: async ({ id, data }: any) => {
+      const res = await productService.updateProduct(id, data);
+
+      if (!res.success) {
+        throw new Error(res.message || "Update failed");
+      }
+
+      return res;
+    },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['products'] });
       qc.invalidateQueries({ queryKey: ['products', vars.id] });

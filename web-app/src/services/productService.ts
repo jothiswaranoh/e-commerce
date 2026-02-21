@@ -1,14 +1,22 @@
 import { apiService } from '../api/apiService';
-import { ProductFormData } from '../types/product';
 
 function buildProductFormData(data: any) {
   const fd = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {
-    if (key === 'variants_attributes' && Array.isArray(value)) {
-      value.forEach((v, i) => {
-        Object.entries(v).forEach(([vk, vv]) => {
-          fd.append(`product[variants_attributes][${i}][${vk}]`, String(vv));
+
+    if (
+      (key === 'variants' || key === 'variants_attributes') &&
+      Array.isArray(value)
+    ) {
+      value.forEach((variant: any, index: number) => {
+        Object.entries(variant).forEach(([vk, vv]) => {
+          if (vv !== undefined && vv !== null) {
+            fd.append(
+              `product[variants_attributes][${index}][${vk}]`,
+              String(vv)
+            );
+          }
         });
       });
       return;
@@ -17,6 +25,13 @@ function buildProductFormData(data: any) {
     if (key === 'images' && Array.isArray(value)) {
       value.forEach((file: File) => {
         fd.append('product[images][]', file);
+      });
+      return;
+    }
+
+    if (key === 'existing_images' && Array.isArray(value)) {
+      value.forEach((img: string) => {
+        fd.append('product[existing_images][]', img);
       });
       return;
     }
@@ -36,19 +51,15 @@ export const productService = {
   getProduct: (id: string | number) =>
     apiService.get(`/products/${id}`),
 
-  createProduct: (data: ProductFormData) =>
-    apiService.post(
-      '/products',
-      buildProductFormData(data),
-      { headers: { 'Content-Type': 'multipart/form-data' } }
-    ),
+  createProduct: async (data: any) => {
+    const formData = buildProductFormData(data);
+    return apiService.post('/products', formData);
+  },
 
-  updateProduct: (id: string | number, data: ProductFormData) =>
-    apiService.put(
-      `/products/${id}`,
-      buildProductFormData(data),
-      { headers: { 'Content-Type': 'multipart/form-data' } }
-    ),
+  updateProduct: async (id: number, data: any) => {
+    const formData = buildProductFormData(data);
+    return apiService.put(`/products/${id}`, formData);
+  },
 
   deleteProduct: (id: string | number) =>
     apiService.delete(`/products/${id}`),
