@@ -15,7 +15,7 @@ import {
   useDeleteCategory,
 } from "../../hooks/useCategory";
 
-import CategoryForm from "../../components/categories/CategoryForm";
+import CategoryModal from "../../components/categories/CategoryModal";
 import { Category, CategoryPayload } from "../../api/category";
 import CategoryDataGrid from "../../components/categories/CategoryDataGrid";
 
@@ -24,8 +24,19 @@ export default function AdminCategories() {
   const [pageSize, setPageSize] = useState(10);
 
   const { data, isLoading } = useCategories(page, pageSize);
+  const [isViewOpen, setIsViewOpen] = useState(false);
 
-  const categories = data?.data ?? [];
+  const rawCategories = data?.data ?? [];
+    const categories = rawCategories
+      .map((c: any) => ({
+        ...c,
+        images: c.image_url ? [c.image_url] : [],
+      }))
+      .sort((a: any, b: any) => {
+        const aOrder = a.sort_order ?? 0;
+        const bOrder = b.sort_order ?? 0;
+        return aOrder - bOrder;
+      });
   const meta = data?.meta;
 
   const createMutation = useCreateCategory();
@@ -72,9 +83,15 @@ export default function AdminCategories() {
       toast.success("Category deleted");
       setIsDeleteOpen(false);
       setSelectedCategory(null);
-    } catch {
-      toast.error("Failed to delete category");
-    }
+    } catch (error: any) {
+        const message =
+          error?.message ||
+          error?.error?.error ||
+          error?.error?.message ||
+          "Failed to delete category";
+
+        toast.error(message);
+      }
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
@@ -104,6 +121,7 @@ export default function AdminCategories() {
           <Card>
             <div className="flex items-center justify-between">
               <div>
+                
                 <p className="text-sm text-neutral-600">Total Categories</p>
                 <p className="text-2xl font-bold text-neutral-900 mt-1">
                   {meta.total_count}
@@ -176,43 +194,64 @@ export default function AdminCategories() {
             onPageChange={setPage}
             onPageSizeChange={handlePageSizeChange}
             onEdit={(cat) => {
-              setSelectedCategory(cat);
+              setSelectedCategory({
+                ...cat,
+                images: cat.image_url ? [cat.image_url] : [],
+                sort_order: cat.sort_order ?? 0,
+              });
               setIsEditOpen(true);
             }}
             onDelete={(cat) => {
               setSelectedCategory(cat);
               setIsDeleteOpen(true);
             }}
+            onView={(cat) => {
+              setSelectedCategory({
+                ...cat,
+                images: cat.image_url ? [cat.image_url] : [],
+                sort_order: cat.sort_order ?? 0,
+              });
+              setIsViewOpen(true);
+            }}
           />
         )}
       </Card>
 
-      <Modal
+      <CategoryModal
+        category={{
+          name: "",
+          slug: "",
+          is_active: true,
+          sort_order: 0,
+          parent_id: null,
+          images: [],
+        }}
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Add Category"
-      >
-        <CategoryForm
-          submitText="Create"
-          isLoading={createMutation.isPending}
-          onSubmit={handleCreate}
-        />
-      </Modal>
+        onSave={handleCreate}
+        categories={categories}
+        initialMode="edit"
+      />
 
-      <Modal
+      <CategoryModal
+        category={selectedCategory}
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        title="Edit Category"
-      >
-        {selectedCategory && (
-          <CategoryForm
-            initialData={selectedCategory}
-            submitText="Update"
-            isLoading={updateMutation.isPending}
-            onSubmit={handleUpdate}
-          />
-        )}
-      </Modal>
+        onSave={handleUpdate}
+        categories={categories}
+        initialMode="edit"
+      />
+
+      <CategoryModal
+        category={selectedCategory}
+        isOpen={isViewOpen}
+        onClose={() => {
+          setIsViewOpen(false);
+          setSelectedCategory(null);
+        }}
+        categories={categories}
+        initialMode="view"
+      />
 
       <ConfirmDialog
         isOpen={isDeleteOpen}

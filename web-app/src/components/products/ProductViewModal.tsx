@@ -136,11 +136,18 @@ const deleteVariant = (index: number) => {
 
   const handleSave = () => {
     if (!draft) return;
-    const payload: any = {
-      ...draft,
-      images: newFiles, // New files to upload
-      existing_images: draft.images.filter(img => !img.startsWith("blob:")), // Keep existing ones
-    };
+      const existingImages = draft.images.filter(
+        (img) => !img.startsWith("blob:")
+      );
+
+      const isImageDeleted =
+        existingImages.length === 0 && newFiles.length === 0;
+
+      const payload: any = {
+        ...draft,
+        images: newFiles.length > 0 ? newFiles : undefined,
+        remove_image: isImageDeleted ? true : undefined,
+      };
 
     // Backend expects variants_attributes for updates
     if (draft.variants && draft.variants.length > 0) {

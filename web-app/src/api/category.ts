@@ -21,6 +21,7 @@ export interface CategoryPayload {
   is_active?: boolean;
   sort_order?: number;
   image?: File | null;
+  remove_image?: boolean;
 }
 
 const BASE_PATH = "/categories";
@@ -45,6 +46,10 @@ const categoryToFormData = (payload: CategoryPayload) => {
 
   if (payload.image) {
     fd.append("category[image]", payload.image);
+  }
+
+  if (payload.remove_image) {
+    fd.append("category[remove_image]", "true");
   }
 
   return fd;

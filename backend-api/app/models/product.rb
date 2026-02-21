@@ -17,5 +17,15 @@ class Product < ApplicationRecord
   validates :org_id, presence: true
   validates :category_id, presence: true
   validates :status, inclusion: { in: %w[active inactive archived], message: "%{value} is not a valid status" }
+  attr_accessor :remove_image
+  before_save :purge_images_if_requested
+
+  private
+
+  def purge_images_if_requested
+    if ActiveModel::Type::Boolean.new.cast(remove_image)
+      images.purge if images.attached?
+    end
+  end
 
 end

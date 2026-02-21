@@ -21,6 +21,7 @@ type Props = {
     onPageSizeChange: (pageSize: number) => void;
     onEdit: (cat: Category) => void;
     onDelete: (cat: Category) => void;
+    onView: (cat: Category) => void;
 };
 
 export default function CategoryDataGrid({
@@ -33,6 +34,7 @@ export default function CategoryDataGrid({
     onPageSizeChange,
     onEdit,
     onDelete,
+    onView, 
 }: Props) {
     const columns: GridColDef[] = [
         {
@@ -58,11 +60,22 @@ export default function CategoryDataGrid({
             headerName: "Name",
             flex: 1,
             minWidth: 200,
-            renderCell: (params) => (
-                <Box sx={{ fontWeight: 600, color: '#1f2937' }}>
-                    {params.value}
-                </Box>
-            ),
+            renderCell: (params) => {
+                const category = params.row;
+
+                return (
+                    <div
+                        className="flex items-center gap-3 cursor-pointer"
+                        onClick={() => onView(category)}
+                    >
+                        <div className="min-w-0">
+                            <p className="font-semibold text-neutral-900 truncate">
+                                {category.name || "Untitled"}
+                            </p>
+                        </div>
+                    </div>
+                );
+            },
         },
         {
             field: "slug",

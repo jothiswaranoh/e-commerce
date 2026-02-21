@@ -44,7 +44,8 @@ module Api
           :parent_id,
           :is_active,
           :sort_order,
-          :image
+          :image,
+          :remove_image
         )
       end
 
