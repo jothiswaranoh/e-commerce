@@ -51,7 +51,7 @@ module Crudable
       handle_response(@resource)
     end
   end
-
+  
   # DELETE /resources/:id
   def destroy
   if @resource.destroy

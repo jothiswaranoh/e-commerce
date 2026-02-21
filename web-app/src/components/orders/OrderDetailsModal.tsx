@@ -23,34 +23,48 @@ export default function OrderDetailsModal({ order, onUpdateStatus, onUpdatePayme
             {/* Header Info */}
             <div className="grid grid-cols-2 gap-8">
                 <div>
-                    <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Customer Details</h3>
-                    <p className="font-bold text-neutral-900">{order.user.name}</p>
-                    <p className="text-sm text-neutral-600">{order.user.email_address}</p>
+                    <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+                        Customer Details
+                    </h3>
+                    <p className="font-bold text-neutral-900">
+                        {order?.user?.name ?? "Guest"}
+                    </p>
+                    <p className="text-sm text-neutral-600">
+                        {order?.user?.email_address ?? "N/A"}
+                    </p>
                 </div>
                 <div>
-                    <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Order Date</h3>
+                    <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+                        Order Date
+                    </h3>
                     <p className="font-bold text-neutral-900">
-                        {order?.created_at ? new Date(order.created_at).toLocaleString() : "N/A"}
+                        {order?.created_at
+                            ? new Date(order.created_at).toLocaleString()
+                            : "N/A"}
                     </p>
                 </div>
             </div>
 
             {/* Status Manager */}
             <div className="bg-neutral-50 rounded-2xl p-6 border border-neutral-100">
-                <h3 className="text-sm font-semibold text-neutral-900 mb-4">Update Order Status</h3>
+                <h3 className="text-sm font-semibold text-neutral-900 mb-4">
+                    Update Order Status
+                </h3>
                 <div className="flex flex-wrap gap-2">
                     {statuses.map((s) => {
                         const Icon = s.icon;
                         const isActive = order?.status === s.value;
+
                         return (
                             <button
                                 key={s.value}
                                 onClick={() => onUpdateStatus(s.value)}
                                 disabled={isLoading || isActive}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${isActive
-                                    ? `${s.color} border-current shadow-sm`
-                                    : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
-                                    } disabled:opacity-50`}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                                    isActive
+                                        ? `${s.color} border-current shadow-sm`
+                                        : "bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
+                                } disabled:opacity-50`}
                             >
                                 <Icon className="w-4 h-4" />
                                 {s.label}
@@ -66,6 +80,7 @@ export default function OrderDetailsModal({ order, onUpdateStatus, onUpdatePayme
                     <Package className="w-4 h-4" />
                     Order Items ({order?.order_items?.length ?? 0})
                 </h3>
+
                 <div className="border border-neutral-100 rounded-2xl overflow-hidden">
                     <table className="w-full text-sm">
                         <thead className="bg-neutral-50 text-neutral-500 font-medium">
@@ -76,38 +91,68 @@ export default function OrderDetailsModal({ order, onUpdateStatus, onUpdatePayme
                                 <th className="px-4 py-3 text-right">Total</th>
                             </tr>
                         </thead>
+
                         <tbody className="divide-y divide-neutral-100">
                             {order?.order_items?.map((item) => (
                                 <tr key={item.id}>
-                                    <td className="px-4 py-4 font-medium text-neutral-900">{item.product_name ?? "Unknown Product"}</td>
-                                    <td className="px-4 py-4 text-right text-neutral-600">₹{(item.price ?? 0).toFixed(2)}</td>
-                                    <td className="px-4 py-4 text-center text-neutral-600">{item.quantity}</td>
-                                    <td className="px-4 py-4 text-right font-bold text-neutral-900">₹{(item.total ?? 0).toFixed(2)}</td>
+                                    <td className="px-4 py-4 font-medium text-neutral-900">
+                                        {item.product_name ?? "Unknown Product"}
+                                    </td>
+
+                                    {/* FIXED */}
+                                    <td className="px-4 py-4 text-right text-neutral-600">
+                                        ₹{(Number(item.price) || 0).toFixed(2)}
+                                    </td>
+
+                                    <td className="px-4 py-4 text-center text-neutral-600">
+                                        {item.quantity}
+                                    </td>
+
+                                    {/* FIXED */}
+                                    <td className="px-4 py-4 text-right font-bold text-neutral-900">
+                                        ₹{(Number(item.total) || 0).toFixed(2)}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
+
                         <tfoot className="bg-neutral-50 font-bold">
                             <tr className="text-neutral-900">
-                                <td colSpan={3} className="px-4 py-3 text-right">Total Amount</td>
-                                <td className="px-4 py-3 text-right text-lg text-primary-600">₹{Number(order?.total ?? 0).toFixed(2)}</td>
+                                <td colSpan={3} className="px-4 py-3 text-right">
+                                    Total Amount
+                                </td>
+                                <td className="px-4 py-3 text-right text-lg text-primary-600">
+                                    ₹{(Number(order?.total) || 0).toFixed(2)}
+                                </td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
 
-            {/* Payment Status (Simplified) */}
+            {/* Payment Status */}
             <div className="flex items-center justify-between p-4 bg-primary-50 rounded-2xl border border-primary-100">
                 <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${order?.payment_status === "paid" ? "bg-green-100 text-green-600" : "bg-primary-100 text-primary-600"
-                        }`}>
+                    <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            order?.payment_status === "paid"
+                                ? "bg-green-100 text-green-600"
+                                : "bg-primary-100 text-primary-600"
+                        }`}
+                    >
                         <CheckCircle className="w-5 h-5" />
                     </div>
+
                     <div>
-                        <p className="text-xs font-semibold text-primary-600 uppercase tracking-wider">Payment Status</p>
-                        <p className="font-bold text-neutral-900 capitalize">{order?.payment_status ?? "unpaid"}</p>
+                        <p className="text-xs font-semibold text-primary-600 uppercase tracking-wider">
+                            Payment Status
+                        </p>
+                        <p className="font-bold text-neutral-900 capitalize">
+                            {order?.payment_status ?? "unpaid"}
+                        </p>
                     </div>
                 </div>
+
                 {order?.payment_status !== "paid" && onUpdatePayment && (
                     <Button
                         size="sm"

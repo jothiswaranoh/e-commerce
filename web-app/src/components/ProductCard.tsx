@@ -9,16 +9,18 @@ interface ProductCardProps {
   name?: string;
   price?: number;
   image?: string;
+  images?: string[];
   category?: string;
   rating?: number;
 }
 
 export default function ProductCard({
   id = '1',
-  variantId,   
+  variantId,
   name = "Product Name",
   price = 999,
-  image = "https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400",
+  image,
+  images,
   category = "Electronics",
 }: ProductCardProps) {
 
@@ -35,12 +37,19 @@ export default function ProductCard({
     try {
       setIsAdding(true);
       await addToCart(id, 1, variantId);
-    }catch (error: any) {
-      // Toast already handled by apiService
-    }finally {
+    } catch (error: any) {
+      // Toast handled elsewhere
+    } finally {
       setIsAdding(false);
     }
   };
+
+  const imageSrc =
+    images && images.length > 0
+      ? images[0]
+      : image
+      ? image
+      : 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
 
   return (
     <div className="group bg-white rounded-xl shadow-md overflow-hidden 
@@ -58,7 +67,7 @@ export default function ProductCard({
         )}
 
         <img
-          src={image}
+          src={imageSrc}
           alt={name}
           loading="lazy"
           onLoad={() => setIsImageLoaded(true)}
@@ -118,13 +127,14 @@ export default function ProductCard({
           </h3>
         </Link>
 
-        {/* Push price/button to bottom always */}
-        <div className="mt-auto flex items-center justify-between gap-4">
+        {/* ✅ FIXED LAYOUT SECTION */}
+        <div className="mt-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
           {/* PRICE */}
           <span className="text-2xl font-bold 
                            bg-gradient-to-r from-primary-600 to-accent-600 
-                           bg-clip-text text-transparent whitespace-nowrap">
+                           bg-clip-text text-transparent 
+                           whitespace-nowrap">
             ₹{price.toLocaleString()}
           </span>
 
@@ -135,14 +145,14 @@ export default function ProductCard({
             className="group/btn bg-gradient-to-r 
                        from-primary-600 to-primary-500 
                        text-white 
-                       px-5 py-2.5 
+                       px-4 py-2.5 
                        rounded-lg 
                        hover:from-primary-700 hover:to-primary-600 
                        transition-all duration-200 
                        flex items-center gap-2 
                        shadow-lg hover:shadow-xl 
                        disabled:opacity-75 disabled:cursor-not-allowed
-                       min-w-[110px] justify-center"
+                       w-full sm:w-auto justify-center"
           >
             <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
             <span className="font-semibold">
