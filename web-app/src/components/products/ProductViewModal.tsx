@@ -155,7 +155,10 @@ const deleteVariant = (index: number) => {
         id: v.id,
         name: (v as any).name || "Default",
         sku: v.sku,
-        price: parseFloat(v.price),
+        price:
+          v.price === "" || v.price == null
+            ? undefined
+            : parseFloat(v.price),
         stock: v.stock,
         _destroy: v._destroy || false
       }));
@@ -165,7 +168,6 @@ const deleteVariant = (index: number) => {
       ...payload,
       id: draft.id,
     });
-    setMode("view");
   };
 
   const handleDragStart = (i: number) => setDragIdx(i);

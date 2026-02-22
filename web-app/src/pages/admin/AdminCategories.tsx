@@ -54,9 +54,12 @@ export default function AdminCategories() {
       await createMutation.mutateAsync(payload);
       toast.success("Category created");
       setIsCreateOpen(false);
-    } catch {
-      toast.error("Failed to create category");
-    }
+    } catch (err: any) {
+        const message = err?.message || "Validation failed";
+        message.split(",").forEach((msg: string) => {
+          toast.error(msg.trim());
+        });
+      }
   };
 
   const handleUpdate = async (payload: Partial<CategoryPayload>) => {
@@ -70,9 +73,12 @@ export default function AdminCategories() {
       toast.success("Category updated");
       setIsEditOpen(false);
       setSelectedCategory(null);
-    } catch {
-      toast.error("Failed to update category");
-    }
+    } catch (err: any) {
+        const message = err?.message || "Validation failed";
+        message.split(",").forEach((msg: string) => {
+          toast.error(msg.trim());
+        });
+      }
   };
 
   const handleDelete = async () => {

@@ -70,6 +70,14 @@ module Api
           )
         end
 
+        if product.variants.joins(:cart_items).exists?
+          return render_error(
+            "common.operation_failed",
+            "Cannot delete product currently in carts",
+            :unprocessable_entity
+          )
+        end
+
         if product.destroy
           render_success({}, success_response_key)
         else

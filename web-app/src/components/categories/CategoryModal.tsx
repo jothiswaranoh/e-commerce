@@ -97,7 +97,6 @@ export default function CategoryModal({
     console.log("SENDING PAYLOAD:", payload);
 
     onSave?.(payload);
-    setMode("view");
   };
 
   const addImage = (files: FileList | null) => {

@@ -14,6 +14,7 @@ export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { clearCart } = useCart();
 
   const navLinks = [
     { label: NAVBAR.nav.home, path: ROUTES.HOME },
@@ -33,6 +34,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await logout();
+    clearCart();
     setIsUserMenuOpen(false);
     setIsMobileMenuOpen(false);
     navigate(ROUTES.HOME);
