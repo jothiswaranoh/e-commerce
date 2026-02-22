@@ -13,24 +13,26 @@ interface CartContextType {
     updateQuantity: (itemId: number, quantity: number) => Promise<void>;
     removeFromCart: (itemId: number) => Promise<void>;
     refreshCart: () => Promise<void>;
+    clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const { isAuthenticated } = useAuth();
-    const [cart, setCart] = useState<CartResponse | null>(() => {
-        const saved = localStorage.getItem('cart');
-        return saved ? JSON.parse(saved) : null;
-    });
+    const [cart, setCart] = useState<CartResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    
+    const clearCart = () => {
+        setCart(null);
+    };
 
     useEffect(() => {
-        if (cart) {
-            localStorage.setItem('cart', JSON.stringify(cart));
+        if (!isAuthenticated) {
+            setCart(null);
         }
-    }, [cart]);
+    }, [isAuthenticated]);
 
     const refreshCart = useCallback(async () => {
         if (!isAuthenticated) {
@@ -148,7 +150,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 addToCart,
                 updateQuantity,
                 removeFromCart,
-                refreshCart
+                refreshCart,
+                clearCart
             }}
         >
             {children}

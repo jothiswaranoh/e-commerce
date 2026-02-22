@@ -36,4 +36,5 @@ export interface ProductFormData extends Omit<Product, 'id' | 'variants' | 'prod
     id?: number | string;
     variants_attributes?: ProductVariant[];
     product_attributes_attributes?: ProductAttribute[];
+    remove_image?: boolean;
 }

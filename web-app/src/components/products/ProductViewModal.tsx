@@ -136,11 +136,18 @@ const deleteVariant = (index: number) => {
 
   const handleSave = () => {
     if (!draft) return;
-    const payload: any = {
-      ...draft,
-      images: newFiles, // New files to upload
-      existing_images: draft.images.filter(img => !img.startsWith("blob:")), // Keep existing ones
-    };
+      const existingImages = draft.images.filter(
+        (img) => !img.startsWith("blob:")
+      );
+
+      const isImageDeleted =
+        existingImages.length === 0 && newFiles.length === 0;
+
+      const payload: any = {
+        ...draft,
+        images: newFiles.length > 0 ? newFiles : undefined,
+        remove_image: isImageDeleted ? true : undefined,
+      };
 
     // Backend expects variants_attributes for updates
     if (draft.variants && draft.variants.length > 0) {
@@ -148,7 +155,10 @@ const deleteVariant = (index: number) => {
         id: v.id,
         name: (v as any).name || "Default",
         sku: v.sku,
-        price: parseFloat(v.price),
+        price:
+          v.price === "" || v.price == null
+            ? undefined
+            : parseFloat(v.price),
         stock: v.stock,
         _destroy: v._destroy || false
       }));
@@ -158,7 +168,6 @@ const deleteVariant = (index: number) => {
       ...payload,
       id: draft.id,
     });
-    setMode("view");
   };
 
   const handleDragStart = (i: number) => setDragIdx(i);

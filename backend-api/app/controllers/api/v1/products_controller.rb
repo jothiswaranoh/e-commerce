@@ -31,15 +31,19 @@ module Api
       def update
         product = model_class.find(params[:id])
 
-        # Attach new images manually (append instead of replace)
+        if ActiveModel::Type::Boolean.new.cast(resource_params[:remove_image])
+          product.images.purge if product.images.attached?
+        end
+
+        # ✅ Attach new images
         if resource_params[:images].present?
           resource_params[:images].each do |img|
             product.images.attach(img)
           end
         end
 
-        # Update everything except images
-        if product.update(resource_params.except(:images))
+        # ✅ Update remaining attributes
+        if product.update(resource_params.except(:images, :remove_image))
           render_success(
             ProductBlueprint.render_as_json(product),
             success_response_key
@@ -62,6 +66,14 @@ module Api
           return render_error(
             "common.operation_failed",
             "Cannot delete product with active orders",
+            :unprocessable_entity
+          )
+        end
+
+        if product.variants.joins(:cart_items).exists?
+          return render_error(
+            "common.operation_failed",
+            "Cannot delete product currently in carts",
             :unprocessable_entity
           )
         end
@@ -90,6 +102,7 @@ module Api
           :category_id,
           :status,
           :description,
+          :remove_image,
           images: [],
           variants_attributes: [
             :id,

@@ -21,6 +21,7 @@ type Props = {
     onPageSizeChange: (pageSize: number) => void;
     onEdit: (cat: Category) => void;
     onDelete: (cat: Category) => void;
+    onView: (cat: Category) => void;
 };
 
 export default function CategoryDataGrid({
@@ -33,36 +34,65 @@ export default function CategoryDataGrid({
     onPageSizeChange,
     onEdit,
     onDelete,
+    onView, 
 }: Props) {
+
+    const showPagination = rowCount > pageSize;
+
     const columns: GridColDef[] = [
+        {
+            field: "serial",
+            headerName: "S.No",
+            width: 50,
+            align: "center",
+            sortable: false,
+            renderCell: (params) => {
+                const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+                return (page - 1) * pageSize + rowIndex + 1;
+            },
+        },
         {
             field: "image_url",
             headerName: "Image",
-            width: 100,
+            width: 80,
             sortable: false,
-            renderCell: (params) =>
-                params.value ? (
-                    <img
-                        src={params.value}
-                        alt=""
-                        className="w-10 h-10 rounded-lg object-cover shadow-sm"
-                    />
-                ) : (
-                    <div className="w-10 h-10 bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-lg text-xs flex items-center justify-center text-neutral-500 font-medium">
-                        No Img
-                    </div>
-                ),
+            renderCell: (params) => (
+                <div className="w-full h-full flex items-center">
+                    {params.value ? (
+                        <img
+                            src={params.value}
+                            alt=""
+                            className="w-10 h-10 rounded-lg object-cover shadow-sm"
+                        />
+                    ) : (
+                        <div className="w-10 h-10 bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-lg text-xs flex items-center justify-center text-neutral-500 font-medium">
+                            No Img
+                        </div>
+                    )}
+                </div>
+            ),
         },
         {
             field: "name",
             headerName: "Name",
             flex: 1,
             minWidth: 200,
-            renderCell: (params) => (
-                <Box sx={{ fontWeight: 600, color: '#1f2937' }}>
-                    {params.value}
-                </Box>
-            ),
+            renderCell: (params) => {
+                const category = params.row;
+
+                return (
+                    <div
+                        className="flex items-center gap-3 cursor-pointer"
+                        onClick={() => onView(category)}
+                    >
+                        <div className="min-w-0">
+                            <p className="font-semibold text-neutral-900 truncate">
+                                {category.name || "Untitled"}
+                            </p>
+                        </div>
+                    </div>
+                );
+            },
         },
         {
             field: "slug",
@@ -78,25 +108,29 @@ export default function CategoryDataGrid({
         {
             field: "is_active",
             headerName: "Status",
+            sortable: false,
             width: 130,
             renderCell: (params) => (
-                <span
-                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${params.value
-                        ? "bg-green-100 text-green-700 border border-green-200"
-                        : "bg-neutral-100 text-neutral-600 border border-neutral-200"
+                <div className="w-full h-full flex items-center">
+                    <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                            params.value
+                                ? "bg-green-100 text-green-700 border border-green-200"
+                                : "bg-neutral-100 text-neutral-600 border border-neutral-200"
                         }`}
-                >
-                    {params.value ? "Active" : "Inactive"}
-                </span>
+                    >
+                        {params.value ? "Active" : "Inactive"}
+                    </span>
+                </div>
             ),
         },
         {
             field: "actions",
             headerName: "Actions",
-            width: 120,
+            width: 100,
             sortable: false,
             renderCell: (params) => (
-                <div className="flex gap-2">
+                <div className="w-full h-full flex items-center justify-center gap-1">
                     <button
                         onClick={() => onEdit(params.row)}
                         className="p-1.5 hover:bg-primary-50 rounded-lg transition-colors group"
@@ -133,12 +167,13 @@ export default function CategoryDataGrid({
                 onPaginationModelChange={(model) => {
                     if (model.pageSize !== pageSize) {
                         onPageSizeChange(model.pageSize);
-                        onPageChange(1); // Reset to first page when page size changes
+                        onPageChange(1);
                     } else if (model.page + 1 !== page) {
                         onPageChange(model.page + 1);
                     }
                 }}
-                pageSizeOptions={[5, 10, 20, 50]}
+                pagination={showPagination}
+                pageSizeOptions={showPagination ? [5, 10, 20, 50] : []}
                 disableRowSelectionOnClick
                 sx={{
                     border: 'none',

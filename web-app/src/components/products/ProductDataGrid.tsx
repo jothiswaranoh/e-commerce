@@ -50,35 +50,64 @@ export default function ProductDataGrid({
     onView,
 
 }: Props) {
+
+    const showPagination = rowCount > pageSize;
+
     const columns: GridColDef[] = [
         {
-            field: "product",
-            headerName: "Product",
-            flex: 1,
-            minWidth: 300,
+            field: "serial",
+            headerName: "S.No",
+            width: 50,
+            align: "center",
+            headerAlign: "center",
+            sortable: false,
+            renderCell: (params) => {
+                const rowIndex = params.api.getRowIndexRelativeToVisibleRows(params.id);
+                return (page - 1) * pageSize + rowIndex + 1;
+            },
+        },
+        {
+            field: "image",
+            headerName: "Image",
+            width: 80,
+            sortable: false,
             renderCell: (params) => {
                 const product = params.row;
                 const primaryImage = product.images?.[0];
 
                 return (
-                    <div className="flex items-center gap-3" onClick={() => onView(product)}>
-                        <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center overflow-hidden shadow-sm border border-neutral-200">
-                            {primaryImage ? (
-                                <img
-                                    src={primaryImage}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <ImageIcon className="w-6 h-6 text-neutral-400" />
-                            )}
-                        </div>
+                    <div className="flex items-center justify-center w-full h-full">
+                        {primaryImage ? (
+                            <img
+                                src={primaryImage}
+                                alt={product.name}
+                                className="w-10 h-10 rounded-lg object-cover shadow-sm"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center text-xs text-neutral-500">
+                                No Img
+                            </div>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
+            field: "name",
+            headerName: "Name",
+            flex: 1,
+            minWidth: 220,
+            renderCell: (params) => {
+                const product = params.row;
+
+                return (
+                    <div
+                        className="flex items-center gap-3 cursor-pointer min-w-0"
+                        onClick={() => onView(product)}
+                    >
                         <div className="min-w-0">
                             <p className="font-semibold text-neutral-900 truncate">
                                 {product.name}
-                            </p>
-                            <p className="text-xs text-neutral-500 truncate">
-                                {product.images?.length || 0} image{product.images?.length !== 1 ? 's' : ''}
                             </p>
                         </div>
                     </div>
@@ -89,6 +118,7 @@ export default function ProductDataGrid({
             field: "category",
             headerName: "Category",
             width: 150,
+            valueGetter: (_value, row) => row.category?.name || "",
             renderCell: (params) => (
                 <div className="flex items-center gap-2">
                     <Package className="w-4 h-4 text-neutral-400" />
@@ -102,6 +132,13 @@ export default function ProductDataGrid({
             field: "price",
             headerName: "Price",
             width: 170,
+            valueGetter: (_value, row) => {
+                const variants = row.variants || [];
+                if (!variants.length) return 0;
+
+                const prices = variants.map((v: any) => Number(v.price));
+                return Math.min(...prices);
+            },
             renderCell: (params) => {
                 const variants = params.row?.variants;
 
@@ -135,6 +172,13 @@ export default function ProductDataGrid({
             field: "stock",
             headerName: "Stock",
             width: 160,
+            valueGetter: (_value, row) => {
+                const variants = row.variants || [];
+                return variants.reduce(
+                    (sum: number, v: any) => sum + Number(v.stock || 0),
+                    0
+                );
+            },
             renderCell: (params) => {
                 const variants = params.row.variants || [];
 
@@ -188,10 +232,10 @@ export default function ProductDataGrid({
         {
             field: "actions",
             headerName: "Actions",
-            width: 120,
+            width: 100,
             sortable: false,
             renderCell: (params) => (
-                <div className="flex gap-2">
+                <div className="w-full h-full flex items-center gap-1">
                     <button
                         onClick={() => onEdit(params.row)}
                         className="p-1.5 hover:bg-primary-50 rounded-lg transition-colors group"
@@ -233,7 +277,8 @@ export default function ProductDataGrid({
                         onPageChange(model.page + 1);
                     }
                 }}
-                pageSizeOptions={[5, 10, 20, 50]}
+                pagination={showPagination}
+                pageSizeOptions={showPagination ? [5, 10, 20, 50] : []}
                 disableRowSelectionOnClick
                 sx={{
                     border: "none",

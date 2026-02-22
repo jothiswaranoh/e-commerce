@@ -45,7 +45,7 @@ function App() {
               <Route path="/" element={<MainLayout><Home /></MainLayout>} />
               <Route path={ROUTES.PRODUCTS} element={<MainLayout><Products /></MainLayout>} />
               <Route path={ROUTES.PRODUCT_DETAIL} element={<MainLayout><ProductDetail /></MainLayout>} />
-              <Route path={ROUTES.CART} element={<MainLayout><Cart /></MainLayout>} />
+              <Route path={ROUTES.CART}element={<ProtectedRoute><MainLayout><Cart /></MainLayout></ProtectedRoute>}/>
 
               {/* Auth Routes */}
               <Route path={ROUTES.LOGIN} element={<MainLayout><Login /></MainLayout>} />

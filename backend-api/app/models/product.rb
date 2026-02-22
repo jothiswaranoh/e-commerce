@@ -18,4 +18,24 @@ class Product < ApplicationRecord
   validates :category_id, presence: true
   validates :status, inclusion: { in: %w[active inactive archived], message: "%{value} is not a valid status" }
 
+  attr_accessor :remove_image
+  before_save :purge_images_if_requested
+
+  validate :must_have_at_least_one_variant
+
+  private
+
+  def purge_images_if_requested
+    if ActiveModel::Type::Boolean.new.cast(remove_image)
+      images.purge if images.attached?
+    end
+  end
+
+  def must_have_at_least_one_variant
+    remaining = variants.reject(&:marked_for_destruction?)
+    if remaining.empty?
+      errors.add(:base, "Product must have at least one variant")
+    end
+  end
+
 end

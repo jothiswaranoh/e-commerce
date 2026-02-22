@@ -124,7 +124,6 @@ export async function service<T = any>(
 
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
-
             const backendError = error.response?.data;
 
             const message =
@@ -135,23 +134,21 @@ export async function service<T = any>(
                 error.message ||
                 'Something went wrong';
 
-            return {
+            return Promise.reject({
                 success: false,
                 error: backendError,
                 status: error.response?.status,
-                headers: error.response?.headers,
                 message,
-            };
+            });
         }
 
         toast.error('Network error');
 
-        return {
+        return Promise.reject({
             success: false,
-            error,
             status: 500,
             message: 'Network error'
-        };
+        });
     }
 }
 

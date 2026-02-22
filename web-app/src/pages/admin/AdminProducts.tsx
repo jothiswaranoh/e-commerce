@@ -75,11 +75,17 @@ export default function AdminProducts() {
       setIsViewOpen(false);
       setViewProduct(null);
     } catch (err: any) {
-      const message = err?.message || "Validation failed";
-      message.split(",").forEach((msg: string) => {
-        toast.error(msg.trim());
-      });
-    }
+        const messages =
+          Array.isArray(err?.message)
+            ? err.message
+            : typeof err?.message === "string"
+            ? err.message.split(",")
+            : ["Validation failed"];
+
+        messages.forEach((msg: string) => {
+          toast.error(msg.trim());
+        });
+      }
   };
 
   const handleView = (product: any) => {
@@ -96,17 +102,24 @@ export default function AdminProducts() {
 
   const handleDelete = async () => {
     if (!selectedProduct) return;
-    const res = await deleteMutation.mutateAsync(selectedProduct.id);
 
-    if (!res?.success) {
-      toast.error(res?.message || "Failed to delete product");
-      return;
+    try {
+      await deleteMutation.mutateAsync(selectedProduct.id);
+
+      toast.success("Product deleted");
+      setIsDeleteOpen(false);
+      setSelectedProduct(null);
+
+    } catch (err: any) {
+      const message =
+        err?.message ||
+        err?.error ||
+        err?.response?.data?.message ||
+        "Cannot delete product";
+
+      toast.error(message);
     }
-
-    toast.success("Product deleted");
-    setIsDeleteOpen(false);
-    setSelectedProduct(null);
-  };
+};
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);

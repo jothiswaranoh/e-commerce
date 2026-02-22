@@ -57,10 +57,11 @@ module Crudable
   if @resource.destroy
     render_success(nil, delete_response_key)
   else
-    render json: {
-      error: "Cannot delete resource",
-      details: @resource.errors.full_messages
-    }, status: :unprocessable_entity
+    render_error(
+      "common.operation_failed",
+      @resource.errors.full_messages.join(", "),
+      :unprocessable_entity
+    )
   end
 end
 

@@ -10,7 +10,7 @@ const CATEGORY_KEYS = {
     ["categories", page, perPage] as const,
   detail: (id: number) => ["categories", id] as const,
 };
-
+ 
 /* =========================
    Queries
 ========================= */

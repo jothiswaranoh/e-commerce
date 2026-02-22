@@ -109,8 +109,23 @@ export const useUpdateProduct = () => {
 
 export const useDeleteProduct = () => {
   const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (id: number) => productService.deleteProduct(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    mutationFn: async (id: number) => {
+      const res = await productService.deleteProduct(id);
+
+      if (!res.success) {
+        throw new Error(
+          Array.isArray(res.error)
+            ? res.error.join(", ")
+            : res.message || "Delete failed"
+        );
+      }
+
+      return res;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+    },
   });
 };
