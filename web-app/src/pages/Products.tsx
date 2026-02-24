@@ -123,7 +123,6 @@ function FilterSidebar({
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -131,6 +130,9 @@ export default function Products() {
   const categories: Category[] = categoriesResponse?.data ?? [];
   const location = useLocation();
   const navigate = useNavigate();
+
+  const params = new URLSearchParams(location.search);
+  const selectedCategory = params.get('category') ?? '';
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -152,17 +154,6 @@ export default function Products() {
       }
     })();
   }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const categoryFromUrl = params.get('category');
-
-    if (categoryFromUrl) {
-      setSelectedCategory(categoryFromUrl);
-    } else {
-      setSelectedCategory('');
-    }
-  }, [location.search]);
 
   const categoryCounts = useMemo(() => {
     const map: Record<string, number> = {};
