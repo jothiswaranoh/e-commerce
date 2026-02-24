@@ -7,6 +7,7 @@ import { productService } from '../services/productService';
 import { Product } from '../types/product';
 import { useCategories } from '../hooks/useCategory';
 import type { Category } from '../api/category';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 type FilterSidebarProps = {
   products: Product[];
@@ -128,6 +129,8 @@ export default function Products() {
 
   const { data: categoriesResponse } = useCategories(1, 100);
   const categories: Category[] = categoriesResponse?.data ?? [];
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -149,6 +152,17 @@ export default function Products() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryFromUrl = params.get('category');
+
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    } else {
+      setSelectedCategory('');
+    }
+  }, [location.search]);
 
   const categoryCounts = useMemo(() => {
     const map: Record<string, number> = {};
@@ -178,10 +192,25 @@ export default function Products() {
     selectedCategory !== '' || searchInput.trim() !== '';
 
   const clearAll = () => {
-    setSelectedCategory('');
+    navigate('/products');
     setSearchInput('');
     setSearchQuery('');
   };
+
+  const handleCategoryChange = (category: string) => {
+    if (!category) {
+      navigate('/products');
+    } else {
+      navigate(`/products?category=${encodeURIComponent(category)}`);
+    }
+  };
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant'
+    });
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -193,7 +222,7 @@ export default function Products() {
             categories={categories}
             categoryCounts={categoryCounts}
             selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
+            setSelectedCategory={handleCategoryChange}
             searchQuery={searchInput}
             setSearchQuery={setSearchInput}
             hasActiveFilters={hasActiveFilters}
