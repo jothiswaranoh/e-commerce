@@ -92,6 +92,7 @@ products_data = [
 
 products_data.each do |p_data|
   product = Product.find_or_create_by!(name: p_data[:name], organization: org) do |p|
+    v.name = "#{product.name} - Default"
     p.category = category_map[p_data[:category]]
     p.description = p_data[:description]
     p.slug = p_data[:name].downcase.parameterize
