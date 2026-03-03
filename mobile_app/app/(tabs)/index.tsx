@@ -78,7 +78,7 @@ export default function HomeScreen() {
     return (
       <TouchableOpacity key={category.id} style={styles.categoryItem} activeOpacity={0.7}>
         <View style={[styles.categoryIcon, { backgroundColor: COLORS.neutral[100] }]}>
-          <IconComponent size={24} color={COLORS.neutral[700]} />
+          <IconComponent size={24} color={COLORS.neutral[900]} />
         </View>
         <AppText variant="xs" weight="medium" numberOfLines={1}>
           {category.name}
@@ -147,41 +147,42 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={styles.headerWrapper} edges={['top']}>
-        <LinearGradient
-          colors={GRADIENTS.amazonHeader}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.headerGradient}
-        >
+      <LinearGradient
+        colors={['rgb(0, 0, 0)', 'rgb(157, 5, 180)', 'rgb(0, 0, 0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.headerWrapper}
+      >
+        <SafeAreaView edges={['top']}>
           <View style={styles.searchRow}>
             <View style={styles.searchBar}>
               <Search size={22} color={COLORS.neutral[900]} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search Amazon"
+                placeholder="Search ShopHub"
                 placeholderTextColor={COLORS.neutral[500]}
                 value={searchQuery}
                 onFocus={() => { }}
               />
             </View>
             <TouchableOpacity style={styles.notificationBtn}>
-              <Bell size={26} color={COLORS.neutral[900]} />
+              <Bell size={26} color={COLORS.neutral[0]} />
               <View style={styles.notificationDot} />
             </TouchableOpacity>
           </View>
-        </LinearGradient>
-      </SafeAreaView>
+        </SafeAreaView>
+      </LinearGradient>
 
       <View style={styles.locationBar}>
-        <MapPin size={18} color={COLORS.neutral[700]} />
-        <AppText variant="sm" color={COLORS.neutral[700]}>
+        <MapPin size={18} color={COLORS.neutral[900]} />
+        <AppText variant="sm" color={COLORS.neutral[900]}>
           Deliver to Stark - SF 94105
         </AppText>
-        <ChevronRight size={18} color={COLORS.neutral[700]} />
+        <ChevronRight size={18} color={COLORS.neutral[900]} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+       
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -189,6 +190,47 @@ export default function HomeScreen() {
         >
           {CATEGORIES.map(renderCategory)}
         </ScrollView>
+         {/*HERO BANNER */}
+<LinearGradient
+  colors={['#000000', '#8628a2', '#000000']}
+  start={{ x: 0, y: 0 }}
+  end={{ x: 1, y: 1 }}
+  style={styles.heroBanner}
+>
+  <View style={styles.heroBadge}>
+    <AppText style={styles.heroBadgeText}>✨ NEW ARRIVALS EVERY WEEK</AppText>
+  </View>
+
+  <AppText style={styles.heroTitle}>Elevate Your Style</AppText>
+
+  <AppText style={styles.heroSubtitle}>
+    Latest trends! Unbeatable prices!
+  </AppText>
+
+  <View style={styles.heroButtonsRow}>
+    <TouchableOpacity style={styles.primaryBtn}>
+      <AppText style={styles.primaryBtnText}>Start Shopping →</AppText>
+    </TouchableOpacity>
+
+    <TouchableOpacity style={styles.secondaryBtn}>
+      <AppText style={styles.secondaryBtnText}>Explore Collections →</AppText>
+    </TouchableOpacity>
+  </View>
+
+  <View style={styles.customersRow}>
+    <View style={styles.avatarGroup}>
+      <View style={[styles.avatar, { backgroundColor: '#a5b4fc' }]} />
+      <View style={[styles.avatar, { backgroundColor: '#c4b5fd' }]} />
+      <View style={[styles.avatar, { backgroundColor: '#f472b6' }]} />
+      <View style={[styles.avatar, { backgroundColor: '#facc15' }]} />
+    </View>
+
+    <AppText style={styles.customerText}>
+      2,400+ happy customers
+    </AppText>
+  </View>
+</LinearGradient>
+{/* HERO BANNER END */}
 
         <View style={styles.bannerSection}>
           <ScrollView
@@ -204,47 +246,69 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.flashHeader}>
-              <Zap size={22} color={COLORS.accent.DEFAULT} fill={COLORS.accent.DEFAULT} />
-              <AppText variant="lg" weight="bold">{UI_TEXT.FLASH_DEALS}</AppText>
-            </View>
-            <View style={styles.countdownRow}>
-              {['hours', 'minutes', 'seconds'].map((unit, i) => (
-                <View key={unit} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={styles.countdownBox}>
-                    <AppText variant="xs" weight="bold" color={COLORS.neutral[0]}>
-                      {String(countdown[unit as keyof typeof countdown]).padStart(2, '0')}
-                    </AppText>
-                  </View>
-                  {i < 2 && <AppText variant="xs" weight="bold" style={styles.countdownSeparator}>:</AppText>}
-                </View>
-              ))}
-            </View>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {FLASH_DEALS.map(renderDeal)}
-          </ScrollView>
-        </View>
+        <View style={styles.flashSection}>
+  {/* HEADER */}
+  <LinearGradient
+    colors={['#ff512f', '#dd2476']}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 0 }}
+    style={styles.flashHeaderPremium}
+  >
+    <View style={styles.flashHeaderLeft}>
+      <Zap size={20} color="#fff" />
+      <AppText variant="lg" weight="bold" color="#fff">
+        Flash Deals
+      </AppText>
+    </View>
 
-        <View style={styles.section}>
-          <AppText variant="lg" weight="bold" style={styles.sectionTitle}>
-            {UI_TEXT.RECOMMENDED}
+    <View style={styles.countdownRow}>
+      {['hours', 'minutes', 'seconds'].map((unit, i) => (
+        <View key={unit} style={styles.countdownPill}>
+          <AppText variant="xs" weight="bold" color="#fff">
+            {String(countdown[unit as keyof typeof countdown]).padStart(2, '0')}
           </AppText>
-          <View style={styles.productGrid}>
-            {MOCK_PRODUCTS.map((product) => (
-              <View key={product.id} style={styles.gridItem}>
-                <ProductCard
-                  product={product}
-                  variant="compact"
-                  onPress={() => router.push(`/product/${product.id}`)}
-                />
-              </View>
-            ))}
-          </View>
         </View>
+      ))}
+    </View>
+  </LinearGradient>
 
+  {/* DEALS */}
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={styles.flashDealsRow}
+  >
+    {FLASH_DEALS.map(renderDeal)}
+    
+  </ScrollView>
+</View>
+<View style={styles.recommendedSection}>
+  {/* HEADER */}
+  <View style={styles.recommendedHeader}>
+    <AppText variant="xl" weight="bold">
+      Recommended for you
+    </AppText>
+
+    <TouchableOpacity>
+      <AppText variant="sm" color={COLORS.info.DEFAULT}>
+        See all →
+      </AppText>
+    </TouchableOpacity>
+  </View>
+
+  {/* GRID */}
+  <View style={styles.recommendedGrid}>
+    {MOCK_PRODUCTS.map((product) => (
+      <View key={product.id} style={styles.recommendedItem}>
+        <ProductCard
+          product={product}
+          variant="compact"
+          onPress={() => router.push(`/product/${product.id}`)}
+        />
+      </View>
+    ))}
+  </View>
+</View>
         <View style={{ height: SPACING['3xl'] }} />
       </ScrollView>
     </View>
@@ -254,7 +318,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.neutral[200],
+    backgroundColor: COLORS.neutral[100],
   },
   loadingContainer: {
     flex: 1,
@@ -263,26 +327,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.neutral[50],
   },
   headerWrapper: {
-    backgroundColor: '#84fab0',
-  },
-  headerGradient: {
-    paddingHorizontal: SPACING.md,
+
+    paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.md,
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    marginTop: SPACING.xs,
+    marginTop: SPACING.md,
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.neutral[0],
-    borderRadius: 8,
+    borderRadius: 30,
     paddingHorizontal: SPACING.md,
-    paddingVertical: 10,
+    paddingVertical: 3,
     gap: SPACING.sm,
     ...SHADOWS.sm,
   },
@@ -308,7 +370,7 @@ const styles = StyleSheet.create({
   locationBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#8fd3f4',
+    backgroundColor: '#e3e3e3',
     paddingHorizontal: SPACING.md,
     paddingVertical: 10,
     gap: SPACING.xs,
@@ -336,29 +398,34 @@ const styles = StyleSheet.create({
   },
   bannerSection: {
     paddingHorizontal: 20,
+    paddingLeft: 5,
+    paddingRight:5,
     marginTop: SPACING.md,
   },
   bannerScroll: {
-    gap: 0,
+    gap: 10,
   },
   bannerWrapper: {
     width: SCREEN_WIDTH - 40,
+    paddingLeft: -39,
+    paddingRight: -30,
+    
   },
   bannerCard: {
-    borderRadius: BORDERS.radius.md,
+    borderRadius: 20,
     height: 160,
     overflow: 'hidden',
     position: 'relative',
   },
-  bannerContent: {
-    flex: 1,
-    padding: SPACING.xl,
-    justifyContent: 'center',
-    zIndex: 2,
-  },
+ bannerContent: {
+  flex: 1,
+  padding: SPACING.lg, // 👈 reduce from xl
+  justifyContent: 'center',
+  zIndex: 2,
+},
   bannerImage: {
     position: 'absolute',
-    right: -10,
+    right: -15,
     bottom: -10,
     width: 160,
     height: 160,
@@ -391,8 +458,8 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 15,
-    marginTop: SPACING.lg,
-    backgroundColor: COLORS.neutral[0],
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.neutral[50],
     paddingVertical: SPACING.lg,
   },
   sectionHeader: {
@@ -409,12 +476,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.xs,
   },
-  countdownRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   countdownBox: {
-    backgroundColor: COLORS.neutral[800],
+    backgroundColor: COLORS.neutral[900],
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 2,
@@ -424,19 +487,23 @@ const styles = StyleSheet.create({
   countdownSeparator: {
     marginHorizontal: 1,
   },
-  dealCard: {
-    backgroundColor: COLORS.neutral[0],
-    width: 130,
-    marginRight: SPACING.md,
-  },
-  dealImageWrapper: {
-    backgroundColor: COLORS.neutral[50],
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
+ dealCard: {
+  backgroundColor: COLORS.neutral[0],
+  width: 140,
+  marginRight: SPACING.md,
+  borderRadius: 12,
+  marginBottom: SPACING.sm,
+  overflow: 'hidden',
+  ...SHADOWS.lg,
+},
+dealImageWrapper: {
+  backgroundColor: COLORS.neutral[50],
+  borderRadius: 4,
+  overflow: 'hidden',
+},
   dealImage: {
     width: '100%',
-    height: 100,
+    height: 95,
     resizeMode: 'contain',
   },
   dealBadge: {
@@ -450,18 +517,190 @@ const styles = StyleSheet.create({
   },
   dealInfo: {
     paddingVertical: SPACING.xs,
+    paddingLeft: 5,
   },
   dealPriceRow: {
-    marginTop: 2,
+    marginTop: 3,
+    paddingLeft: 4,
   },
-  productGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -5,
-  },
-  gridItem: {
-    width: '50%',
-    paddingHorizontal: 5,
-    marginBottom: SPACING.md,
-  },
+  //RECOMMENDED SECTION
+recommendedSection: {
+  marginTop: SPACING['sm'],
+  backgroundColor: COLORS.neutral[0],
+  borderTopLeftRadius: 24,
+  borderTopRightRadius: 24,
+  paddingTop: SPACING.lg,
+
+  // shadow
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: -4 },
+  shadowOpacity: 0.08,
+  shadowRadius: 12,
+  elevation: 4,
+},
+
+recommendedHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingHorizontal: SPACING.lg,
+  marginBottom: SPACING.lg,
+},
+
+recommendedGrid: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  paddingHorizontal: SPACING.sm,
+  paddingTop: SPACING.md,
+  paddingLeft: -1,
+  paddingRight:-1,
+  backgroundColor: COLORS.neutral[50],
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.12,
+  shadowRadius: 10,
+  // Android shadow
+  elevation: 6,
+},
+
+recommendedItem: {
+  width: '50%',
+  paddingHorizontal: 12,   // center gap
+  marginBottom: 18,        // vertical gap
+},
+  //Hero banner
+  heroBanner: {
+  marginHorizontal: 2,
+  marginTop: SPACING.md,
+  borderRadius: 15,
+  padding: 15,
+},
+
+heroBadge: {
+  alignSelf: 'flex-start',
+  backgroundColor: 'rgba(255,255,255,0.15)',
+  paddingHorizontal: 14,
+  paddingVertical: 5,
+  borderRadius: 20,
+  marginBottom: 12,
+},
+
+heroBadgeText: {
+  color: '#fff',
+  fontSize: 11,
+  fontWeight: '600',
+},
+
+heroTitle: {
+  color: '#fff',
+  fontSize: 28,
+  fontWeight: '800',
+  marginBottom: 5,
+},
+
+heroSubtitle: {
+  color: '#d1d5db',
+  fontSize: 14,
+  marginBottom: 20,
+},
+
+heroButtonsRow: {
+  flexDirection: 'row',
+  gap: 9,
+  paddingLeft: -12,
+  paddingRight: -3,
+  marginBottom: 20,
+},
+
+primaryBtn: {
+  backgroundColor: '#6366f1',
+  paddingHorizontal: 15,
+  paddingLeft: 12,
+  paddingRight: 11,
+  paddingVertical: 14,
+  borderRadius: 28,
+},
+
+primaryBtnText: {
+  color: '#fff',
+  fontSize: 15,
+  fontWeight: '700',
+},
+
+secondaryBtn: {
+  backgroundColor: 'rgba(255,255,255,0.15)',
+  paddingHorizontal: 15,
+  paddingVertical: 14,
+  paddingLeft: 12,
+  paddingRight: 11,
+  borderRadius: 28,
+},
+
+secondaryBtnText: {
+  color: '#e5e7eb',
+  fontSize: 15,
+  fontWeight: '600',
+},
+
+customersRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 10,
+},
+
+avatarGroup: {
+  flexDirection: 'row',
+},
+
+avatar: {
+  width: 31,
+  height: 32,
+  borderRadius: 16,
+  borderWidth: 2,
+  borderColor: '#fff',
+  marginLeft: -5,
+},
+
+customerText: {
+  color: '#e5e7eb',
+  fontSize: 13,
+},
+flashSection: {
+  marginTop: SPACING.lg,
+  backgroundColor: COLORS.neutral[0],
+  paddingBottom: SPACING.lg,
+},
+
+flashHeaderPremium: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingHorizontal: SPACING.lg,
+  paddingVertical: SPACING.md,
+  borderTopLeftRadius: 16,
+  borderTopRightRadius: 16,
+},
+
+flashHeaderLeft: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 8,
+},
+
+countdownRow: {
+  flexDirection: 'row',
+  gap: 6,
+},
+
+countdownPill: {
+  backgroundColor: 'rgba(255,255,255,0.25)',
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 12,
+},
+
+flashDealsRow: {
+  paddingHorizontal: SPACING.lg,
+  paddingTop: SPACING.md,
+},
 });

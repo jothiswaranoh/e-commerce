@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     borderRadius: BORDERS.radius.lg,
   },
   iconContainerActive: {
-    backgroundColor: COLORS.primary[50],
+    backgroundColor: COLORS.primary.light,
   },
   badge: {
     position: 'absolute',

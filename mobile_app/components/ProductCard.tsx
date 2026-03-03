@@ -125,7 +125,7 @@ export default function ProductCard({
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  size={14}
+                  size={12}
                   color={
                     star <= Math.round(product.rating)
                       ? COLORS.accent.DEFAULT
@@ -145,7 +145,7 @@ export default function ProductCard({
           </View>
 
           <View style={styles.priceContainer}>
-            <AppText variant="xl" weight="medium" color={COLORS.neutral[700]}>
+            <AppText variant="md" weight="medium" color={COLORS.neutral[900]}>
               ${product.price.toFixed(2)}
             </AppText>
 
@@ -172,21 +172,35 @@ export default function ProductCard({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: COLORS.neutral[0],
-    borderRadius: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.neutral[200],
-    marginBottom: SPACING.md,
-  },
+ card: {
+  backgroundColor: COLORS.neutral[50],
+  borderRadius: 12,
+  overflow: 'hidden',
+  borderWidth: 0,
+  // iOS shadow
+  shadowColor: '#ff00d9',
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.20,
+  shadowRadius: 10,
+  // Android shadow
+  elevation: 6,
+  marginBottom: 8,
+},
   imageContainer: {
-    backgroundColor: COLORS.neutral[50],
-    height: 200,
+  backgroundColor: COLORS.neutral[50],
+  borderTopLeftRadius: 0,
+  borderBottomLeftRadius: 0,
+  borderTopRightRadius: 0,
+  borderBottomRightRadius: 0,
+  justifyContent: 'center',
+  alignItems: 'center',
+  overflow: 'hidden',
+  height: 150,
   },
   image: {
-    width: width - 40,
-    height: 200,
+    width: width - 135,
+    height: 150,
+    resizeMode: 'contain',
   },
   dotsContainer: {
     position: 'absolute',
@@ -209,7 +223,7 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
     backgroundColor: COLORS.error.DEFAULT,
-    paddingHorizontal: 8,
+    paddingHorizontal: 5,
     paddingVertical: 4,
     borderRadius: 4,
   },
@@ -219,17 +233,18 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 4,
     lineHeight: 20,
-    color: COLORS.neutral[700],
+    fontSize: 15,
+    color: COLORS.neutral[500],
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   starsRow: {
     flexDirection: 'row',
-    gap: 1,
+    gap: 0.5,
   },
   priceContainer: {
     flexDirection: 'row',

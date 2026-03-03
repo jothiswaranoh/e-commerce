@@ -1,168 +1,228 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-    View,
-    StyleSheet,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    TouchableOpacity,
-    Image,
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Pressable,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import AppText from '@/components/AppText';
 import AppButton from '@/components/AppButton';
 import InputField from '@/components/InputField';
-import { COLORS, SPACING, GRADIENTS, BORDERS, SHADOWS } from '@/lib/theme';
+import { COLORS, SPACING } from '@/lib/theme';
 
 export default function LoginScreen() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
+  const router = useRouter();
 
-    const handleLogin = () => {
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            router.replace('/(tabs)');
-        }, 1500);
-    };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
+  const handleLogin = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      router.replace('/(tabs)');
+    }, 1200);
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* LOGO */}
+        <View style={styles.logoRow}>
+          <View style={styles.logoBox}>
+            <Ionicons name="cube-outline" size={26} color="#fff" />
+          </View>
+          <AppText variant="xl" weight="bold" color={COLORS.primary.DEFAULT}>
+            ShopHub
+          </AppText>
+        </View>
+
+        {/* TITLE */}
+        <AppText variant="3xl" weight="bold" style={styles.title}>
+          Welcome Back
+        </AppText>
+        <AppText color={COLORS.neutral[500]} style={styles.subtitle}>
+          Sign in to your account to continue shopping
+        </AppText>
+
+        {/* EMAIL */}
+        <InputField
+          label="Email Address"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="demo@example.com"
+          keyboardType="email-address"
+          leftIcon={<Ionicons name="mail-outline" size={20} color={COLORS.neutral[400]} />}
+        />
+
+        {/* PASSWORD */}
+        <InputField
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          placeholder="••••••••"
+          secureTextEntry={!showPassword}
+          leftIcon={<Ionicons name="lock-closed-outline" size={20} color={COLORS.neutral[400]} />}
+          rightIcon={
+            <Pressable onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color={COLORS.neutral[400]}
+              />
+            </Pressable>
+          }
+        />
+
+        {/* REMEMBER ME */}
+        <Pressable
+          style={styles.rememberRow}
+          onPress={() => setRemember(!remember)}
         >
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.header}>
-                    <AppText variant="3xl" weight="bold" color={COLORS.neutral[900]}>
-                        Sign in
-                    </AppText>
-                    <AppText variant="md" color={COLORS.neutral[600]} style={styles.subtitle}>
-                        Welcome back to Shop
-                    </AppText>
-                </View>
+          <View style={[styles.checkbox, remember && styles.checked]} />
+          <AppText>Remember me</AppText>
+        </Pressable>
 
-                <View style={styles.form}>
-                    <InputField
-                        label="Email or mobile phone number"
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder=""
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-                    <InputField
-                        label="Password"
-                        value={password}
-                        onChangeText={setPassword}
-                        placeholder=""
-                        secureTextEntry
-                    />
+        {/* SIGN IN */}
+        <AppButton
+          title={loading ? 'Signing in...' : 'Sign In'}
+          onPress={handleLogin}
+          loading={loading}
+          style={styles.signInBtn}
+        />
 
-                    <AppButton
-                        title={loading ? "Signing in..." : "Continue"}
-                        onPress={handleLogin}
-                        loading={loading}
-                        variant="primary"
-                        style={styles.loginBtn}
-                    />
+        {/* DIVIDER */}
+        <View style={styles.dividerRow}>
+          <View style={styles.line} />
+          <AppText color={COLORS.neutral[500]} style={styles.orText}>
+            Or continue with
+          </AppText>
+          <View style={styles.line} />
+        </View>
 
-                    <View style={styles.termsBox}>
-                        <AppText variant="xs" color={COLORS.neutral[600]} style={styles.terms}>
-                            By continuing, you agree to Shop's <AppText variant="xs" color={COLORS.info.DEFAULT}>Conditions of Use</AppText> and <AppText variant="xs" color={COLORS.info.DEFAULT}>Privacy Notice</AppText>.
-                        </AppText>
-                    </View>
+        {/* SOCIAL */}
+        <View style={styles.socialRow}>
+          <Pressable style={styles.socialBtn}>
+            <Ionicons name="logo-google" size={18} />
+            <AppText style={styles.socialText}>Google</AppText>
+          </Pressable>
 
-                    <View style={styles.dividerRow}>
-                        <View style={styles.divider} />
-                        <AppText variant="sm" color={COLORS.neutral[500]} style={styles.dividerText}>
-                            New to Shop?
-                        </AppText>
-                        <View style={styles.divider} />
-                    </View>
+          <Pressable style={styles.socialBtn}>
+            <Ionicons name="logo-github" size={18} />
+            <AppText style={styles.socialText}>GitHub</AppText>
+          </Pressable>
+        </View>
 
-                    <AppButton
-                        title="Create your Shop account"
-                        onPress={() => router.push('/(auth)/signup')}
-                        variant="outline"
-                        style={styles.signupBtn}
-                    />
-                </View>
-
-                <View style={styles.footer}>
-                    <View style={styles.footerLinks}>
-                        <AppText variant="xs" color={COLORS.info.DEFAULT}>Conditions of Use</AppText>
-                        <AppText variant="xs" color={COLORS.info.DEFAULT}>Privacy Notice</AppText>
-                        <AppText variant="xs" color={COLORS.info.DEFAULT}>Help</AppText>
-                    </View>
-                    <AppText variant="xs" color={COLORS.neutral[500]} style={styles.copyright}>
-                        © 1996-2023, Shop.com, Inc. or its affiliates
-                    </AppText>
-                </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
-    );
+        {/* SIGN UP */}
+        <Pressable onPress={() => router.push('/(auth)/signup')}>
+          <AppText style={styles.signupText}>
+            New here? Create an account
+          </AppText>
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.neutral[0],
-    },
-    scrollContent: {
-        padding: SPACING.xl,
-        paddingTop: 100,
-    },
-    header: {
-        marginBottom: SPACING['3xl'],
-    },
-    subtitle: {
-        marginTop: SPACING.xs,
-    },
-    form: {
-        gap: SPACING.md,
-    },
-    loginBtn: {
-        backgroundColor: COLORS.accent.yellow,
-        borderRadius: 8,
-        marginTop: SPACING.md,
-    },
-    termsBox: {
-        marginTop: SPACING.md,
-    },
-    terms: {
-        lineHeight: 18,
-    },
-    dividerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: SPACING['2xl'],
-    },
-    divider: {
-        flex: 1,
-        height: 1,
-        backgroundColor: COLORS.neutral[300],
-    },
-    dividerText: {
-        marginHorizontal: SPACING.md,
-    },
-    signupBtn: {
-        backgroundColor: COLORS.neutral[100],
-        borderColor: COLORS.neutral[300],
-        borderRadius: 8,
-    },
-    footer: {
-        marginTop: SPACING['3xl'],
-        alignItems: 'center',
-    },
-    footerLinks: {
-        flexDirection: 'row',
-        gap: SPACING.xl,
-        marginBottom: SPACING.md,
-    },
-    copyright: {
-        marginTop: SPACING.xs,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.neutral[0],
+  },
+  content: {
+    padding: SPACING.xl,
+    paddingTop: 80,
+  },
+
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  logoBox: {
+    backgroundColor: COLORS.primary.DEFAULT,
+    padding: 10,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+
+  title: {
+    marginTop: SPACING.md,
+  },
+  subtitle: {
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.xl,
+  },
+
+  rememberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: SPACING.md,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.neutral[400],
+    marginRight: 8,
+  },
+  checked: {
+    backgroundColor: COLORS.primary.DEFAULT,
+  },
+
+  signInBtn: {
+    marginTop: SPACING.md,
+    borderRadius: 25,
+  },
+
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: SPACING.xl,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.neutral[300],
+  },
+  orText: {
+    marginHorizontal: SPACING.md,
+  },
+
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  socialBtn: {
+    width: '48%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: COLORS.neutral[300],
+    borderRadius: 14,
+  },
+  socialText: {
+    marginLeft: 6,
+    fontWeight: '600',
+  },
+
+  signupText: {
+    textAlign: 'center',
+    marginTop: SPACING.xl,
+    color: COLORS.info.DEFAULT,
+  },
 });
