@@ -124,7 +124,6 @@ export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: categoriesResponse } = useCategories(1, 100);
   const categories: Category[] = categoriesResponse?.data ?? [];
@@ -134,24 +133,35 @@ export default function Products() {
   const params = new URLSearchParams(location.search);
   const selectedCategory = params.get('category') ?? '';
 
-  useEffect(() => {
-    const debounce = setTimeout(() => setSearchQuery(searchInput), 300);
-    return () => clearTimeout(debounce);
-  }, [searchInput]);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   useEffect(() => {
-    (async () => {
+    const params = new URLSearchParams(location.search);
+    const search = params.get('search');
+
+    if (search) {
+      setSearchInput(search);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
       setLoading(true);
       try {
-        const res = await productService.getProducts();
+        const params = new URLSearchParams(location.search);
+        const search = params.get("search") || "";
+
+        const res = await productService.getProducts({ search });
         setProducts(res?.data?.data ?? []);
       } catch {
         setProducts([]);
       } finally {
         setLoading(false);
       }
-    })();
-  }, []);
+    };
+
+    fetchProducts();
+  }, [location.search]);
 
   const categoryCounts = useMemo(() => {
     const map: Record<string, number> = {};
@@ -164,31 +174,60 @@ export default function Products() {
 
   const displayed = useMemo(() => {
     let list = [...products];
+
     if (selectedCategory)
       list = list.filter(p => p.category?.name === selectedCategory);
-    if (searchQuery.trim())
-      list = list.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    return list;
-  }, [products, selectedCategory, searchQuery]);
 
-  const hasActiveFilters = selectedCategory !== '' || searchInput.trim() !== '';
+    return list;
+  }, [products, selectedCategory]);
+
+  const searchParam = params.get("search") ?? "";
+  const hasActiveFilters = selectedCategory !== '' || searchParam !== '';
 
   const clearAll = () => {
     navigate('/products');
     setSearchInput('');
-    setSearchQuery('');
   };
 
   const handleCategoryChange = (category: string) => {
+    const params = new URLSearchParams(location.search);
+
     if (!category) {
-      navigate('/products');
+      params.delete("category");
     } else {
-      navigate(`/products?category=${encodeURIComponent(category)}`);
+      params.set("category", category);
     }
+
+    navigate(`/products?${params.toString()}`);
   };
+
+  const handleSidebarSearch = (value: string) => {
+    setSearchInput(value);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const currentSearch = params.get("search") || "";
+
+    if (debouncedSearch === currentSearch) return;
+
+    if (!debouncedSearch.trim()) {
+      params.delete("search");
+    } else {
+      params.set("search", debouncedSearch);
+    }
+
+    navigate(`/products?${params.toString()}`, { replace: true });
+
+  }, [debouncedSearch, location.search, navigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -215,7 +254,7 @@ export default function Products() {
             <span className="text-xs font-bold tracking-wider uppercase text-indigo-200">Shop Everything</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-2">
-            All Products
+            {searchParam ? `Results for "${searchParam}"` : "All Products"}
           </h1>
           <p className="text-slate-400 mt-1 text-base">
             {loading ? 'Loading…' : `${products.length} products available`}
@@ -236,7 +275,7 @@ export default function Products() {
             selectedCategory={selectedCategory}
             setSelectedCategory={handleCategoryChange}
             searchQuery={searchInput}
-            setSearchQuery={setSearchInput}
+            setSearchQuery={handleSidebarSearch}
             hasActiveFilters={hasActiveFilters}
             clearAll={clearAll}
             showMobileFilters={false}
@@ -270,23 +309,20 @@ export default function Products() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
               {displayed.map(product => (
-                <div key={product.id} className="h-full flex">
-                  <div className="w-full h-full flex">
-                    <ProductCard
-                      id={product.id.toString()}
-                      variantId={product.variants?.[0]?.id}
-                      name={product.name}
-                      price={product.variants?.[0]?.price ?? 0}
-                      image={
-                        (product.images?.[0] as any)?.url ||
-                        (typeof product.images?.[0] === 'string' ? product.images[0] : undefined) ||
-                        'https://via.placeholder.com/400?text=No+Image'
-                      }
-                      category={product.category?.name ?? 'Uncategorized'}
-                      viewMode="grid"
-                    />
-                  </div>
-                </div>
+                <ProductCard
+                  key={product.id}
+                  id={product.id.toString()}
+                  variantId={product.variants?.[0]?.id}
+                  name={product.name}
+                  price={product.variants?.[0]?.price ?? 0}
+                  image={
+                    (product.images?.[0] as any)?.url ||
+                    (typeof product.images?.[0] === 'string' ? product.images[0] : undefined) ||
+                    'https://via.placeholder.com/400?text=No+Image'
+                  }
+                  category={product.category?.name ?? 'Uncategorized'}
+                  viewMode="grid"
+                />
               ))}
             </div>
           )}
