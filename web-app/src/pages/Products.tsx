@@ -70,7 +70,9 @@ function FilterSidebar({
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('');
+              }}
               className="absolute right-3 top-1/2 -translate-y-1/2"
             >
               <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
@@ -123,7 +125,6 @@ function FilterSidebar({
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchInput, setSearchInput] = useState('');
 
   const { data: categoriesResponse } = useCategories(1, 100);
   const categories: Category[] = categoriesResponse?.data ?? [];
@@ -133,16 +134,7 @@ export default function Products() {
   const params = new URLSearchParams(location.search);
   const selectedCategory = params.get('category') ?? '';
 
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const search = params.get('search');
-
-    if (search) {
-      setSearchInput(search);
-    }
-  }, [location.search]);
+  const searchParam = params.get("search") ?? "";
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -181,12 +173,10 @@ export default function Products() {
     return list;
   }, [products, selectedCategory]);
 
-  const searchParam = params.get("search") ?? "";
   const hasActiveFilters = selectedCategory !== '' || searchParam !== '';
 
   const clearAll = () => {
     navigate('/products');
-    setSearchInput('');
   };
 
   const handleCategoryChange = (category: string) => {
@@ -202,32 +192,16 @@ export default function Products() {
   };
 
   const handleSidebarSearch = (value: string) => {
-    setSearchInput(value);
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const currentSearch = params.get("search") || "";
 
-    if (debouncedSearch === currentSearch || searchInput === "") return;
-
-    if (!debouncedSearch.trim()) {
+    if (!value.trim()) {
       params.delete("search");
     } else {
-      params.set("search", debouncedSearch);
+      params.set("search", value);
     }
 
     navigate(`/products?${params.toString()}`, { replace: true });
-
-  }, [debouncedSearch, location.search, navigate]);
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -274,7 +248,7 @@ export default function Products() {
             categoryCounts={categoryCounts}
             selectedCategory={selectedCategory}
             setSelectedCategory={handleCategoryChange}
-            searchQuery={searchInput}
+            searchQuery={searchParam}
             setSearchQuery={handleSidebarSearch}
             hasActiveFilters={hasActiveFilters}
             clearAll={clearAll}
