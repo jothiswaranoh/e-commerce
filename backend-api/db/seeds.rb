@@ -92,6 +92,7 @@ products_data = [
 
 products_data.each do |p_data|
   product = Product.find_or_create_by!(name: p_data[:name], organization: org) do |p|
+    v.name = "#{product.name} - Default"
     p.category = category_map[p_data[:category]]
     p.description = p_data[:description]
     p.slug = p_data[:name].downcase.parameterize
@@ -101,6 +102,7 @@ products_data.each do |p_data|
 
   # Create Default Variant
   ProductVariant.find_or_create_by!(product: product, sku: p_data[:sku]) do |v|
+    v.name = "#{product.name} - Default"
     v.price = p_data[:price]
     v.stock = rand(10..100)
     v.is_active = true
@@ -117,7 +119,8 @@ admin_user.update!(
   password: "password123",
   password_confirmation: "password123",
   role: :admin,
-  organization: org
+  organization: org,
+  name: "Admin"
 )
 puts "✅ Admin user '#{admin_email}' ready."
 
@@ -128,7 +131,8 @@ customer_user.update!(
   password: "password123",
   password_confirmation: "password123",
   role: :customer,
-  organization: org
+  organization: org,
+  name: "Customer"
 )
 puts "✅ Customer user '#{customer_email}' ready."
 

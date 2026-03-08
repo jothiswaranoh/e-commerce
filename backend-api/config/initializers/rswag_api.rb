@@ -1,10 +1,12 @@
+
   # Specify a root folder where Swagger JSON files are located
   # This is used by the Swagger middleware to serve requests for API descriptions
   # NOTE: If you're using rswag-specs to generate Swagger, you'll need to ensure
   # that it's configured to generate files in the same folder
-if defined?(Rswag)
-  Rswag::Api.configure do |c|
-    c.openapi_root = Rails.root.to_s + '/swagger'
+  if defined?(Rswag)
+    Rswag::Api.configure do |c|
+      # Specify a root folder where Swagger JSON files are located
+      c.openapi_root = Rails.root.to_s + '/swagger'
   end
 end
 
