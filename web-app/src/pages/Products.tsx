@@ -217,7 +217,7 @@ export default function Products() {
     const params = new URLSearchParams(location.search);
     const currentSearch = params.get("search") || "";
 
-    if (debouncedSearch === currentSearch) return;
+    if (debouncedSearch === currentSearch || searchInput === "") return;
 
     if (!debouncedSearch.trim()) {
       params.delete("search");
