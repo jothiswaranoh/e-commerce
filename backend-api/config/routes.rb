@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
-  # Swagger UI
-  mount Rswag::Ui::Engine => "/api-docs"
-  mount Rswag::Api::Engine => "/api-docs"
+  if Rails.env.development? || Rails.env.test?
+    mount Rswag::Ui::Engine => "/api-docs"
+    mount Rswag::Api::Engine => "/api-docs"
+  end
 
   namespace :api do
     namespace :v1 do
