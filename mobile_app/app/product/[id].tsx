@@ -31,6 +31,7 @@ import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/context/CartContext';
 import { MOCK_PRODUCTS } from '@/lib/mock-data';
 import { COLORS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
+import { useFavourite } from '@/context/FavouriteContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -38,12 +39,13 @@ export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { addToCart } = useCart();
+  const { toggleFavourite, isFavourite } = useFavourite();
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
 
   const product = MOCK_PRODUCTS.find((p) => p.id === id) || MOCK_PRODUCTS[0];
+  const favourite = isFavourite(product.id);
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 500);
@@ -85,8 +87,15 @@ export default function ProductDetailsScreen() {
           <TouchableOpacity style={styles.headerBtn} onPress={handleShare}>
             <Share2 size={22} color={COLORS.neutral[900]} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerBtn} onPress={() => setIsFavorite(!isFavorite)}>
-            <Heart size={22} color={isFavorite ? COLORS.error.DEFAULT : COLORS.neutral[900]} fill={isFavorite ? COLORS.error.DEFAULT : 'transparent'} />
+          <TouchableOpacity
+            style={styles.headerBtn}
+            onPress={() => toggleFavourite(product)}
+          >
+            <Heart
+              size={22}
+              color={favourite ? COLORS.error.DEFAULT : COLORS.neutral[900]}
+              fill={favourite ? COLORS.error.DEFAULT : 'transparent'}
+            />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -149,7 +158,7 @@ export default function ProductDetailsScreen() {
           {product.isPrime && (
             <View style={styles.primeBadge}>
               <AppText variant="xs" weight="bold" color={COLORS.info.DEFAULT}>✓prime</AppText>
-              <AppText variant="xs" color={COLORS.neutral[600]}> One-Day</AppText>
+              <AppText variant="xs" color={COLORS.neutral[500]}> One-Day</AppText>
             </View>
           )}
 
@@ -157,7 +166,7 @@ export default function ProductDetailsScreen() {
 
           <View style={styles.stockInfo}>
             <AppText variant="lg" weight="bold" color={COLORS.success.DEFAULT}>In Stock</AppText>
-            <AppText variant="sm" color={COLORS.neutral[700]}>
+            <AppText variant="sm" color={COLORS.neutral[500]}>
               FREE delivery <AppText weight="bold">Tomorrow</AppText>. Order within <AppText color={COLORS.success.DEFAULT}>6 hrs 12 mins</AppText>.
             </AppText>
           </View>
@@ -166,11 +175,11 @@ export default function ProductDetailsScreen() {
             <AppText weight="bold">Quantity:</AppText>
             <View style={styles.qtySelector}>
               <TouchableOpacity onPress={() => setQuantity(Math.max(1, quantity - 1))} style={styles.qtyBtn}>
-                <Minus size={18} color={COLORS.neutral[700]} />
+                <Minus size={18} color={COLORS.neutral[900]} />
               </TouchableOpacity>
               <AppText variant="lg" weight="bold" style={styles.qtyText}>{quantity}</AppText>
               <TouchableOpacity onPress={() => setQuantity(quantity + 1)} style={styles.qtyBtn}>
-                <Plus size={18} color={COLORS.neutral[700]} />
+                <Plus size={18} color={COLORS.neutral[900]} />
               </TouchableOpacity>
             </View>
           </View>
@@ -179,12 +188,12 @@ export default function ProductDetailsScreen() {
             <AppButton
               title="Add to Cart"
               onPress={handleAddToCart}
-              style={[styles.buyBtn, { backgroundColor: COLORS.accent.yellow }]}
+              style={{ ...styles.buyBtn, backgroundColor: COLORS.accent.yellow }}
             />
             <AppButton
               title="Buy Now"
               onPress={() => router.push('/checkout')}
-              style={[styles.buyBtn, { backgroundColor: COLORS.accent.DEFAULT }]}
+              style={{ ...styles.buyBtn, backgroundColor: COLORS.accent.DEFAULT }}
             />
           </View>
 
@@ -197,7 +206,7 @@ export default function ProductDetailsScreen() {
 
           <View style={styles.descriptionSection}>
             <AppText variant="lg" weight="bold" style={{ marginBottom: SPACING.sm }}>Description</AppText>
-            <AppText variant="md" color={COLORS.neutral[700]} style={{ lineHeight: 22 }}>
+            <AppText variant="md" color={COLORS.neutral[900]} style={{ lineHeight: 22 }}>
               {product.description}
             </AppText>
           </View>
@@ -286,7 +295,7 @@ const styles = StyleSheet.create({
   },
   title: {
     lineHeight: 24,
-    color: COLORS.neutral[700],
+    color: COLORS.neutral[900],
     marginBottom: SPACING.md,
   },
   priceSection: {
@@ -307,7 +316,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.neutral[200],
+    backgroundColor: COLORS.neutral[0],
     marginVertical: SPACING.lg,
   },
   stockInfo: {

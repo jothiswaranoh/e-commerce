@@ -38,7 +38,6 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        {/* LOGO */}
         <View style={styles.logoRow}>
           <View style={styles.logoBox}>
             <Ionicons name="cube-outline" size={26} color="#fff" />
@@ -48,7 +47,6 @@ export default function LoginScreen() {
           </AppText>
         </View>
 
-        {/* TITLE */}
         <AppText variant="3xl" weight="bold" style={styles.title}>
           Welcome Back
         </AppText>
@@ -56,7 +54,6 @@ export default function LoginScreen() {
           Sign in to your account to continue shopping
         </AppText>
 
-        {/* EMAIL */}
         <InputField
           label="Email Address"
           value={email}
@@ -66,7 +63,6 @@ export default function LoginScreen() {
           leftIcon={<Ionicons name="mail-outline" size={20} color={COLORS.neutral[400]} />}
         />
 
-        {/* PASSWORD */}
         <InputField
           label="Password"
           value={password}
@@ -94,7 +90,6 @@ export default function LoginScreen() {
           <AppText>Remember me</AppText>
         </Pressable>
 
-        {/* SIGN IN */}
         <AppButton
           title={loading ? 'Signing in...' : 'Sign In'}
           onPress={handleLogin}
@@ -102,7 +97,6 @@ export default function LoginScreen() {
           style={styles.signInBtn}
         />
 
-        {/* DIVIDER */}
         <View style={styles.dividerRow}>
           <View style={styles.line} />
           <AppText color={COLORS.neutral[500]} style={styles.orText}>
@@ -111,7 +105,6 @@ export default function LoginScreen() {
           <View style={styles.line} />
         </View>
 
-        {/* SOCIAL */}
         <View style={styles.socialRow}>
           <Pressable style={styles.socialBtn}>
             <Ionicons name="logo-google" size={18} />
@@ -124,7 +117,6 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        {/* SIGN UP */}
         <Pressable onPress={() => router.push('/(auth)/signup')}>
           <AppText style={styles.signupText}>
             New here? Create an account
