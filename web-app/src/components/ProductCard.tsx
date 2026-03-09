@@ -2,6 +2,7 @@ import { ShoppingCart, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
+import { toast } from 'react-toastify';
 
 interface ProductCardProps {
   id?: string;
@@ -12,6 +13,32 @@ interface ProductCardProps {
   images?: string[];
   category?: string;
   rating?: number;
+  viewMode?: 'grid' | 'list';
+}
+
+/* ──────────────────────────────────────────────
+   Wishlist helpers (localStorage-backed)
+────────────────────────────────────────────── */
+function getWishlist(): Set<string> {
+  try {
+    const raw = localStorage.getItem('wishlist');
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function toggleWishlistItem(id: string): boolean {
+  const wl = getWishlist();
+  if (wl.has(id)) {
+    wl.delete(id);
+    localStorage.setItem('wishlist', JSON.stringify([...wl]));
+    return false; // now not wishlisted
+  } else {
+    wl.add(id);
+    localStorage.setItem('wishlist', JSON.stringify([...wl]));
+    return true; // now wishlisted
+  }
 }
 
 export default function ProductCard({
@@ -24,7 +51,7 @@ export default function ProductCard({
   category = "Electronics",
 }: ProductCardProps) {
 
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(() => getWishlist().has(id));
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { addToCart } = useCart();
   const [isAdding, setIsAdding] = useState(false);
@@ -37,10 +64,23 @@ export default function ProductCard({
     try {
       setIsAdding(true);
       await addToCart(id, 1, variantId);
+      toast.success(`${name} added to cart! 🛒`);
     } catch (error: any) {
-      // Toast handled elsewhere
+      toast.error('Failed to add to cart. Please try again.');
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nowLiked = toggleWishlistItem(id);
+    setIsWishlisted(nowLiked);
+    if (nowLiked) {
+      toast.success('Added to wishlist ❤️');
+    } else {
+      toast.info('Removed from wishlist');
     }
   };
 
@@ -48,22 +88,23 @@ export default function ProductCard({
     images && images.length > 0
       ? images[0]
       : image
-      ? image
-      : 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
+        ? image
+        : 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
 
   return (
-    <div className="group bg-white rounded-xl shadow-md overflow-hidden 
-                    hover:shadow-2xl transition-all duration-300 
-                    hover:-translate-y-2 
+    <div className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
+                    hover:shadow-xl hover:border-gray-200 transition-all duration-300
+                    hover:-translate-y-1
                     h-full flex flex-col">
 
-      {/* IMAGE */}
+      {/* ── IMAGE ── */}
       <Link
         to={`/product/${id}`}
-        className="relative block aspect-square bg-neutral-100 overflow-hidden"
+        className="relative block aspect-square bg-gray-50 overflow-hidden"
       >
+        {/* Skeleton while loading */}
         {!isImageLoaded && (
-          <div className="absolute inset-0 animate-shimmer" />
+          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
         )}
 
         <img
@@ -76,88 +117,77 @@ export default function ProductCard({
               'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
             setIsImageLoaded(true);
           }}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isImageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
         />
 
-        {/* Category */}
+        {/* Category badge */}
         <div className="absolute top-3 left-3">
-          <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold text-neutral-700 rounded-full">
+          <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-[11px] font-bold text-indigo-700 rounded-full border border-indigo-100">
             {category}
           </span>
         </div>
 
-        {/* Wishlist */}
+        {/* Like / Wishlist button */}
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            setIsWishlisted(!isWishlisted);
-          }}
-          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm 
-                     rounded-full hover:bg-white transition-all duration-200 
-                     opacity-0 group-hover:opacity-100"
+          onClick={handleWishlist}
+          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm
+                     rounded-full hover:bg-white transition-all duration-200
+                     shadow-sm hover:shadow-md
+                     opacity-0 group-hover:opacity-100
+                     active:scale-90"
+          aria-label="Toggle wishlist"
         >
           <Heart
-            className={`w-5 h-5 transition-colors ${
-              isWishlisted
-                ? 'fill-red-500 text-red-500'
-                : 'text-neutral-600'
-            }`}
+            className={`w-4 h-4 transition-all duration-200 ${isWishlisted
+              ? 'fill-red-500 text-red-500 scale-110'
+              : 'text-gray-500'
+              }`}
           />
         </button>
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent 
-                        opacity-0 group-hover:opacity-100 
-                        transition-opacity duration-300 
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent
+                        opacity-0 group-hover:opacity-100
+                        transition-opacity duration-300
                         flex items-end justify-center pb-4">
-          <span className="text-white text-sm font-semibold">
-            Quick View
+          <span className="text-white text-xs font-bold tracking-wide uppercase">
+            View Details
           </span>
         </div>
       </Link>
 
-      {/* CONTENT */}
-      <div className="p-5 flex flex-col flex-grow">
+      {/* ── CONTENT ── */}
+      <div className="p-4 flex flex-col flex-grow">
 
         <Link to={`/product/${id}`} className="block mb-3">
-          <h3 className="text-lg font-semibold text-neutral-900 
-                         hover:text-primary-600 transition-colors 
-                         line-clamp-2 min-h-[3.5rem]">
+          <h3 className="text-sm font-bold text-gray-900
+                         hover:text-indigo-600 transition-colors
+                         line-clamp-2 min-h-[2.6rem] leading-snug">
             {name}
           </h3>
         </Link>
 
-        {/* ✅ FIXED LAYOUT SECTION */}
-        <div className="mt-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mt-auto flex items-center justify-between gap-3">
 
-          {/* PRICE */}
-          <span className="text-2xl font-bold 
-                           bg-gradient-to-r from-primary-600 to-accent-600 
-                           bg-clip-text text-transparent 
-                           whitespace-nowrap">
-            ₹{price.toLocaleString()}
+          {/* Price */}
+          <span className="text-xl font-bold text-indigo-600 whitespace-nowrap">
+            ₹{price.toLocaleString('en-IN')}
           </span>
 
-          {/* ADD BUTTON */}
+          {/* Add to Cart */}
           <button
             onClick={handleAddToCart}
             disabled={isAdding}
-            className="group/btn bg-gradient-to-r 
-                       from-primary-600 to-primary-500 
-                       text-white 
-                       px-4 py-2.5 
-                       rounded-lg 
-                       hover:from-primary-700 hover:to-primary-600 
-                       transition-all duration-200 
-                       flex items-center gap-2 
-                       shadow-lg hover:shadow-xl 
-                       disabled:opacity-75 disabled:cursor-not-allowed
-                       w-full sm:w-auto justify-center"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold
+                       bg-indigo-600 hover:bg-indigo-500 text-white
+                       rounded-xl transition-all duration-200
+                       shadow-sm hover:shadow-indigo-200 hover:shadow-md
+                       disabled:opacity-60 disabled:cursor-not-allowed
+                       active:scale-95"
           >
-            <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-            <span className="font-semibold">
-              {isAdding ? '...' : 'Add'}
-            </span>
+            <ShoppingCart className="w-3.5 h-3.5" />
+            {isAdding ? 'Adding…' : 'Add'}
           </button>
         </div>
       </div>

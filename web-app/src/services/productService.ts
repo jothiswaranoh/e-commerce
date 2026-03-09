@@ -45,7 +45,7 @@ function buildProductFormData(data: any) {
 }
 
 export const productService = {
-  getProducts: (params?: { page?: number; per_page?: number }) =>
+  getProducts: (params?: { page?: number; per_page?: number; search?: string }) =>
     apiService.get('/products', params),
 
   getProduct: (id: string | number) =>

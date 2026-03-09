@@ -121,8 +121,14 @@ module Api
                   .includes(:variants, :category)
                   .order(created_at: :desc)
 
-        return scope unless current_user
-        scope.where(org_id: current_org.id)
+        scope = scope.where(org_id: current_org.id) if current_user
+
+        if params[:search].present?
+          term = "%#{params[:search]}%"
+          scope = scope.where("products.name ILIKE ?", term)
+        end
+
+        scope
       end
     end
   end
