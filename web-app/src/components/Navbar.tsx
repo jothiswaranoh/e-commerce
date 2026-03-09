@@ -15,6 +15,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { clearCart } = useCart();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const navLinks = [
     { label: NAVBAR.nav.home, path: ROUTES.HOME },
@@ -83,6 +84,14 @@ export default function Navbar() {
               <input
                 type="text"
                 placeholder={NAVBAR.searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    navigate(`${ROUTES.PRODUCTS}?search=${encodeURIComponent(searchQuery)}`);
+                    setSearchQuery("");
+                  }
+                }}
                 className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               />
             </div>
