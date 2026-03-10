@@ -13,11 +13,12 @@ class Ability
       can :manage, ProductVariant, product: { org_id: user.org_id }
 
     elsif user.customer?
-      can :read, [Category, Product], org_id: user.org_id
-      can :read, ProductVariant
+  can :read, [Category, Product], org_id: user.org_id
+  can :read, ProductVariant
 
-      can :create, Order
-      can :read, Order, user_id: user.id
+  can :create, Order
+  can :read, Order, user_id: user.id
+  can :update, Order, user_id: user.id
     end
   end
 end

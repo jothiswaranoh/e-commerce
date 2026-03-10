@@ -97,23 +97,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const updateQuantity = async (itemId: number, quantity: number) => {
-        // Optimistic update could happen here, but for now strict sync
-        setIsLoading(true);
-        try {
-            const response = await cartService.updateItem(itemId, quantity);
-            if (response.success && response.data) {
-                setCart(response.data);
-                setError(null);
-            } else {
-                setError(response.message || 'Failed to update quantity');
-            }
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to update quantity');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+   const updateQuantity = async (itemId: number, quantity: number) => {
+  if (quantity < 1) return;
+
+  setIsLoading(true);
+
+  try {
+    const response = await cartService.updateItem(itemId, quantity);
+
+    if (response.success && response.data) {
+      setCart(response.data);
+      setError(null);
+    } else {
+      setError(response.message || 'Failed to update quantity');
+    }
+  } catch (err: any) {
+    setError(err.response?.data?.error || 'Failed to update quantity');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
     const removeFromCart = async (itemId: number) => {
         setIsLoading(true);

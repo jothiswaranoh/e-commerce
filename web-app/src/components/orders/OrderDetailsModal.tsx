@@ -17,7 +17,7 @@ export default function OrderDetailsModal({ order, onUpdateStatus, onUpdatePayme
         { value: "delivered", label: "Delivered", icon: CheckCircle, color: "text-green-600 bg-green-50" },
         { value: "cancelled", label: "Cancelled", icon: XCircle, color: "text-red-600 bg-red-50" },
     ];
-
+    const isLocked = order?.status === "cancelled" || order?.status === "delivered";
     return (
         <div className="space-y-8">
             {/* Header Info */}
@@ -59,7 +59,7 @@ export default function OrderDetailsModal({ order, onUpdateStatus, onUpdatePayme
                             <button
                                 key={s.value}
                                 onClick={() => onUpdateStatus(s.value)}
-                                disabled={isLoading || isActive}
+                                disabled={isLoading || isActive || isLocked}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
                                     isActive
                                         ? `${s.color} border-current shadow-sm`
@@ -156,7 +156,10 @@ export default function OrderDetailsModal({ order, onUpdateStatus, onUpdatePayme
                 {order?.payment_status !== "paid" && onUpdatePayment && (
                     <Button
                         size="sm"
-                        onClick={() => onUpdatePayment("paid")}
+                        onClick={() => {
+                    if (isLocked) return;
+                    onUpdateStatus(s.value);
+}}
                         isLoading={isLoading}
                     >
                         Mark as Paid
