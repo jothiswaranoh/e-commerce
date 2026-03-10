@@ -17,13 +17,18 @@ type Variant = {
   _destroy?: boolean;
 };
 
+type ImageItem = {
+  id?: number;
+  url: string;
+};
+
 type Product = {
   id?: number;
   name: string;
   description?: string;
   slug: string;
   status: string;
-  images: string[];
+  images: ImageItem[];
   category?: { id?: number; name: string };
   category_id?: number;
   variants?: Variant[];
@@ -51,11 +56,13 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [newImageDrop, setNewImageDrop] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
 
   useEffect(() => {
     if (product) {
       setDraft({ ...product, images: [...(product.images || [])] });
       setNewFiles([]);
+      setDeletedImageIds([]);
       setActiveImg(0);
       setMode(initialMode);
     }
@@ -75,6 +82,7 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
     setMode(initialMode);
     setDraft(product ? { ...product, images: [...(product.images || [])] } : null);
     setNewFiles([]);
+    setDeletedImageIds([]);
     setActiveImg(0);
     onClose();
   };
@@ -135,19 +143,19 @@ const deleteVariant = (index: number) => {
 };
 
   const handleSave = () => {
-    if (!draft) return;
-      const existingImages = draft.images.filter(
-        (img) => !img.startsWith("blob:")
-      );
 
-      const isImageDeleted =
-        existingImages.length === 0 && newFiles.length === 0;
+    const orderedImageIds = draft.images
+    .filter(img => img.id)
+    .map(img => img.id);
+
+    if (!draft) return;
 
       const payload: any = {
-        ...draft,
-        images: newFiles.length > 0 ? newFiles : undefined,
-        remove_image: isImageDeleted ? true : undefined,
-      };
+      ...draft,
+      images: newFiles.length ? newFiles : undefined,
+      delete_image_ids: deletedImageIds.length ? deletedImageIds : undefined,
+      image_order_ids: orderedImageIds
+    };
 
     // Backend expects variants_attributes for updates
     if (draft.variants && draft.variants.length > 0) {
@@ -185,6 +193,12 @@ const deleteVariant = (index: number) => {
   };
 
   const deleteImage = (i: number) => {
+    const img = draft.images[i];
+    if (img?.id) {
+      setDeletedImageIds(prev =>
+        img.id && !prev.includes(img.id) ? [...prev, img.id] : prev
+      );
+    }
     const imgs = draft.images.filter((_, idx) => idx !== i);
     setDraft(p => p ? { ...p, images: imgs } : p);
     setActiveImg(Math.max(0, Math.min(activeImg, imgs.length - 1)));
@@ -193,7 +207,9 @@ const deleteVariant = (index: number) => {
   const addImages = (files: FileList | null) => {
     if (!files) return;
     const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
-    const urls = fileArray.map(f => URL.createObjectURL(f));
+    const urls = fileArray.map(f => ({
+      url: URL.createObjectURL(f)
+    }));
 
     setNewFiles(prev => [...prev, ...fileArray]);
     setDraft(p => p ? { ...p, images: [...p.images, ...urls] } : p);
@@ -303,7 +319,7 @@ const deleteVariant = (index: number) => {
               {draft.images.length > 0 ? (
                 <img
                   key={activeImg}
-                  src={draft.images[activeImg]}
+                  src={draft.images[activeImg]?.url}
                   alt=""
                   className="w-full h-full object-cover"
                 />
@@ -383,7 +399,7 @@ const deleteVariant = (index: number) => {
                     } ${dragOver === i && dragIdx !== i ? "border-indigo-400 scale-105" : ""} ${dragIdx === i ? "opacity-30 scale-95" : ""
                     }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img src={img.url} alt="" className="w-full h-full object-cover" />
                   {isEdit && (
                     <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
                       <GripVertical className="w-5 h-5 text-white drop-shadow" />

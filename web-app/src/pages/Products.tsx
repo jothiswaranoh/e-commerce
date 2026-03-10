@@ -20,6 +20,7 @@ type FilterSidebarProps = {
   setSearchQuery: (v: string) => void;
   hasActiveFilters: boolean;
   clearAll: () => void;
+  allProductsCount: number;   
   showMobileFilters: boolean;
   setShowMobileFilters: (v: boolean) => void;
 };
@@ -34,6 +35,7 @@ function FilterSidebar({
   setSearchQuery,
   hasActiveFilters,
   clearAll,
+  allProductsCount,   
 }: FilterSidebarProps) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -97,7 +99,7 @@ function FilterSidebar({
           >
             <span>All Products</span>
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-              {products.length}
+              {allProductsCount}
             </span>
           </button>
 
@@ -124,6 +126,7 @@ function FilterSidebar({
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const { data: categoriesResponse } = useCategories(1, 100);
@@ -131,20 +134,23 @@ export default function Products() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const params = new URLSearchParams(location.search);
-  const selectedCategory = params.get('category') ?? '';
+  const query = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
-  const searchParam = params.get("search") ?? "";
+  const selectedCategory = query.get("category") ?? "";
+  const searchParam = query.get("search") ?? "";
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams(location.search);
-        const search = params.get("search") || "";
+        const search = searchParam;
 
-        const res = await productService.getProducts({ search });
+        const res = await productService.getProducts({
+          search,
+          per_page: 100
+        });
         setProducts(res?.data?.data ?? []);
+        setTotalCount(res?.data?.meta?.total_count ?? 0);
       } catch {
         setProducts([]);
       } finally {
@@ -153,16 +159,7 @@ export default function Products() {
     };
 
     fetchProducts();
-  }, [location.search]);
-
-  const categoryCounts = useMemo(() => {
-    const map: Record<string, number> = {};
-    products.forEach(p => {
-      const name = p.category?.name ?? 'Uncategorized';
-      map[name] = (map[name] ?? 0) + 1;
-    });
-    return map;
-  }, [products]);
+  }, [searchParam]);
 
   const displayed = useMemo(() => {
     let list = [...products];
@@ -172,6 +169,21 @@ export default function Products() {
 
     return list;
   }, [products, selectedCategory]);
+
+  const allProductsCount = searchParam ? displayed.length : totalCount;
+
+  const categoryCounts = useMemo(() => {
+    const base = searchParam ? displayed : products;
+
+    const map: Record<string, number> = {};
+
+    base.forEach(p => {
+      const name = p.category?.name ?? "Uncategorized";
+      map[name] = (map[name] ?? 0) + 1;
+    });
+
+    return map;
+  }, [products, displayed, searchParam]);
 
   const hasActiveFilters = selectedCategory !== '' || searchParam !== '';
 
@@ -198,6 +210,7 @@ export default function Products() {
       params.delete("search");
     } else {
       params.set("search", value);
+      params.delete("category");
     }
 
     navigate(`/products?${params.toString()}`, { replace: true });
@@ -231,7 +244,9 @@ export default function Products() {
             {searchParam ? `Results for "${searchParam}"` : "All Products"}
           </h1>
           <p className="text-slate-400 mt-1 text-base">
-            {loading ? 'Loading…' : `${products.length} products available`}
+            {loading
+              ? 'Loading…'
+              : `${selectedCategory || searchParam ? displayed.length : totalCount} products available`}
             {selectedCategory && ` · ${selectedCategory}`}
           </p>
         </div>
@@ -252,6 +267,7 @@ export default function Products() {
             setSearchQuery={handleSidebarSearch}
             hasActiveFilters={hasActiveFilters}
             clearAll={clearAll}
+            allProductsCount={allProductsCount}
             showMobileFilters={false}
             setShowMobileFilters={() => { }}
           />
@@ -289,11 +305,7 @@ export default function Products() {
                   variantId={product.variants?.[0]?.id}
                   name={product.name}
                   price={product.variants?.[0]?.price ?? 0}
-                  image={
-                    (product.images?.[0] as any)?.url ||
-                    (typeof product.images?.[0] === 'string' ? product.images[0] : undefined) ||
-                    'https://via.placeholder.com/400?text=No+Image'
-                  }
+                  images={product.images}
                   category={product.category?.name ?? 'Uncategorized'}
                   viewMode="grid"
                 />
