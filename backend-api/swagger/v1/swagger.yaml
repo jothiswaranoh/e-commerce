@@ -870,6 +870,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
 
+    /orders:
+    get:
+      summary: List orders
+      tags: [Orders]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Order'
+
+    post:
+      summary: Create order
+      tags: [Orders]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  $ref: '#/components/schemas/OrderInput'
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id:
+                        type: integer
+                      product_variant_id:
+                        type: integer
+                      quantity:
+                        type: integer
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Order'
+
   /orders/{id}:
     get:
       summary: Get order
@@ -879,10 +938,55 @@ paths:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Order details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Order'
+
+    patch:
+      summary: Update order
+      tags: [Orders]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '200':
+          description: Order updated
+
+  /orders/{id}/cancel:
+    patch:
+      summary: Cancel order
+      tags: [Orders]
+      parameters:
+        - $ref: '#/components/parameters/XOrgSlug'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Order cancelled successfully
           content:
             application/json:
               schema:

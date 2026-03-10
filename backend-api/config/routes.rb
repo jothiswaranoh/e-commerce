@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  # Swagger UI
   if Rails.env.development? || Rails.env.test?
     mount Rswag::Ui::Engine => "/api-docs"
     mount Rswag::Api::Engine => "/api-docs"
@@ -18,10 +19,10 @@ Rails.application.routes.draw do
       # Cart
       resource :cart, only: [:show] do
         collection do
-          post   'add',    to: 'carts#add_item'
-          get    '',       to: 'carts#show'
-          put    'update', to: 'carts#update_item'
-          delete 'remove', to: 'carts#remove_item'
+          post   "add",    to: "carts#add_item"
+          get    "",       to: "carts#show"
+          put    "update", to: "carts#update_item"
+          delete "remove", to: "carts#remove_item"
         end
 
         post   :add_item
@@ -30,7 +31,11 @@ Rails.application.routes.draw do
       end
 
       # Orders
-      resources :orders, only: [:index, :show, :create, :update]
+      resources :orders, only: [:index, :show, :create, :update] do
+        member do
+          patch :cancel
+        end
+      end
 
       # Catalog
       resources :categories
@@ -41,9 +46,10 @@ Rails.application.routes.draw do
 
       resources :users
 
-      get 'dashboard', to: 'dashboard#index'
+      get "dashboard", to: "dashboard#index"
     end
   end
 
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 end
