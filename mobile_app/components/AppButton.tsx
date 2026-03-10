@@ -53,13 +53,13 @@ export default function AppButton({
         ghost: ['transparent', 'transparent'] as [string, string],
     };
 
-    const shadowMap = {
-        primary: SHADOWS.primaryGlow,
-        secondary: SHADOWS.md,
-        accent: SHADOWS.accentGlow,
-        outline: SHADOWS.none,
-        ghost: SHADOWS.none,
-    };
+  const shadowMap = {
+  primary: SHADOWS.primaryGlow,
+  secondary: SHADOWS.md,
+  accent: SHADOWS.accentGlow,
+  outline: SHADOWS.none,
+  ghost: SHADOWS.none,
+};
 
     const textColorMap = {
         primary: COLORS.neutral[0],
@@ -68,8 +68,6 @@ export default function AppButton({
         outline: COLORS.primary.DEFAULT,
         ghost: COLORS.primary.DEFAULT,
     };
-
-    const isGradient = variant === 'primary' || variant === 'secondary' || variant === 'accent';
 
     return (
         <TouchableOpacity
@@ -118,6 +116,7 @@ const styles = StyleSheet.create({
     gradient: {
         alignItems: 'center',
         justifyContent: 'center',
+        
     },
     text: {
         fontWeight: TYPOGRAPHY.fontWeight.semibold,

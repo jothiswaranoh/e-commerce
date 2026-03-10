@@ -27,6 +27,7 @@ export interface Banner {
     id: string;
     title: string;
     subtitle: string;
+    shortSubtitle?: string;
     image: string;
     gradient: [string, string];
 }
@@ -48,13 +49,14 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const BANNERS: Banner[] = [
-    {
-        id: '1',
-        title: 'Summer Sale',
-        subtitle: 'Up to 70% off on Electronics',
-        image: 'https://images.pexels.com/photos/3944405/pexels-photo-3944405.jpeg?w=800',
-        gradient: ['#667eea', '#764ba2'],
-    },
+  {
+    id: '1',
+    title: 'Summer Sale',
+    subtitle: 'Up to 70% off \n            on Electronics',
+    image: 'https://images.pexels.com/photos/3944405/pexels-photo-3944405.jpeg?w=800',
+    gradient: ['#667eea', '#764ba2'],
+  },
+
     {
         id: '2',
         title: 'New Arrivals',
@@ -87,7 +89,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.8,
         reviewCount: 12542,
         inStock: true,
-        isPrime: true,
         discount: 25,
         features: [
             'Active Noise Cancellation',
@@ -111,7 +112,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.6,
         reviewCount: 8540,
         inStock: true,
-        isPrime: true,
         discount: 20,
         features: [
             'Heart Rate Monitor',
@@ -135,7 +135,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.9,
         reviewCount: 42890,
         inStock: true,
-        isPrime: true,
         discount: 21,
         features: [
             'Hi-Res Audio Certified',
@@ -158,7 +157,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.5,
         reviewCount: 3420,
         inStock: true,
-        isPrime: false,
         discount: 31,
         features: [
             '100% Genuine Leather',
@@ -181,7 +179,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.4,
         reviewCount: 1890,
         inStock: true,
-        isPrime: true,
         discount: 22,
         features: [
             'Touch Controls',
@@ -204,7 +201,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.7,
         reviewCount: 7650,
         inStock: true,
-        isPrime: true,
         discount: 28,
         features: [
             'Hot-swappable Switches',
@@ -227,7 +223,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.6,
         reviewCount: 15420,
         inStock: true,
-        isPrime: true,
         discount: 34,
         features: [
             '65W Fast Charging',
@@ -250,7 +245,6 @@ export const MOCK_PRODUCTS: Product[] = [
         rating: 4.8,
         reviewCount: 2340,
         inStock: true,
-        isPrime: false,
         discount: 27,
         features: [
             'f/1.4 Maximum Aperture',
