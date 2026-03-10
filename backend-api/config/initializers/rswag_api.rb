@@ -14,4 +14,4 @@ end
   # The function will have access to the rack env for the current request
   # For example, you could leverage this to dynamically assign the "host" property
   #
-  #c.swagger_filter = lambda { |swagger, env| swagger['host'] = env['HTTP_HOST'] }
+  #c.swagger_filter = lambda { |swagger, env| swagger['host'] = env['HTTP_HOST'] }psa
