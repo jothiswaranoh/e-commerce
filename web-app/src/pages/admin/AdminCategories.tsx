@@ -72,6 +72,7 @@ export default function AdminCategories() {
       });
       toast.success("Category updated");
       setIsEditOpen(false);
+      setIsViewOpen(false); 
       setSelectedCategory(null);
     } catch (err: any) {
         const message = err?.message || "Validation failed";
@@ -255,6 +256,7 @@ export default function AdminCategories() {
           setIsViewOpen(false);
           setSelectedCategory(null);
         }}
+        onSave={handleUpdate}
         categories={categories}
         initialMode="view"
       />

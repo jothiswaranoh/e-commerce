@@ -21,10 +21,11 @@ export const ROUTES = {
     // Admin Routes
     ADMIN: '/admin',
     ADMIN_DASHBOARD: '/admin/dashboard',
+    ADMIN_CATEGORY: '/admin/category',
     ADMIN_PRODUCTS: '/admin/products',
     ADMIN_ORDERS: '/admin/orders',
     ADMIN_USERS: '/admin/users',
-    ADMIN_CATEGORY: '/admin/category',
+    
 } as const;
 
 // Helper function to generate product detail route
@@ -36,6 +37,11 @@ export const ADMIN_NAV_ITEMS = [
         label: 'Dashboard',
         path: ROUTES.ADMIN_DASHBOARD,
         icon: 'LayoutDashboard',
+    },
+    {
+        label: 'Categories',
+        path: ROUTES.ADMIN_CATEGORY,
+        icon: 'Users',
     },
     {
         label: 'Products',
@@ -52,9 +58,5 @@ export const ADMIN_NAV_ITEMS = [
         path: ROUTES.ADMIN_USERS,
         icon: 'Users',
     },
-    {
-        label: 'Categories',
-        path: ROUTES.ADMIN_CATEGORY,
-        icon: 'Users',
-    },
+    
 ] as const;
