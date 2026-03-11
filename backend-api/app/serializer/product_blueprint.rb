@@ -1,28 +1,14 @@
-class ProductBlueprint < Blueprinter::Base
-  identifier :id
+field :images do |product|
+  next [] unless product.images.attached?
 
-  fields :org_id,
-         :name,
-         :slug,
-         :description,
-         :status,
-         :category_id,
-         :created_at,
-         :updated_at
-
-  association :category, blueprint: CategoryBlueprint
-  association :variants, blueprint: ::ProductVariantBlueprint
-  association :product_attributes, blueprint: ::ProductAttributeBlueprint
-
-  field :images do |product|
-    next [] unless product.images.attached?
-    
-    product.images.map do |image|
-      Rails.application.routes.url_helpers.rails_blob_url(
-        image,
-        host: "localhost",
-        port: 3000
+  product.images.attachments.map do |attachment|
+    {
+      id: attachment.id,
+      url: Rails.application.routes.url_helpers.rails_blob_url(
+        attachment,
+        host: ENV.fetch("APP_HOST"),
+        protocol: ENV.fetch("APP_PROTOCOL", "http")
       )
-    end
+    }
   end
 end
