@@ -16,16 +16,11 @@ class ProductBlueprint < Blueprinter::Base
 
   field :images do |product|
     next [] unless product.images.attached?
-
-    product.images.attachments.map do |attachment|
-      {
-        id: attachment.id,
-        url: Rails.application.routes.url_helpers.rails_blob_url(
-          attachment,
-          host: "localhost",
-          port: 3000
-        )
-      }
+    
+    product.images.map do |image|
+      Rails.application.routes.url_helpers.rails_blob_url(
+        image,
+      )
     end
   end
 end
