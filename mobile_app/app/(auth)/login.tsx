@@ -8,6 +8,7 @@ import {
   Pressable,
   StatusBar,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,9 +18,11 @@ import AppText from '@/components/AppText';
 import AppButton from '@/components/AppButton';
 import InputField from '@/components/InputField';
 import { COLORS, SPACING, BORDERS, SHADOWS, GRADIENTS } from '@/lib/theme';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { login, isLoading, error, clearError } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,12 +30,29 @@ export default function LoginScreen() {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    // tovalidate inputs
+    if (!email.trim()) {
+      Alert.alert('Alert!', 'Please enter your email address');
+      return;
+    }
+    if (!password) {
+      Alert.alert('Alert!', 'Please enter your password');
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    clearError();
+
+    try {
+      await login(email.trim(), password);
       router.replace('/(tabs)');
-    }, 1200);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed';
+      Alert.alert('Login Failed', message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -210,7 +230,7 @@ export default function LoginScreen() {
           </View>
 
           <AppText color="rgba(255,255,255,0.5)" style={styles.footer}>
-            © 2025 ShopHub. All rights reserved.
+            © 2026 ShopHub. All rights reserved.
           </AppText>
         </ScrollView>
       </KeyboardAvoidingView>

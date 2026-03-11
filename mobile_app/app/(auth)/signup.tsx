@@ -8,6 +8,7 @@ import {
   Pressable,
   StatusBar,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +17,7 @@ import { useRouter } from 'expo-router';
 import AppText from '@/components/AppText';
 import InputField from '@/components/InputField';
 import { COLORS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SignupScreen() {
   const [name, setName] = useState('');
@@ -24,13 +26,35 @@ export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { signup, clearError } = useAuth();
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
+    //to validate inputs
+    if (!name.trim()) {
+      Alert.alert('Alert!', 'Please enter your name');
+      return;
+    }
+    if (!email.trim()) {
+      Alert.alert('Alerrt!', 'Please enter your email address');
+      return;
+    }
+    if (!password || password.length < 6) {
+      Alert.alert('Alert!', 'Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    clearError();
+
+    try {
+      await signup(name.trim(), email.trim(), password);
       router.replace('/(tabs)');
-    }, 1500);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Signup failed';
+      Alert.alert('Signup Failed', message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
