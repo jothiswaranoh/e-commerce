@@ -24,6 +24,7 @@ services:
       - /rails/node_modules
       - /rails/public/packs
       - /rails/tmp
+      - rails_storage:/rails/storage
     environment:
       RAILS_ENV: development
       DATABASE_URL: postgresql://postgres:password@db:5432/ecommerce_development
@@ -54,3 +55,4 @@ networks:
 
 volumes:
   postgres_data:
+  rails_storage:
