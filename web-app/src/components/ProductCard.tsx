@@ -10,7 +10,7 @@ interface ProductCardProps {
   name?: string;
   price?: number;
   image?: string;
-  images?: string[];
+  images?: { id: number; url: string }[];
   category?: string;
   rating?: number;
   viewMode?: 'grid' | 'list';
@@ -86,7 +86,7 @@ export default function ProductCard({
 
   const imageSrc =
     images && images.length > 0
-      ? images[0]
+      ? images[0].url
       : image
         ? image
         : 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';

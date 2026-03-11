@@ -104,7 +104,7 @@ export default function ProductDetail() {
 
   const images =
     product.images && product.images.length > 0
-      ? product.images
+      ? product.images.map((img) => img.url)
       : ['https://via.placeholder.com/600?text=No+Image'];
 
   const goNext = () => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
@@ -174,7 +174,7 @@ export default function ProductDetail() {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {images.map((img, index) => (
                   <button
-                    key={index}
+                    key={img}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`w-18 h-18 flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${currentImageIndex === index
                       ? 'border-indigo-500 shadow-md shadow-indigo-100'
