@@ -13,6 +13,9 @@ import { Star } from 'lucide-react-native';
 import AppText from './AppText';
 import { COLORS, SPACING } from '@/lib/theme';
 import { Product } from '@/lib/mock-data';
+import { Heart } from 'lucide-react-native';
+import { useFavourite } from '@/context/FavouriteContext';
+import { BlurView } from 'expo-blur';
 
 interface ProductCardProps {
   product: Product;
@@ -29,7 +32,11 @@ export default function ProductCard({
 }: ProductCardProps) {
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const heartScale = useRef(new Animated.Value(1)).current;
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const { toggleFavourite, isFavourite } = useFavourite();
+  const favourite = isFavourite(product.id);
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -45,18 +52,31 @@ export default function ProductCard({
     }).start();
   };
 
+  const animateHeart = () => {
+    Animated.sequence([
+      Animated.spring(heartScale, {
+        toValue: 1.3,
+        useNativeDriver: true,
+      }),
+      Animated.spring(heartScale, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
   const formatReviewCount = (count: number) => {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
     return `${count}`;
   };
 
-  // 👇 Support both old and new structure
+  // Support both old and new structure
   const images =
     product.images && product.images.length > 0
       ? product.images
       : product.image_url
-      ? [product.image_url]
-      : [];
+        ? [product.image_url]
+        : [];
 
   return (
     <TouchableOpacity
@@ -67,7 +87,7 @@ export default function ProductCard({
     >
       <Animated.View style={[styles.card, { transform: [{ scale: scaleAnim }] }]}>
 
-        {/* 🖼 IMAGE SLIDER */}
+        {/* IMAGE SLIDER */}
         <View style={styles.imageContainer}>
           <ScrollView
             horizontal
@@ -89,7 +109,24 @@ export default function ProductCard({
               />
             ))}
           </ScrollView>
-
+          {/*Favourite Button */}
+          <TouchableOpacity
+            style={styles.favButton}
+            onPress={() => {
+              toggleFavourite(product);
+              animateHeart();
+            }}
+          >
+            <BlurView intensity={60} tint="dark" style={styles.blurHeart}>
+              <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                <Heart
+                  size={18}
+                  color={favourite ? "#ff3040" : "#fff"}
+                  fill={favourite ? "#ff3040" : "none"}
+                />
+              </Animated.View>
+            </BlurView>
+          </TouchableOpacity>
           {/* Dots Indicator */}
           {images.length > 1 && (
             <View style={styles.dotsContainer}>
@@ -125,7 +162,7 @@ export default function ProductCard({
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  size={14}
+                  size={12}
                   color={
                     star <= Math.round(product.rating)
                       ? COLORS.accent.DEFAULT
@@ -145,7 +182,7 @@ export default function ProductCard({
           </View>
 
           <View style={styles.priceContainer}>
-            <AppText variant="xl" weight="medium" color={COLORS.neutral[700]}>
+            <AppText variant="md" weight="medium" color={COLORS.neutral[900]}>
               ${product.price.toFixed(2)}
             </AppText>
 
@@ -173,20 +210,34 @@ export default function ProductCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.neutral[0],
-    borderRadius: 8,
+    backgroundColor: COLORS.neutral[50],
+    borderRadius: 12,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.neutral[200],
-    marginBottom: SPACING.md,
+    borderWidth: 0,
+    // iOS shadow
+    shadowColor: '#9000ff',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.20,
+    shadowRadius: 10,
+    // Android shadow
+    elevation: 6,
+    marginBottom: 8,
   },
   imageContainer: {
     backgroundColor: COLORS.neutral[50],
-    height: 200,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    height: 150,
   },
   image: {
-    width: width - 40,
-    height: 200,
+    width: width - 135,
+    height: 150,
+    resizeMode: 'contain',
   },
   dotsContainer: {
     position: 'absolute',
@@ -209,7 +260,7 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
     backgroundColor: COLORS.error.DEFAULT,
-    paddingHorizontal: 8,
+    paddingHorizontal: 5,
     paddingVertical: 4,
     borderRadius: 4,
   },
@@ -219,17 +270,18 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 4,
     lineHeight: 20,
-    color: COLORS.neutral[700],
+    fontSize: 15,
+    color: COLORS.neutral[500],
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   starsRow: {
     flexDirection: 'row',
-    gap: 1,
+    gap: 0.5,
   },
   priceContainer: {
     flexDirection: 'row',
@@ -239,4 +291,17 @@ const styles = StyleSheet.create({
   strikethrough: {
     textDecorationLine: 'line-through',
   },
+ favButton: {
+  position: 'absolute',
+  top: 10,
+  right: 10,
+},
+blurHeart: {
+  width: 34,
+  height: 34,
+  borderRadius: 17,
+  justifyContent: 'center',
+  alignItems: 'center',
+  overflow: 'hidden',
+}
 });

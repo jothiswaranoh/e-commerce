@@ -5,6 +5,8 @@ function buildProductFormData(data: any) {
 
   Object.entries(data).forEach(([key, value]) => {
 
+    if (key === "category") return;
+
     if (
       (key === 'variants' || key === 'variants_attributes') &&
       Array.isArray(value)
@@ -23,8 +25,10 @@ function buildProductFormData(data: any) {
     }
 
     if (key === 'images' && Array.isArray(value)) {
-      value.forEach((file: File) => {
-        fd.append('product[images][]', file);
+      value.forEach((img: any) => {
+        if (img instanceof File) {
+          fd.append('product[images][]', img);
+        }
       });
       return;
     }
@@ -36,12 +40,30 @@ function buildProductFormData(data: any) {
       return;
     }
 
-    if (value !== undefined && value !== null) {
+    if (key === 'delete_image_ids' && Array.isArray(value)) {
+      value.forEach((id: number) => {
+        fd.append('product[delete_image_ids][]', String(id));
+      });
+      return;
+    }
+
+    if (key === 'image_order_ids' && Array.isArray(value)) {
+      value.forEach((id: number) => {
+        fd.append('product[image_order_ids][]', String(id));
+      });
+      return;
+    }
+
+    if (
+      value !== undefined &&
+      value !== null &&
+      typeof value !== "object"
+    ) {
       fd.append(`product[${key}]`, String(value));
     }
-  });
+      });
 
-  return fd;
+      return fd;
 }
 
 export const productService = {

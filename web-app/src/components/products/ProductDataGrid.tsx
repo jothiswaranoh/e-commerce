@@ -18,7 +18,7 @@ type Product = {
         price: number;
         stock: number;
     }>;
-    images?: string[];
+    images?: { id: number; url: string }[];
     created_at: string;
 };
 
@@ -73,7 +73,7 @@ export default function ProductDataGrid({
             sortable: false,
             renderCell: (params) => {
                 const product = params.row;
-                const primaryImage = product.images?.[0];
+                const primaryImage = product.images?.[0]?.url;
 
                 return (
                     <div className="flex items-center justify-center w-full h-full">
@@ -117,11 +117,13 @@ export default function ProductDataGrid({
         {
             field: "category",
             headerName: "Category",
-            width: 150,
+            width: 200,
             valueGetter: (_value, row) => row.category?.name || "",
             renderCell: (params) => (
                 <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-neutral-400" />
+                    <div className="w-4 h-4 flex items-center justify-center">
+                        <Package className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                    </div>
                     <span className="text-neutral-700">
                         {params.row.category?.name || "N/A"}
                     </span>

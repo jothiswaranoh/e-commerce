@@ -27,4 +27,12 @@ export const orderService = {
       method: 'get',
     });
   },
+
+
+  cancelOrder(orderId: number) {
+  return api({
+    url: `/orders/${orderId}/cancel`,
+    method: 'patch',
+  });
+}
 };

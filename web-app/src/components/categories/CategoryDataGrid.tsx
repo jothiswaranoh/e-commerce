@@ -24,6 +24,10 @@ type Props = {
     onView: (cat: Category) => void;
 };
 
+type CategoryRow = Category & {
+  depth: number;
+};
+
 export default function CategoryDataGrid({
     rows,
     page,
@@ -38,6 +42,41 @@ export default function CategoryDataGrid({
 }: Props) {
 
     const showPagination = rowCount > pageSize;
+
+    const buildTree = (categories: Category[]): CategoryRow[] => {
+        const childrenMap = new Map<number, Category[]>();
+        const roots: Category[] = [];
+
+        categories.forEach(cat => {
+            if (cat.parent_id === null) {
+            roots.push(cat);
+            } else {
+            if (!childrenMap.has(cat.parent_id)) childrenMap.set(cat.parent_id, []);
+            childrenMap.get(cat.parent_id)!.push(cat);
+            }
+        });
+
+        const result: CategoryRow[] = [];
+
+        const traverse = (node: Category, depth: number) => {
+            result.push({ ...node, depth });
+
+            let children = childrenMap.get(node.id) || [];
+
+            // leaf children first
+            children = children.sort((a, b) => {
+            const aHasChildren = childrenMap.has(a.id);
+            const bHasChildren = childrenMap.has(b.id);
+            return Number(aHasChildren) - Number(bHasChildren);
+            });
+
+            children.forEach(child => traverse(child, depth + 1));
+        };
+
+        roots.forEach(root => traverse(root, 0));
+
+        return result;
+        };
 
     const columns: GridColDef[] = [
         {
@@ -79,6 +118,7 @@ export default function CategoryDataGrid({
             minWidth: 200,
             renderCell: (params) => {
                 const category = params.row;
+                const depth = category.depth;
 
                 return (
                     <div
@@ -86,7 +126,11 @@ export default function CategoryDataGrid({
                         onClick={() => onView(category)}
                     >
                         <div className="min-w-0">
-                            <p className="font-semibold text-neutral-900 truncate">
+                            <p
+                                className="font-semibold text-neutral-900 truncate"
+                                style={{ paddingLeft: depth * 20 }}
+                            >
+                                {depth > 0 && "↳ "}
                                 {category.name || "Untitled"}
                             </p>
                         </div>
@@ -150,11 +194,13 @@ export default function CategoryDataGrid({
         },
     ];
 
+    const orderedRows = buildTree(rows);
+
     return (
         <div style={{ width: "100%" }}>
             <DataGrid
                 autoHeight
-                rows={rows}
+                rows={orderedRows}
                 columns={columns}
                 getRowId={(row) => row.id}
                 loading={loading}

@@ -20,8 +20,11 @@ services:
       RAILS_ENV: production
       DATABASE_URL: postgresql://${DATABASE_USER:-postgres}:${DATABASE_PASSWORD:-password}@db:5432/ecommerce_production
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     depends_on:
       - db
+    expose:
+      - "3000"
     networks:
       - ecommerce_network_prod
     restart: always
