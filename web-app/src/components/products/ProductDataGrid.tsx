@@ -1,6 +1,5 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Edit, Trash2, Package, Image as ImageIcon } from "lucide-react";
-import { SPACING } from "../../config/theme.constants";
+import { Edit, Trash2, Package } from "lucide-react";
 
 type Product = {
     id: number;
@@ -18,7 +17,7 @@ type Product = {
         price: number;
         stock: number;
     }>;
-    images?: { id: number; url: string }[];
+    images?: string[];
     created_at: string;
 };
 
@@ -73,7 +72,7 @@ export default function ProductDataGrid({
             sortable: false,
             renderCell: (params) => {
                 const product = params.row;
-                const primaryImage = product.images?.[0]?.url;
+                const primaryImage = product.images?.[0];
 
                 return (
                     <div className="flex items-center justify-center w-full h-full">
@@ -279,7 +278,7 @@ export default function ProductDataGrid({
                         onPageChange(model.page + 1);
                     }
                 }}
-                pagination={showPagination}
+                pagination={showPagination || undefined}
                 pageSizeOptions={showPagination ? [5, 10, 20, 50] : []}
                 disableRowSelectionOnClick
                 sx={{
