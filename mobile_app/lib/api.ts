@@ -72,6 +72,7 @@ export const authApi = {
           email_address: email,
           password: password,
           password_confirmation: password,
+          role: "customer",
         },
       }),
     });
