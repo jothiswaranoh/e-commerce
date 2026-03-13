@@ -101,7 +101,6 @@ export default function ProductDetail() {
       </div>
     );
   }
-
   const images =
     product.images && product.images.length > 0
       ? product.images
@@ -174,7 +173,7 @@ export default function ProductDetail() {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {images.map((img, index) => (
                   <button
-                    key={index}
+                    key={img}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`w-18 h-18 flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${currentImageIndex === index
                       ? 'border-indigo-500 shadow-md shadow-indigo-100'

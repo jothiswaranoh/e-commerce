@@ -26,11 +26,16 @@ export interface CategoryPayload {
 
 const BASE_PATH = "/categories";
 
-const categoryToFormData = (payload: CategoryPayload) => {
+const categoryToFormData = (payload: Partial<CategoryPayload>) => {
   const fd = new FormData();
 
-  fd.append("category[name]", payload.name);
-  fd.append("category[slug]", payload.slug);
+  if (payload.name !== undefined) {
+    fd.append("category[name]", payload.name);
+  }
+
+  if (payload.slug !== undefined) {
+    fd.append("category[slug]", payload.slug);
+  }
 
   if (payload.parent_id !== undefined && payload.parent_id !== null) {
     fd.append("category[parent_id]", String(payload.parent_id));
@@ -48,8 +53,8 @@ const categoryToFormData = (payload: CategoryPayload) => {
     fd.append("category[image]", payload.image);
   }
 
-  if (payload.remove_image) {
-    fd.append("category[remove_image]", "true");
+  if (payload.remove_image !== undefined) {
+    fd.append("category[remove_image]", String(payload.remove_image));
   }
 
   return fd;
@@ -80,11 +85,11 @@ const CategoryAPI = {
   },
 
   update(id: number, payload: Partial<CategoryPayload>) {
-    return apiService.patch<Category>(
-      `${BASE_PATH}/${id}`,
-      categoryToFormData(payload as CategoryPayload)
-    );
-  },
+  return apiService.patch<Category>(
+    `${BASE_PATH}/${id}`,
+    categoryToFormData(payload)
+  );
+},
 
   delete(id: number) {
     return apiService.delete<void>(`${BASE_PATH}/${id}`);

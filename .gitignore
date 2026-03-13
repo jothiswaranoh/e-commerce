@@ -1,4 +1,5 @@
 web-app/node_modules/
+web-app/dist/
 
 # Ignore bundler config.
 backend-api/.bundle/

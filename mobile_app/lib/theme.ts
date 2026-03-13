@@ -1,11 +1,9 @@
 export const COLORS = {
     primary: {
-        DEFAULT: '#232F3E', // Amazon Navy
-        light: '#37475A',
-        50: '#F3F5F7',
-        100: '#E6E9EE',
-        200: '#CCD3DC',
-    },
+    DEFAULT: '#7c3aed', // YOUR purple
+    dark: '#5d00ff',    // checkbox purple
+    light: '#ffffff',   // light purple for backgrounds
+  },
     accent: {
         DEFAULT: '#FF9900', // Amazon Orange
         light: '#FFB84D',
@@ -13,21 +11,22 @@ export const COLORS = {
         yellow: '#FFD814', // Amazon Main Button Yellow
     },
     secondary: {
-        DEFAULT: '#37475A',
+        DEFAULT: '#176fdb',
         light: '#485769',
     },
     neutral: {
-        0: '#FFFFFF',
-        50: '#F7F8F8',
-        100: '#F0F2F2',
-        200: '#E3E6E6',
-        300: '#D5D9D9',
-        400: '#888C8C',
-        500: '#565959',
-        600: '#333333',
-        700: '#0F1111', // Amazon Black
-        900: '#000000',
-    },
+    0: '#ffffff',
+    50: '#f9fafb',
+    100: '#f3f4f6',
+    200: '#e5e7eb',
+    300: '#d1d5db',
+    400: '#9ca3af',
+    500: '#6b7280',
+    600: '#4b5563',
+    700: '#374151',
+    800: '#1f2937',
+    900: '#111827',
+  },
     success: {
         DEFAULT: '#007600',
         light: '#E7F3E7',
@@ -48,7 +47,7 @@ export const COLORS = {
 };
 
 export const GRADIENTS = {
-    primary: ['#232F3E', '#37475A'] as [string, string],
+    primary: ['#010101', '#0073ff'] as [string, string],
     secondary: ['#37475A', '#485769'] as [string, string],
     accent: ['#FFD814', '#F7CA00'] as [string, string], // Amazon Gold Button
     amazonHeader: ['#84fab0', '#8fd3f4'] as [string, string], // Amazon app-like teal
@@ -150,15 +149,15 @@ export const SHADOWS = {
     primaryGlow: {
         shadowColor: COLORS.primary.DEFAULT,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.3,
         shadowRadius: 8,
-        elevation: 4,
+        elevation: 6,
     },
     accentGlow: {
         shadowColor: COLORS.accent.DEFAULT,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-        elevation: 6,
+        elevation: 8,
     },
 };

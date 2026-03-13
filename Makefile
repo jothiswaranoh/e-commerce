@@ -18,14 +18,14 @@ clear-nodemodules: ## Remove frontend node_modules and lock file
 
 dev-containers: stop-containers ## Build and start dev Docker containers
 	@echo "Starting E-commerce App in Development Mode..."
-	docker-compose -f docker-compose.yml up --build --force-recreate
+	docker compose -f docker-compose.yml up --build --force-recreate
 	@echo "Application should be running at:"
 	@echo "   Frontend: http://localhost:5173"
 	@echo "   Backend:  http://localhost:3000"
 
 prod-containers: stop-containers ## Build and start prod Docker containers
 	@echo "Starting AI Prompt Playground in Production Mode..."
-	docker-compose up --build
+	docker compose up --build
 	@echo "Application should be running at:"
 	@echo "   Frontend: http://localhost:3000"
 	@echo "   Backend:  http://localhost:8001"

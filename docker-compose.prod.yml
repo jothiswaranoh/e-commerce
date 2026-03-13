@@ -24,8 +24,6 @@ services:
       - db
     expose:
       - "3000"
-    volumes:
-      - rails_storage_prod:/app/storage
     networks:
       - ecommerce_network_prod
     restart: always

@@ -30,20 +30,38 @@ module Api
 
       def update
         product = model_class.find(params[:id])
+        delete_ids = resource_params[:delete_image_ids]
 
-        if ActiveModel::Type::Boolean.new.cast(resource_params[:remove_image])
-          product.images.purge if product.images.attached?
-        end
-
-        # ✅ Attach new images
-        if resource_params[:images].present?
-          resource_params[:images].each do |img|
-            product.images.attach(img)
+        if delete_ids.present?
+          delete_ids.each do |id|
+            attachment = product.images.attachments.find_by(id: id)
+            attachment&.purge
           end
         end
 
-        # ✅ Update remaining attributes
-        if product.update(resource_params.except(:images, :remove_image))
+        if product.update(resource_params.except(:images, :delete_image_ids, :image_order_ids))
+
+          if params[:product][:image_order_ids].present?
+            ordered_ids = params[:product][:image_order_ids].map(&:to_i)
+
+            attachments = product.images.attachments.where(id: ordered_ids).index_by(&:id)
+
+            product.images.detach
+
+            ordered_ids.each do |id|
+              attachment = attachments[id]
+              product.images.attach(attachment.blob) if attachment
+            end
+          end
+
+          if resource_params[:images].present?
+            resource_params[:images].each do |img|
+              product.images.attach(img)
+            end
+          end
+
+          product.reload
+
           render_success(
             ProductBlueprint.render_as_json(product),
             success_response_key
@@ -102,8 +120,9 @@ module Api
           :category_id,
           :status,
           :description,
-          :remove_image,
           images: [],
+          delete_image_ids: [],
+          image_order_ids: [], 
           variants_attributes: [
             :id,
             :name,
@@ -121,8 +140,14 @@ module Api
                   .includes(:variants, :category)
                   .order(created_at: :desc)
 
-        return scope unless current_user
-        scope.where(org_id: current_org.id)
+        scope = scope.where(org_id: current_org.id) if current_user
+
+        if params[:search].present?
+          term = "%#{params[:search]}%"
+          scope = scope.where("products.name ILIKE ?", term)
+        end
+
+        scope
       end
     end
   end

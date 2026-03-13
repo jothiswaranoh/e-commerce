@@ -20,6 +20,7 @@ type FilterSidebarProps = {
   setSearchQuery: (v: string) => void;
   hasActiveFilters: boolean;
   clearAll: () => void;
+  allProductsCount: number;
   showMobileFilters: boolean;
   setShowMobileFilters: (v: boolean) => void;
 };
@@ -34,6 +35,7 @@ function FilterSidebar({
   setSearchQuery,
   hasActiveFilters,
   clearAll,
+  allProductsCount,
 }: FilterSidebarProps) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -70,7 +72,9 @@ function FilterSidebar({
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('');
+              }}
               className="absolute right-3 top-1/2 -translate-y-1/2"
             >
               <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
@@ -95,7 +99,7 @@ function FilterSidebar({
           >
             <span>All Products</span>
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-              {products.length}
+              {allProductsCount}
             </span>
           </button>
 
@@ -122,72 +126,93 @@ function FilterSidebar({
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: categoriesResponse } = useCategories(1, 100);
   const categories: Category[] = categoriesResponse?.data ?? [];
   const location = useLocation();
   const navigate = useNavigate();
 
-  const params = new URLSearchParams(location.search);
-  const selectedCategory = params.get('category') ?? '';
+  const query = useMemo(() => new URLSearchParams(location.search), [location.search]);
+
+  const selectedCategory = query.get("category") ?? "";
+  const searchParam = query.get("search") ?? "";
 
   useEffect(() => {
-    const debounce = setTimeout(() => setSearchQuery(searchInput), 300);
-    return () => clearTimeout(debounce);
-  }, [searchInput]);
-
-  useEffect(() => {
-    (async () => {
+    const fetchProducts = async () => {
       setLoading(true);
       try {
-        const res = await productService.getProducts();
+        const search = searchParam;
+
+        const res = await productService.getProducts({
+          search,
+          per_page: 100
+        });
         setProducts(res?.data?.data ?? []);
+        setTotalCount(res?.data?.meta?.total_count ?? 0);
       } catch {
         setProducts([]);
       } finally {
         setLoading(false);
       }
-    })();
-  }, []);
+    };
 
-  const categoryCounts = useMemo(() => {
-    const map: Record<string, number> = {};
-    products.forEach(p => {
-      const name = p.category?.name ?? 'Uncategorized';
-      map[name] = (map[name] ?? 0) + 1;
-    });
-    return map;
-  }, [products]);
+    fetchProducts();
+  }, [searchParam, selectedCategory]);
 
   const displayed = useMemo(() => {
     let list = [...products];
+
     if (selectedCategory)
       list = list.filter(p => p.category?.name === selectedCategory);
-    if (searchQuery.trim())
-      list = list.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    return list;
-  }, [products, selectedCategory, searchQuery]);
 
-  const hasActiveFilters = selectedCategory !== '' || searchInput.trim() !== '';
+    return list;
+  }, [products, selectedCategory]);
+
+  const allProductsCount = searchParam ? displayed.length : totalCount;
+
+  const categoryCounts = useMemo(() => {
+    const base = searchParam ? displayed : products;
+
+    const map: Record<string, number> = {};
+
+    base.forEach(p => {
+      const name = p.category?.name ?? "Uncategorized";
+      map[name] = (map[name] ?? 0) + 1;
+    });
+
+    return map;
+  }, [products, displayed, searchParam]);
+
+  const hasActiveFilters = selectedCategory !== '' || searchParam !== '';
 
   const clearAll = () => {
     navigate('/products');
-    setSearchInput('');
-    setSearchQuery('');
   };
 
   const handleCategoryChange = (category: string) => {
+    const params = new URLSearchParams(location.search);
+
     if (!category) {
-      navigate('/products');
+      params.delete("category");
     } else {
-      navigate(`/products?category=${encodeURIComponent(category)}`);
+      params.set("category", category);
     }
+
+    navigate(`/products?${params.toString()}`);
+  };
+
+  const handleSidebarSearch = (value: string) => {
+    const params = new URLSearchParams(location.search);
+
+    if (!value.trim()) {
+      params.delete("search");
+    } else {
+      params.set("search", value);
+    }
+
+    navigate(`/products?${params.toString()}`, { replace: true });
   };
 
   useEffect(() => {
@@ -215,10 +240,12 @@ export default function Products() {
             <span className="text-xs font-bold tracking-wider uppercase text-indigo-200">Shop Everything</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-2">
-            All Products
+            {searchParam ? `Results for "${searchParam}"` : "All Products"}
           </h1>
           <p className="text-slate-400 mt-1 text-base">
-            {loading ? 'Loading…' : `${products.length} products available`}
+            {loading
+              ? 'Loading…'
+              : `${selectedCategory || searchParam ? displayed.length : totalCount} products available`}
             {selectedCategory && ` · ${selectedCategory}`}
           </p>
         </div>
@@ -235,10 +262,11 @@ export default function Products() {
             categoryCounts={categoryCounts}
             selectedCategory={selectedCategory}
             setSelectedCategory={handleCategoryChange}
-            searchQuery={searchInput}
-            setSearchQuery={setSearchInput}
+            searchQuery={searchParam}
+            setSearchQuery={handleSidebarSearch}
             hasActiveFilters={hasActiveFilters}
             clearAll={clearAll}
+            allProductsCount={allProductsCount}
             showMobileFilters={false}
             setShowMobileFilters={() => { }}
           />
@@ -270,23 +298,16 @@ export default function Products() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
               {displayed.map(product => (
-                <div key={product.id} className="h-full flex">
-                  <div className="w-full h-full flex">
-                    <ProductCard
-                      id={product.id.toString()}
-                      variantId={product.variants?.[0]?.id}
-                      name={product.name}
-                      price={product.variants?.[0]?.price ?? 0}
-                      image={
-                        (product.images?.[0] as any)?.url ||
-                        (typeof product.images?.[0] === 'string' ? product.images[0] : undefined) ||
-                        'https://via.placeholder.com/400?text=No+Image'
-                      }
-                      category={product.category?.name ?? 'Uncategorized'}
-                      viewMode="grid"
-                    />
-                  </div>
-                </div>
+                <ProductCard
+                  key={product.id}
+                  id={product.id.toString()}
+                  variantId={product.variants?.[0]?.id}
+                  name={product.name}
+                  price={product.variants?.[0]?.price ?? 0}
+                  images={product.images}
+                  category={product.category?.name ?? 'Uncategorized'}
+                  viewMode="grid"
+                />
               ))}
             </div>
           )}

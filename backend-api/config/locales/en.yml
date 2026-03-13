@@ -1,5 +1,8 @@
 en:
   responses:
+    order_cancelled:
+      message: "Order cancelled successfully"
+      status: :ok
     common:
       created:
         message: "Created successfully"

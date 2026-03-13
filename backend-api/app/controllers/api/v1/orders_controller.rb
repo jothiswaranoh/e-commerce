@@ -101,13 +101,49 @@ module Api
       end
 
       def update
-        if @order.update(update_params)
-          render_success(OrderBlueprint.render_as_json(@order), "common.updated")
-        else
-          handle_response(@order)
-        end
-      end
+  new_status = update_params[:status]
 
+  if new_status.present? && !valid_status_transition?(@order.status, new_status)
+    return render_error(
+      "common.operation_failed",
+      "Invalid order status transition",
+      :unprocessable_entity
+    )
+  end
+
+  if @order.update(update_params)
+    render_success(OrderBlueprint.render_as_json(@order), "common.updated")
+  else
+    handle_response(@order)
+  end
+end
+      def cancel
+  order = Order.accessible_by(current_ability).find(params[:id])
+
+  unless order.status == "pending"
+    return render_error(
+      "common.operation_failed",
+      "Order cannot be cancelled unless it is pending",
+      :unprocessable_entity
+    )
+  end
+
+  ActiveRecord::Base.transaction do
+    order.order_items.each do |item|
+      variant = item.product_variant
+      next unless variant
+
+      variant.update!(stock: variant.stock + item.quantity)
+    end
+
+    order.update!(status: "cancelled")
+  end
+
+  render_success(
+  OrderBlueprint.render_as_json(order),
+  "order_cancelled"
+)
+end
       private
 
       def order_params
@@ -117,7 +153,17 @@ module Api
       def update_params
         params.require(:order).permit(:status, :payment_status)
       end
+      def valid_status_transition?(current_status, new_status)
+  allowed_transitions = {
+    "pending" => ["confirmed", "cancelled"],
+    "confirmed" => ["shipped", "cancelled"],
+    "shipped" => ["delivered"],
+    "delivered" => [],
+    "cancelled" => []
+  }
 
+  allowed_transitions[current_status]&.include?(new_status)
+end
       def build_items
         items = params[:items]
 
