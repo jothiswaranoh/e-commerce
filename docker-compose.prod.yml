@@ -23,6 +23,8 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     depends_on:
       - db
+    expose:
+      - "3000"
     networks:
       - ecommerce_network_prod
     restart: always

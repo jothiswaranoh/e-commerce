@@ -85,13 +85,16 @@ export default function CategoryModal({
       hadOriginalImage && !hasCurrentImage;
 
     const payload = {
-      ...draft,
-      image: newFiles[0] ?? undefined,
-      remove_image: isImageDeleted, // ALWAYS boolean
+      name: draft.name,
+      slug: draft.slug,
+      parent_id: draft.parent_id ?? null,
+      is_active: draft.is_active,
       sort_order:
         draft.sort_order === "" || draft.sort_order == null
           ? 0
           : Number(draft.sort_order),
+      image: newFiles[0],
+      remove_image: isImageDeleted
     };
 
     console.log("SENDING PAYLOAD:", payload);
@@ -145,10 +148,13 @@ export default function CategoryModal({
                   value={draft.name}
                   onChange={e => {
                     const value = e.target.value;
+                     const slug = value
+                      .toLowerCase()
+                      .trim()
+                      .replace(/\s+/g, "-")
+                      .replace(/[^a-z0-9-]/g, "");
                     set("name", value);
-                    set("slug",
-                      value.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
-                    );
+                    set("slug", slug.charAt(0).toUpperCase() + slug.slice(1));
                   }}
                   className="text-xl font-semibold text-gray-900 bg-transparent border-b-2 border-indigo-300 focus:outline-none focus:border-indigo-500"
                 />
@@ -180,7 +186,14 @@ export default function CategoryModal({
               </>
             ) : (
               <button
-                onClick={() => setMode("edit")}
+                onClick={() => {
+                  if (category) {
+                    setDraft({ ...category, images: [...(category.images || [])] });
+                    setNewFiles([]);
+                    setActiveImg(0);
+                  }
+                  setMode("edit");
+                }}
                 className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700"
               >
                 <Pencil className="w-4 h-4" /> Edit category

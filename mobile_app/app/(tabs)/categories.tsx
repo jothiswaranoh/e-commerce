@@ -1,50 +1,52 @@
 import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Search, Menu } from 'lucide-react-native';
 import AppText from '@/components/AppText';
-import { COLORS, SPACING, BORDERS, SHADOWS, GRADIENTS } from '@/lib/theme';
+import { COLORS, SPACING } from '@/lib/theme';
 import { CATEGORIES } from '@/lib/constants';
 
 const { width } = Dimensions.get('window');
-const COLUMN_WIDTH = (width - SPACING.lg * 2 - SPACING.md * 2) / 3;
 
 export default function CategoriesScreen() {
     const router = useRouter();
 
-    const renderCategoryItem = (category: any) => {
+    const renderCategoryCard = (category: any, index: number) => {
         const IconComponent = category.icon;
         return (
             <TouchableOpacity
                 key={category.id}
-                style={styles.gridItem}
+                style={styles.categoryCard}
                 activeOpacity={0.7}
-                onPress={() => { }}
             >
-                <View style={[styles.iconWrapper, { backgroundColor: category.color + '15' }]}>
-                    <IconComponent size={28} color={category.color} />
+                <View style={styles.cardContent}>
+                    <View style={styles.iconContainer}>
+                        <IconComponent size={32} color={category.color} />
+                    </View>
+                    <AppText variant="sm" weight="medium" numberOfLines={2} style={styles.categoryName}>
+                        {category.name}
+                    </AppText>
                 </View>
-                <AppText variant="xs" weight="medium" style={styles.categoryName} numberOfLines={1}>
-                    {category.name}
-                </AppText>
             </TouchableOpacity>
         );
     };
 
-    const renderListCategory = (category: any) => {
+    const renderListItem = (category: any, index: number) => {
         const IconComponent = category.icon;
         return (
             <TouchableOpacity
                 key={`list-${category.id}`}
                 style={styles.listItem}
                 activeOpacity={0.7}
-                onPress={() => { }}
             >
                 <View style={styles.listContent}>
-                    <IconComponent size={20} color={COLORS.neutral[500]} />
-                    <AppText variant="md" style={styles.listText}>{category.name}</AppText>
-                    <ChevronRight size={16} color={COLORS.neutral[300]} />
+                    <View style={styles.listIconContainer}>
+                        <IconComponent size={20} color={category.color} />
+                    </View>
+                    <AppText variant="md" weight="medium" style={styles.listText}>
+                        {category.name}
+                    </AppText>
+                    <ChevronRight size={20} color={COLORS.neutral[400]} />
                 </View>
             </TouchableOpacity>
         );
@@ -52,54 +54,71 @@ export default function CategoriesScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Amazon Search Header */}
-            <LinearGradient
-                colors={GRADIENTS.amazonHeader}
-                style={styles.headerGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-            >
+            {/*headd*/}
+            <View style={styles.header}>
                 <SafeAreaView edges={['top']}>
-                    <View style={styles.searchBarWrapper}>
-                        <View style={styles.searchBar}>
-                            <Search size={20} color={COLORS.neutral[900]} style={styles.searchIcon} />
-                            <TextInput
-                                placeholder="Search Shop.com"
-                                style={styles.searchInput}
-                                placeholderTextColor={COLORS.neutral[500]}
-                            />
+                    <View style={styles.headerContent}>
+                        <View style={styles.headerTop}>
+                            <TouchableOpacity style={styles.menuBtn}>
+                                <Menu size={24} color={COLORS.neutral[0]} />
+                            </TouchableOpacity>
+                            <AppText variant="xl" weight="bold" color={COLORS.neutral[0]}>
+                                Shop by Categories
+                            </AppText>
+                            <View style={{ width: 40 }} />
+                        </View>
+
+                        {/*search-bar*/}
+                        <View style={styles.searchContainer}>
+                            <View style={styles.searchBar}>
+                                <Search size={20} color={COLORS.neutral[500]} />
+                                <TextInput
+                                    placeholder="Search Categories"
+                                    placeholderTextColor={COLORS.neutral[500]}
+                                    style={styles.searchInput}
+                                />
+                            </View>
                         </View>
                     </View>
                 </SafeAreaView>
-            </LinearGradient>
+            </View>
 
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
-                stickyHeaderIndices={[1]}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Popular Departments Title */}
-                <View style={[styles.sectionHeader, { paddingTop: SPACING.lg }]}>
-                    <AppText variant="lg" weight="bold">Popular Departments</AppText>
+                <View style={styles.section}>
+                    <View style={styles.gridContainer}>
+                        {CATEGORIES.slice(0, 8).map((category, index) => (
+                            <TouchableOpacity
+                                key={category.id}
+                                style={styles.gridItem}
+                                activeOpacity={0.7}
+                            >
+                                <View style={styles.gridIconContainer}>
+                                    <category.icon size={28} color={category.color} />
+                                </View>
+                                <AppText variant="xs" weight="medium" numberOfLines={2} style={styles.gridText}>
+                                    {category.name}
+                                </AppText>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
                 </View>
 
-                {/* Popular Tiled Grid */}
-                <View style={styles.gridContainer}>
-                    {CATEGORIES.slice(0, 9).map(renderCategoryItem)}
-                </View>
-
-                {/* Full Directory Section */}
+                {/*all category*/}
                 <View style={styles.directorySection}>
-                    <View style={styles.sectionHeader}>
-                        <AppText variant="lg" weight="bold">Shop by Department</AppText>
+                    <View style={styles.directoryHeader}>
+                        <AppText variant="lg" weight="bold">All Categories</AppText>
                     </View>
+
                     <View style={styles.listContainer}>
-                        {CATEGORIES.map(renderListCategory)}
+                        {CATEGORIES.map(renderListItem)}
                     </View>
                 </View>
 
-                <View style={{ height: 40 }} />
+                <View style={{ height: 100 }} />
             </ScrollView>
         </View>
     );
@@ -108,77 +127,125 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.neutral[100],
+        backgroundColor: COLORS.neutral[50],
     },
-    headerGradient: {
-        paddingBottom: SPACING.md,
+    header: {
+        backgroundColor: COLORS.neutral[0],
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.neutral[300],
     },
-    searchBarWrapper: {
-        paddingHorizontal: SPACING.lg,
+    headerContent: {
+        paddingHorizontal: SPACING.md,
+        paddingBottom: SPACING.sm,
+    },
+    headerTop: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         paddingVertical: SPACING.sm,
+    },
+    menuBtn: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    searchContainer: {
+        paddingTop: SPACING.xs,
     },
     searchBar: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.neutral[0],
+        backgroundColor: COLORS.neutral[100],
         height: 44,
         borderRadius: 8,
-        paddingHorizontal: SPACING.md,
-        ...SHADOWS.sm,
-    },
-    searchIcon: {
-        marginRight: SPACING.sm,
+        paddingHorizontal: SPACING.sm,
+        gap: SPACING.sm,
+        marginTop: -25,
     },
     searchInput: {
         flex: 1,
-        fontSize: 15,
+        fontSize: 16,
         color: COLORS.neutral[900],
     },
     scrollView: {
         flex: 1,
     },
     scrollContent: {
-        gap: SPACING.md,
+        paddingTop: SPACING.md,
     },
-    sectionHeader: {
-        paddingHorizontal: SPACING.xl,
-        paddingVertical: SPACING.md,
+
+    // Grid 
+    section: {
+        paddingHorizontal: SPACING.md,
+        marginBottom: SPACING.md,
     },
     gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        paddingHorizontal: SPACING.lg,
-        gap: SPACING.md,
+        gap: 1,
+        backgroundColor: COLORS.neutral[0],
+        borderRadius: 8,
+        overflow: 'hidden',
     },
     gridItem: {
-        width: COLUMN_WIDTH,
+        width: (width - SPACING.md * 2 - 3) / 4,
         backgroundColor: COLORS.neutral[0],
-        borderRadius: 12,
-        padding: SPACING.md,
+        paddingVertical: SPACING.md,
         alignItems: 'center',
-        ...SHADOWS.sm,
-        borderWidth: 1,
-        borderColor: COLORS.neutral[200],
+        justifyContent: 'center',
     },
-    iconWrapper: {
+    gridIconContainer: {
         width: 56,
         height: 56,
         borderRadius: 28,
+        backgroundColor: COLORS.neutral[50],
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: SPACING.xs,
+    },
+    gridText: {
+        textAlign: 'center',
+        color: COLORS.neutral[900],
+        paddingHorizontal: SPACING.xs,
+    },
+    categoryCard: {
+        width: (width - SPACING.md * 2 - SPACING.sm) / 2,
+        backgroundColor: COLORS.neutral[0],
+        borderRadius: 8,
+        padding: SPACING.md,
+        marginBottom: SPACING.sm,
+    },
+    cardContent: {
+        alignItems: 'center',
+    },
+    iconContainer: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: COLORS.neutral[50],
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: SPACING.sm,
     },
     categoryName: {
         textAlign: 'center',
+        color: COLORS.neutral[900],
     },
+
+    // all catog
     directorySection: {
-        marginTop: SPACING.lg,
         backgroundColor: COLORS.neutral[0],
-        borderTopWidth: 1,
-        borderTopColor: COLORS.neutral[200],
+        paddingTop: SPACING.md,
+    },
+    directoryHeader: {
+        paddingHorizontal: SPACING.md,
+        paddingBottom: SPACING.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.neutral[100],
     },
     listContainer: {
-        paddingHorizontal: SPACING.xl,
+        paddingHorizontal: SPACING.md,
     },
     listItem: {
         borderBottomWidth: 1,
@@ -187,11 +254,20 @@ const styles = StyleSheet.create({
     listContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: SPACING.lg,
+        paddingVertical: SPACING.md,
         gap: SPACING.md,
+    },
+    listIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: COLORS.neutral[50],
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     listText: {
         flex: 1,
-        color: COLORS.neutral[700],
+        color: COLORS.neutral[900],
     },
 });
+

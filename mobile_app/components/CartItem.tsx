@@ -22,7 +22,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove }: CartItemP
                         {item.name}
                     </AppText>
                     <View style={styles.priceRow}>
-                        <AppText variant="lg" weight="bold" color={COLORS.neutral[700]}>
+                        <AppText variant="lg" weight="bold" color={COLORS.neutral[900]}>
                             ${item.price.toFixed(2)}
                         </AppText>
                         {item.isPrime && (
@@ -59,8 +59,8 @@ export default function CartItem({ item, onUpdateQuantity, onRemove }: CartItemP
                             style={styles.deleteBtn}
                             onPress={() => onRemove(item.id)}
                         >
-                            <Trash2 size={18} color={COLORS.neutral[600]} />
-                            <AppText variant="sm" color={COLORS.neutral[600]}>Delete</AppText>
+                            <Trash2 size={18} color={COLORS.neutral[500]} />
+                            <AppText variant="sm" color={COLORS.neutral[500]}>Delete</AppText>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.neutral[0],
         padding: SPACING.lg,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.neutral[200],
+        borderBottomColor: COLORS.neutral[100],
     },
     content: {
         flexDirection: 'row',
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     },
     title: {
         lineHeight: 20,
-        color: COLORS.neutral[700],
+        color: COLORS.neutral[900],
     },
     priceRow: {
         flexDirection: 'row',
