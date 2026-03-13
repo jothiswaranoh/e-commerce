@@ -1,5 +1,6 @@
 web-app/node_modules/
 web-app/dist/
+web-app/nginx.config
 
 # Ignore bundler config.
 backend-api/.bundle/
@@ -29,3 +30,11 @@ backend-api/tmp/storage/*
 backend-api/config/master.key
 .DS_Store
 node_modules/
+
+
+#certificates
+/ssl
+
+#docker
+docker-compose.prod.yml
+
