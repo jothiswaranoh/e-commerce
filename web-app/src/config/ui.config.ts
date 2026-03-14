@@ -33,6 +33,7 @@ export const NAVBAR = {
     login: 'Login',
     menu: {
         myProfile: 'My Profile',
+        myWishlist: 'My Wishlist',
         myOrders: 'My Orders',
         adminDashboard: 'Admin Dashboard',
         signOut: 'Sign Out',
