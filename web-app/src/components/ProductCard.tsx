@@ -1,9 +1,11 @@
 import { ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { getWishlist, toggleWishlistItem } from '../utils/wishlist';
+import { ROUTES } from '../config/routes.constants';
 
 interface ProductCardProps {
   id?: string;
@@ -28,6 +30,8 @@ export default function ProductCard({
   images,
   category = "Electronics",
 }: ProductCardProps) {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const [isWishlisted, setIsWishlisted] = useState(() => getWishlist().has(id));
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -45,6 +49,11 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     if (isAdding) return;
+
+    if (!isAuthenticated) {
+      navigate(ROUTES.LOGIN);
+      return;
+    }
 
     try {
       setIsAdding(true);
