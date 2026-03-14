@@ -10,7 +10,16 @@ end
 puts "✅ Organization '#{org.name}' ready."
 
 # 2. Create Categories
-categories = ["Electronics", "Fashion", "Home", "Sports"]
+categories = [
+  "MENS T-SHIRTS",
+  "MENS JEANS",
+  "MENS FORMALS",
+  "MENS ACCESSORIES",
+  "MENS FOOTWEAR",
+  "HOODIES/SWEATSHIRTS",
+  "ACCESSORIES",
+  "MENS FASHION"
+]
 category_map = {}
 
 categories.each do |cat_name|
@@ -27,7 +36,7 @@ products_data = [
   {
     name: "Classic Leather Jacket",
     description: "Premium leather jacket for a timeless look.",
-    category: "Fashion",
+    category: "MENS FASHION",
     price: 199.99,
     image_url: "https://images.unsplash.com/photo-1551028919-ac7d21422e91?auto=format&fit=crop&q=80&w=800",
     sku: "JKT-001"
@@ -35,7 +44,7 @@ products_data = [
   {
     name: "Slim Fit Denim Jeans",
     description: "Comfortable and stylish denim jeans.",
-    category: "Fashion",
+    category: "MENS JEANS",
     price: 49.99,
     image_url: "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?auto=format&fit=crop&q=80&w=800",
     sku: "JNS-002"
@@ -43,7 +52,7 @@ products_data = [
   {
     name: "Running Shoes",
     description: "High-performance running shoes.",
-    category: "Sports",
+    category: "MENS FOOTWEAR",
     price: 89.99,
     image_url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800",
     sku: "SHS-003"
@@ -51,7 +60,7 @@ products_data = [
   {
     name: "Smart Watch Series 5",
     description: "Track your fitness and stay connected.",
-    category: "Electronics",
+    category: "ACCESSORIES",
     price: 299.99,
     image_url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800",
     sku: "WTC-004"
@@ -59,7 +68,7 @@ products_data = [
   {
     name: "Minimalist Desk Lamp",
     description: "Modern LED desk lamp with adjustable brightness.",
-    category: "Home",
+    category: "ACCESSORIES",
     price: 35.00,
     image_url: "https://images.unsplash.com/photo-1507473888900-52e1ad142756?auto=format&fit=crop&q=80&w=800",
     sku: "LMP-005"
@@ -67,7 +76,7 @@ products_data = [
   {
     name: "Cotton T-Shirt",
     description: "Breathable 100% cotton t-shirt in various colors.",
-    category: "Fashion",
+    category: "MENS T-SHIRTS",
     price: 15.99,
     image_url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800",
     sku: "TSH-006"
@@ -75,7 +84,7 @@ products_data = [
   {
     name: "Yoga Mat",
     description: "Non-slip yoga mat for your daily workout.",
-    category: "Sports",
+    category: "HOODIES/SWEATSHIRTS",
     price: 25.00,
     image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800",
     sku: "YGM-007"
@@ -83,7 +92,7 @@ products_data = [
   {
     name: "Wireless Headphones",
     description: "Noise-cancelling over-ear headphones.",
-    category: "Electronics",
+    category: "MENS ACCESSORIES",
     price: 150.00,
     image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800",
     sku: "HDP-008"

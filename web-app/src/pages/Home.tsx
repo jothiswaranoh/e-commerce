@@ -159,7 +159,6 @@ export default function Home() {
           CATEGORIES + FEATURED (unchanged logic)
       ══════════════════════════════════════ */}
       <CategoriesSection />
-      <FeaturedProductsSection />
 
       {/* ══════════════════════════════════════
           PROMOTIONAL BANNER
@@ -189,6 +188,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════
+          FEATURED PRODUCTS
+      ══════════════════════════════════════ */}
+      <FeaturedProductsSection />
 
       {/* ══════════════════════════════════════
           NEWSLETTER
