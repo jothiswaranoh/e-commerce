@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Share,
   Modal,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +19,6 @@ import {
   Share2,
   Heart,
   Star,
-  ChevronRight,
   ShieldCheck,
   Truck,
   RotateCcw,
@@ -31,16 +31,16 @@ import {
   ChevronDown,
   ChevronUp,
   X,
-  Eye,
   ArrowRight,
   BadgeCheck,
 } from 'lucide-react-native';
 import AppText from '@/components/AppText';
-import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/context/CartContext';
-import { MOCK_PRODUCTS, Product } from '@/lib/mock-data';
-import { COLORS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
+import { COLORS, SPACING, SHADOWS } from '@/lib/theme';
 import { useFavourite } from '@/context/FavouriteContext';
+import { productApi } from '@/lib/api';
+import { mapBackendProduct } from '@/lib/product-utils';
+import { Product } from '@/types/product';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -92,6 +92,9 @@ export default function ProductDetailsScreen() {
   const { addToCart } = useCart();
   const { toggleFavourite, isFavourite } = useFavourite();
   const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImage, setCurrentImage] = useState(0);
   const [showZoom, setShowZoom] = useState(false);
@@ -99,15 +102,54 @@ export default function ProductDetailsScreen() {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const product = MOCK_PRODUCTS.find((p) => p.id === id) || MOCK_PRODUCTS[0];
-  const favourite = isFavourite(product.id);
-  const images = product.images || [product.image_url];
+  const productId = Array.isArray(id) ? id[0] : id;
+  const favourite = isFavourite(product?.id ?? '');
+  const images = product?.images || (product ? [product.image_url] : []);
   const colors = ['Black', 'White', 'Blue'];
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 500);
-  }, [id]);
+    if (!productId) {
+      setError('Product not found.');
+      setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadProduct() {
+      try {
+        const [productResponse, productsResponse] = await Promise.all([
+          productApi.getProduct(productId),
+          productApi.getProducts({ page: 1, per_page: 6 }),
+        ]);
+
+        if (!isMounted) return;
+
+        const mappedProduct = mapBackendProduct(productResponse);
+        const mappedRelatedProducts = productsResponse.data
+          .map(mapBackendProduct)
+          .filter((item) => item.id !== mappedProduct.id);
+
+        setProduct(mappedProduct);
+        setRelatedProducts(mappedRelatedProducts);
+        setError(null);
+      } catch (fetchError) {
+        if (!isMounted) return;
+
+        setError(fetchError instanceof Error ? fetchError.message : 'Failed to load product');
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProduct();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [productId]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -117,12 +159,22 @@ export default function ProductDetailsScreen() {
     }).start();
   }, []);
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
-    router.push('/(tabs)/cart');
+  const handleAddToCart = async () => {
+    if (!product) return;
+    try {
+      await addToCart(product, quantity);
+      router.push('/(tabs)/cart');
+    } catch (error) {
+      Alert.alert(
+        'Unable to add item',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
   };
 
   const handleShare = async () => {
+    if (!product) return;
+
     try {
       await Share.share({
         message: `Check out this ${product.name} on Shop!`,
@@ -152,6 +204,16 @@ export default function ProductDetailsScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary.DEFAULT} />
+      </View>
+    );
+  }
+
+  if (!product) {
+    return (
+      <View style={styles.loadingContainer}>
+        <AppText variant="md" color={COLORS.neutral[500]}>
+          {error ?? 'Product not found.'}
+        </AppText>
       </View>
     );
   }
@@ -460,7 +522,7 @@ export default function ProductDetailsScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.relatedScroll}
             >
-              {MOCK_PRODUCTS.filter(p => p.id !== product.id).slice(0, 5).map((item) => (
+              {relatedProducts.slice(0, 5).map((item) => (
                 <TouchableOpacity 
                   key={item.id} 
                   style={styles.relatedCard}
@@ -1053,4 +1115,3 @@ const styles = StyleSheet.create({
     ...SHADOWS.sm,
   },
 });
-

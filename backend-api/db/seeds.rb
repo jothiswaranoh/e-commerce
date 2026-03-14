@@ -91,22 +91,20 @@ products_data = [
 ]
 
 products_data.each do |p_data|
-  product = Product.find_or_create_by!(name: p_data[:name], organization: org) do |p|
-    p.name = "#{p_data[:name]} - Default"
-    p.category = category_map[p_data[:category]]
-    p.description = p_data[:description]
-    p.slug = p_data[:name].downcase.parameterize
-    p.status = 'active'
-    p.image_url = p_data[:image_url]
-  end
+  product = Product.find_or_initialize_by(name: p_data[:name], organization: org)
+  product.category = category_map[p_data[:category]]
+  product.description = p_data[:description]
+  product.slug = p_data[:name].downcase.parameterize
+  product.status = "active"
+  product.image_url = p_data[:image_url]
 
-  # Create Default Variant
-  ProductVariant.find_or_create_by!(product: product, sku: p_data[:sku]) do |v|
-    v.name = "#{product.name} - Default"
-    v.price = p_data[:price]
-    v.stock = rand(10..100)
-    v.is_active = true
-  end
+  variant = product.variants.find_or_initialize_by(sku: p_data[:sku])
+  variant.name = "#{p_data[:name]} - Default"
+  variant.price = p_data[:price]
+  variant.stock = variant.stock.presence || rand(10..100)
+  variant.is_active = true
+
+  product.save!
 
   puts "✅ Product '#{product.name}' ready."
 end

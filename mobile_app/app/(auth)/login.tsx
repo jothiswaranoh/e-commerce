@@ -158,7 +158,7 @@ export default function LoginScreen() {
                   <AppText color={COLORS.neutral[500]}>Remember me</AppText>
                 </Pressable>
                 
-                <Pressable>
+                <Pressable onPress={() => router.push('/(auth)/forgot-password')}>
                   <AppText color={COLORS.primary.DEFAULT} weight="semibold" style={styles.forgotText}>
                     Forgot Password?
                   </AppText>
@@ -472,4 +472,3 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 });
-

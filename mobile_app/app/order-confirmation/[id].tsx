@@ -9,7 +9,7 @@ import AppButton from '@/components/AppButton';
 import { COLORS, SPACING, SHADOWS, BORDERS, GRADIENTS } from '@/lib/theme';
 
 export default function OrderConfirmationScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, orderNumber } = useLocalSearchParams();
   const router = useRouter();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -65,7 +65,7 @@ export default function OrderConfirmationScreen() {
           <View style={styles.orderRow}>
             <View>
               <AppText variant="sm" color={COLORS.neutral[500]}>Order Number</AppText>
-              <AppText variant="lg" weight="bold">#{id}</AppText>
+              <AppText variant="lg" weight="bold">#{orderNumber ?? id}</AppText>
             </View>
             <View style={styles.statusBadge}>
               <AppText variant="sm" weight="semibold" color={COLORS.success.dark}>
@@ -138,6 +138,16 @@ export default function OrderConfirmationScreen() {
 
       {/* Bottom Actions */}
       <View style={styles.footer}>
+        {orderNumber ? (
+          <AppButton
+            title="View Order"
+            onPress={() => router.push(`/order/${id}`)}
+            variant="outline"
+            size="lg"
+            fullWidth
+            style={styles.viewOrderButton}
+          />
+        ) : null}
         <AppButton
           title="Continue Shopping"
           onPress={() => router.replace('/(tabs)')}
@@ -253,5 +263,8 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
     backgroundColor: COLORS.neutral[0],
     ...SHADOWS.lg,
+  },
+  viewOrderButton: {
+    marginBottom: SPACING.md,
   },
 });

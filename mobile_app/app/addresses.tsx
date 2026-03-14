@@ -1,196 +1,256 @@
-import { View, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRef, useEffect, useState } from 'react';
-import { ArrowLeft, MapPin, Plus, Trash2, Edit2, CheckCircle2 } from 'lucide-react-native';
+import { Plus, ArrowLeft, MapPin, Edit2, Trash2, Check } from 'lucide-react-native';
 import AppText from '@/components/AppText';
 import { COLORS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
 import { MOCK_ADDRESSES } from '@/lib/constants';
 
 export default function AddressesScreen() {
-    const router = useRouter();
-    const [addresses, setAddresses] = useState(MOCK_ADDRESSES);
-    const fadeAnim = useRef(new Animated.Value(0)).current;
+  const router = useRouter();
+  const [addresses, setAddresses] = useState(MOCK_ADDRESSES);
+  const [selectedId, setSelectedId] = useState(MOCK_ADDRESSES[0]?.id || null);
 
-    useEffect(() => {
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-        }).start();
-    }, []);
+  const handleDelete = (id: string) => {
+    setAddresses(addresses.filter((a) => a.id !== id));
+    if (selectedId === id) setSelectedId(null);
+  };
 
-    const handleDelete = (id: string) => {
-        setAddresses(addresses.filter(a => a.id !== id));
-    };
+  const toggleDefault = (id: string) => {
+    setSelectedId(id);
+  };
 
-    const setDefault = (id: string) => {
-        setAddresses(addresses.map(a => ({
-            ...a,
-            isDefault: a.id === id
-        })));
-    };
+  const renderAddressCard = (address: any) => (
+    <TouchableOpacity
+      key={address.id}
+      style={[
+        styles.card,
+        selectedId === address.id && styles.defaultCard,
+      ]}
+      activeOpacity={0.8}
+      onPress={() => toggleDefault(address.id)}
+    >
+      <View style={styles.cardHeader}>
+        <View style={styles.typeContainer}>
+          <MapPin size={20} color={COLORS.primary.DEFAULT} />
+          <AppText variant="sm" weight="semibold" style={styles.typeLabel}>
+            {address.type}
+          </AppText>
+        </View>
+        {selectedId === address.id && (
+          <View style={styles.checkContainer}>
+            <Check size={20} color={COLORS.primary.DEFAULT} />
+          </View>
+        )}
+      </View>
 
-    return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <ArrowLeft size={24} color={COLORS.neutral[900]} />
-                </TouchableOpacity>
-                <AppText variant="lg" weight="bold">Your Addresses</AppText>
-                <View style={{ width: 44 }} />
-            </View>
+      <View style={styles.addressDetails}>
+        <AppText variant="md" weight="bold" style={styles.name}>
+          {address.name}
+        </AppText>
+        <AppText variant="sm" numberOfLines={2} style={styles.street}>
+          {address.street}
+        </AppText>
+        <AppText variant="sm" style={styles.location}>
+          {address.city}, {address.zip}
+        </AppText>
+      </View>
 
-            <Animated.ScrollView
-                style={[styles.scrollView, { opacity: fadeAnim }]}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {addresses.map((address) => (
-                    <TouchableOpacity
-                        key={address.id}
-                        style={[styles.addressCard, address.isDefault && styles.defaultCard]}
-                        activeOpacity={0.9}
-                        onPress={() => setDefault(address.id)}
-                    >
-                        <View style={styles.cardHeader}>
-                            <View style={styles.typeBadge}>
-                                <AppText variant="xs" weight="bold" color={COLORS.neutral[500]}>
-                                    {address.type.toUpperCase()}
-                                </AppText>
-                            </View>
-                            {address.isDefault && (
-                                <View style={styles.defaultBadge}>
-                                    <CheckCircle2 size={16} color={COLORS.success.DEFAULT} />
-                                    <AppText variant="sm" weight="bold" color={COLORS.success.DEFAULT}>
-                                        Default
-                                    </AppText>
-                                </View>
-                            )}
-                        </View>
+      <View style={styles.actionsRow}>
+        <TouchableOpacity style={styles.actionBtn} activeOpacity={0.7}>
+          <Edit2 size={18} color={COLORS.neutral[600]} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionBtn}
+          activeOpacity={0.7}
+          onPress={() => handleDelete(address.id)}
+        >
+          <Trash2 size={18} color={COLORS.neutral[600]} />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
 
-                        <View style={styles.addressInfo}>
-                            <AppText variant="md" weight="bold">{address.name}</AppText>
-                            <AppText variant="sm" color={COLORS.neutral[700]} style={styles.street}>
-                                {address.street}
-                            </AppText>
-                            <AppText variant="sm" color={COLORS.neutral[700]}>
-                                {address.city}, {address.zip}
-                            </AppText>
-                        </View>
+  const hasAddresses = addresses.length > 0;
 
-                        <View style={styles.divider} />
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <ArrowLeft size={24} color={COLORS.neutral[900]} />
+        </TouchableOpacity>
+        <AppText variant="lg" weight="bold" style={styles.headerTitle}>
+          Addresses
+        </AppText>
+        <View style={{ width: 44 }} />
+      </View>
 
-                        <View style={styles.actions}>
-                            <TouchableOpacity style={styles.actionButton}>
-                                <AppText variant="sm" weight="medium" color={COLORS.info.DEFAULT}>Edit</AppText>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => handleDelete(address.id)}
-                            >
-                                <AppText variant="sm" weight="medium" color={COLORS.info.DEFAULT}>Remove</AppText>
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
-                ))}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {hasAddresses ? (
+          addresses.map(renderAddressCard)
+        ) : (
+          <View style={styles.emptyState}>
+            <MapPin size={64} color={COLORS.neutral[400]} />
+            <AppText variant="lg" weight="semibold" style={styles.emptyTitle}>
+              No Addresses
+            </AppText>
+            <AppText variant="sm" color={COLORS.neutral[500]} style={styles.emptySubtitle}>
+              Add your first delivery address to get started.
+            </AppText>
+          </View>
+        )}
+      </ScrollView>
 
-                <TouchableOpacity style={styles.addNewCard}>
-                    <Plus size={24} color={COLORS.neutral[400]} />
-                    <AppText variant="md" weight="medium" color={COLORS.neutral[700]}>
-                        Add a new address
-                    </AppText>
-                </TouchableOpacity>
-
-                <View style={{ height: 40 }} />
-            </Animated.ScrollView>
-        </SafeAreaView>
-    );
+      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
+        <Plus size={24} color={COLORS.neutral[0]} />
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.neutral[200],
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: SPACING.lg,
-        backgroundColor: COLORS.neutral[0],
-        ...SHADOWS.sm,
-    },
-    backButton: {
-        width: 44,
-        height: 44,
-        borderRadius: BORDERS.radius.full,
-        backgroundColor: COLORS.neutral[100],
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        padding: SPACING.lg,
-    },
-    addressCard: {
-        backgroundColor: COLORS.neutral[0],
-        borderRadius: BORDERS.radius.sm,
-        padding: SPACING.lg,
-        marginBottom: SPACING.md,
-        ...SHADOWS.sm,
-        borderWidth: 1,
-        borderColor: COLORS.neutral[300],
-    },
-    defaultCard: {
-        borderColor: COLORS.accent.DEFAULT,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.sm,
-    },
-    typeBadge: {
-        backgroundColor: COLORS.neutral[100],
-        paddingHorizontal: SPACING.sm,
-        paddingVertical: 2,
-        borderRadius: 4,
-    },
-    defaultBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    addressInfo: {
-        marginBottom: SPACING.lg,
-    },
-    street: {
-        marginTop: 2,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: COLORS.neutral[200],
-        marginBottom: SPACING.sm,
-    },
-    actions: {
-        flexDirection: 'row',
-        gap: SPACING.xl,
-    },
-    actionButton: {
-        paddingVertical: 4,
-    },
-    addNewCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: SPACING.sm,
-        backgroundColor: COLORS.neutral[0],
-        borderRadius: BORDERS.radius.sm,
-        padding: SPACING.xl,
-        borderWidth: 1,
-        borderColor: COLORS.neutral[300],
-        marginTop: SPACING.sm,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.neutral[0],
+    ...SHADOWS.sm,
+  },
+  backBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: BORDERS.radius.full,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 32,
+    lineHeight: 36,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: SPACING['3xl'],
+    paddingBottom: 120,
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 24,
+    padding: SPACING.xl,
+    marginBottom: SPACING.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(3, 2, 2, 0.2)',
+    ...SHADOWS.lg,
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.08,
+    shadowRadius: 40,
+    elevation: 12,
+  },
+  defaultCard: {
+    borderColor: COLORS.primary.DEFAULT,
+    shadowColor: COLORS.neutral[0],
+    shadowOpacity: 0.15,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  typeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    backgroundColor: 'rgba(124,58,237,0.1)',
+    borderRadius: 20,
+  },
+  typeLabel: {
+    color: COLORS.primary.DEFAULT,
+  },
+  checkContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(124,58,237,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addressDetails: {
+    marginBottom: SPACING.lg,
+  },
+  name: {
+    marginBottom: SPACING.xs,
+    color: COLORS.neutral[900],
+  },
+  street: {
+    marginBottom: SPACING.xs,
+    color: COLORS.neutral[900],
+    lineHeight: 22,
+  },
+  location: {
+    color: COLORS.neutral[600],
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: SPACING.lg,
+  },
+  actionBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: 100,
+    gap: SPACING.lg,
+  },
+  emptyTitle: {
+    color: COLORS.neutral[900],
+  },
+  emptySubtitle: {
+    textAlign: 'center',
+    maxWidth: 280,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 32,
+    right: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: COLORS.primary.DEFAULT,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...SHADOWS.lg,
+    shadowColor: COLORS.primary.DEFAULT,
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
+    elevation: 16,
+  },
 });

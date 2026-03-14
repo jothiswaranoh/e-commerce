@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Animated, Dimensions, Alert, Platform } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Animated, Dimensions, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -7,20 +7,43 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingCart, ShieldCheck, ChevronRight, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import AppText from '@/components/AppText';
-import AppButton from '@/components/AppButton';
 import { useCart } from '@/context/CartContext';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
 import { COLORS, SPACING, SHADOWS } from '@/lib/theme';
+import { productApi } from '@/lib/api';
+import { mapBackendProduct } from '@/lib/product-utils';
+import { Product } from '@/types/product';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function CartScreen() {
-  const { cart, removeFromCart, updateQuantity, totalPrice } = useCart();
+  const { cart, removeFromCart, updateQuantity, totalPrice, isLoading, error } = useCart();
   const router = useRouter();
+  const [recommendations, setRecommendations] = useState<Product[]>([]);
 
   const itemsCount = cart.reduce((acc, curr) => acc + curr.quantity, 0);
   const shipping = totalPrice >= 500 ? 0 : 49;
   const finalTotal = totalPrice + shipping;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRecommendations() {
+      try {
+        const response = await productApi.getProducts({ page: 1, per_page: 8 });
+        if (!isMounted) return;
+        setRecommendations(response.data.map(mapBackendProduct));
+      } catch {
+        if (!isMounted) return;
+        setRecommendations([]);
+      }
+    }
+
+    loadRecommendations();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>, itemId: string) => {
     const scale = dragX.interpolate({
@@ -32,9 +55,9 @@ export default function CartScreen() {
     return (
       <TouchableOpacity
         style={styles.deleteAction}
-        onPress={() => {
+        onPress={async () => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          removeFromCart(itemId);
+          await removeFromCart(itemId);
         }}
       >
         <Animated.View style={[styles.deleteActionContent, { transform: [{ scale }] }]}>
@@ -45,16 +68,16 @@ export default function CartScreen() {
     );
   };
 
-  const AnimatedQuantityControl = ({ quantity, onIncrement, onDecrement }: { quantity: number; onIncrement: () => void; onDecrement: () => void }) => {
+  const AnimatedQuantityControl = ({ quantity, onIncrement, onDecrement }: { quantity: number; onIncrement: () => Promise<void>; onDecrement: () => Promise<void> }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
-    const animatePress = (callback: () => void) => {
+    const animatePress = async (callback: () => Promise<void>) => {
       Animated.sequence([
         Animated.timing(scaleAnim, { toValue: 0.85, duration: 100, useNativeDriver: true }),
         Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
       ]).start();
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      callback();
+      await callback();
     };
 
     return (
@@ -110,9 +133,9 @@ export default function CartScreen() {
               <AnimatedQuantityControl
                 quantity={item.quantity}
                 onIncrement={() => updateQuantity(item.id, 1)}
-                onDecrement={() => {
+                onDecrement={async () => {
                   if (item.quantity > 1) {
-                    updateQuantity(item.id, -1);
+                    await updateQuantity(item.id, -1);
                   } else {
                     swipeableRef.current?.openRight();
                   }
@@ -120,9 +143,9 @@ export default function CartScreen() {
               />
               <TouchableOpacity
                 style={styles.deleteBtn}
-                onPress={() => {
+                onPress={async () => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  removeFromCart(item.id);
+                  await removeFromCart(item.id);
                 }}
               >
                 <Trash2 size={16} color={COLORS.error.DEFAULT} />
@@ -134,6 +157,14 @@ export default function CartScreen() {
       </Swipeable>
     );
   };
+
+  if (isLoading && cart.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary.DEFAULT} />
+      </View>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -191,7 +222,7 @@ export default function CartScreen() {
               </TouchableOpacity>
             </View>
             <View style={styles.recGrid}>
-              {MOCK_PRODUCTS.slice(0, 4).map((p) => (
+              {recommendations.slice(0, 4).map((p) => (
                 <TouchableOpacity
                   key={p.id}
                   style={styles.recItem}
@@ -279,7 +310,7 @@ export default function CartScreen() {
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recScrollContent}>
-              {MOCK_PRODUCTS.slice(4, 8).map((p) => (
+              {recommendations.slice(4, 8).map((p) => (
                 <TouchableOpacity
                   key={p.id}
                   style={styles.recCard}
@@ -326,6 +357,14 @@ export default function CartScreen() {
         }
       />
 
+      {error ? (
+        <View style={styles.errorBanner}>
+          <AppText variant="xs" color={COLORS.error.DEFAULT}>
+            {error}
+          </AppText>
+        </View>
+      ) : null}
+
       {/*checkout Button */}
       <View style={styles.stickyCheckout}>
         <SafeAreaView edges={['bottom']}>
@@ -366,6 +405,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.neutral[50],
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.neutral[50],
+  },
+  errorBanner: {
+    position: 'absolute',
+    left: SPACING.md,
+    right: SPACING.md,
+    bottom: Platform.OS === 'ios' ? 170 : 120,
+    backgroundColor: COLORS.error.light,
+    borderRadius: 12,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
 
   header: {
@@ -729,4 +784,3 @@ const styles = StyleSheet.create({
     paddingRight: SPACING.md,
   },
 });
-
