@@ -71,6 +71,8 @@ export default function ProductForm({
     const [errors, setErrors] = useState<FormErrors>({});
     const [dragOver, setDragOver] = useState(false);
 
+    const hasImages = existingImages.length > 0 || newImages.length > 0;
+
     /* ----------------------------------------
        Auto-slug from name
     ---------------------------------------- */
@@ -297,51 +299,6 @@ export default function ProductForm({
             {/* Images */}
             <Field label="Product Images" hint="Upload multiple images">
                 <div className="space-y-3">
-                    {/* Existing images */}
-                    {existingImages.length > 0 && (
-                        <div className="grid grid-cols-4 gap-3">
-                            {existingImages.map((url, idx) => (
-                                <div key={idx} className="relative group">
-                                    <img
-                                        src={url}
-                                        alt={`Product ${idx + 1}`}
-                                        className="w-full h-24 object-cover rounded-xl border border-gray-200"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeExistingImage(idx)}
-                                        className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-200"
-                                    >
-                                        <X className="w-3 h-3 text-gray-500 hover:text-red-500" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* New images preview */}
-                    {newImages.length > 0 && (
-                        <div className="grid grid-cols-4 gap-3">
-                            {newImages.map((file, idx) => (
-                                <div key={idx} className="relative group">
-                                    <img
-                                        src={URL.createObjectURL(file)}
-                                        alt={`New ${idx + 1}`}
-                                        className="w-full h-24 object-cover rounded-xl border border-indigo-200 ring-2 ring-indigo-100"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeNewImage(idx)}
-                                        className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-200"
-                                    >
-                                        <X className="w-3 h-3 text-gray-500 hover:text-red-500" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Upload zone */}
                     <label
                         onDragOver={(e) => {
                             e.preventDefault();
@@ -349,16 +306,75 @@ export default function ProductForm({
                         }}
                         onDragLeave={() => setDragOver(false)}
                         onDrop={handleDrop}
-                        className={`flex flex-col items-center justify-center gap-2 h-28 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${dragOver
+                        className={`relative flex flex-col items-center justify-center gap-3 min-h-[18rem] rounded-2xl border-2 border-dashed cursor-pointer transition-colors overflow-hidden ${dragOver
                             ? "border-indigo-400 bg-indigo-50"
-                            : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100"
+                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
                             }`}
                     >
-                        <ImagePlus className="w-5 h-5 text-gray-400" />
-                        <span className="text-xs text-gray-400">
-                            Drop images or{" "}
-                            <span className="text-indigo-500 font-medium">browse</span>
-                        </span>
+                        {hasImages ? (
+                            <div className="w-full h-full p-4">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    {existingImages.map((url, idx) => (
+                                        <div key={`existing-${idx}`} className="relative group">
+                                            <img
+                                                src={url}
+                                                alt={`Product ${idx + 1}`}
+                                                className="w-full h-32 object-cover rounded-xl border border-gray-200"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    removeExistingImage(idx);
+                                                }}
+                                                className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-200"
+                                            >
+                                                <X className="w-3 h-3 text-gray-500 hover:text-red-500" />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {newImages.map((file, idx) => (
+                                        <div key={`new-${idx}`} className="relative group">
+                                            <img
+                                                src={URL.createObjectURL(file)}
+                                                alt={`New ${idx + 1}`}
+                                                className="w-full h-32 object-cover rounded-xl border border-indigo-200 ring-2 ring-indigo-100"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    removeNewImage(idx);
+                                                }}
+                                                className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-200"
+                                            >
+                                                <X className="w-3 h-3 text-gray-500 hover:text-red-500" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
+                                    <ImagePlus className="w-4 h-4 text-indigo-500" />
+                                    <span>Click anywhere here to upload more images</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="w-20 h-20 rounded-3xl bg-gray-50 flex items-center justify-center border border-gray-100">
+                                    <Package className="w-10 h-10 text-gray-300" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-lg font-semibold text-gray-700">No images uploaded</p>
+                                    <p className="mt-1 text-sm text-gray-400">
+                                        Click here to upload product images or drag and drop them
+                                    </p>
+                                </div>
+                            </>
+                        )}
                         <input
                             type="file"
                             accept="image/*"
