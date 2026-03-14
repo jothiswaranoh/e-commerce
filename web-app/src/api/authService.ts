@@ -4,12 +4,12 @@ import type { User, AuthResponse } from '../types';
 
 // Auth Service
 export const authService = {
-    loginUser: async (email: string, password: string): Promise<AuthResponse> => {
+    loginUser: async (identifier: string, password: string): Promise<AuthResponse> => {
         try {
             const response = await service<any>({
                 url: '/login',
                 method: 'post',
-                data: { email_address: email, password },
+                data: { identifier, password },
             });
 
             if (response.success && response.data?.token) {
@@ -52,6 +52,7 @@ export const authService = {
                     user: {
                         name: userData.name,
                         email_address: userData.email,
+                        phone_number: userData.phone,
                         password: userData.password,
                         password_confirmation: userData.password,
                         org_id: 1,
@@ -114,6 +115,7 @@ export const authService = {
                 id: userData.id.toString(),
                 name: userData.name || userData.email_address?.split('@')[0] || 'User',
                 email: userData.email_address,
+                phone: userData.phone_number,
                 role: userData.role || 'customer',
                 emailVerified: true,
                 createdAt: userData.created_at || new Date().toISOString()

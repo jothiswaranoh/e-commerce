@@ -15,6 +15,7 @@ module Api
             success: true,
             token: token,
             email: user.email_address,
+            phone_number: user.phone_number,
             role: role_name,
             message: "User registered successfully"
           }, status: :created
@@ -26,10 +27,8 @@ module Api
       private
 
       def registration_params
-        params.require(:user).permit(:email_address, :password, :password_confirmation, :org_id, :role, :name)
+        params.require(:user).permit(:email_address, :phone_number, :password, :password_confirmation, :org_id, :role, :name)
       end
     end
   end
 end
-
-
