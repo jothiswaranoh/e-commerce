@@ -103,7 +103,7 @@ export default function ProductDetail() {
   }
   const images =
     product.images && product.images.length > 0
-      ? product.images
+      ? product.images.map((img: any) => img.url || img.image_url)
       : ['https://via.placeholder.com/600?text=No+Image'];
 
   const goNext = () => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
