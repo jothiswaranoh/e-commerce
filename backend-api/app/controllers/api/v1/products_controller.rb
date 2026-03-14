@@ -41,16 +41,17 @@ module Api
 
         if product.update(resource_params.except(:images, :delete_image_ids, :image_order_ids))
 
-          if params[:product][:image_order_ids].present?
-            ordered_ids = params[:product][:image_order_ids].map(&:to_i)
+          if resource_params[:image_order_ids].present?
+            ordered_ids = resource_params[:image_order_ids].map(&:to_i)
 
             attachments = product.images.attachments.where(id: ordered_ids).index_by(&:id)
 
+            ordered_blobs = ordered_ids.map { |id| attachments[id]&.blob }.compact
+
             product.images.detach
 
-            ordered_ids.each do |id|
-              attachment = attachments[id]
-              product.images.attach(attachment.blob) if attachment
+            ordered_blobs.each do |blob|
+              product.images.attach(blob)
             end
           end
 
