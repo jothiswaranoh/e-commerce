@@ -28,6 +28,30 @@ module Api
         )
       end
 
+      def create
+        product = model_class.new(resource_params.except(:images))
+        product.org_id = current_org.id if product.respond_to?(:org_id)
+
+        if product.save
+          if resource_params[:images].present?
+            resource_params[:images].each do |img|
+              product.images.attach(img)
+            end
+          end
+
+          product.reload
+
+          render_success(
+            ProductBlueprint.render_as_json(product),
+            create_response_key,
+            nil,
+            :created
+          )
+        else
+          handle_response(product)
+        end
+      end
+
       def update
         product = model_class.find(params[:id])
         delete_ids = resource_params[:delete_image_ids]

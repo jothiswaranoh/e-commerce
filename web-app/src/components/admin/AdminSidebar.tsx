@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Users, ChevronLeft, ChevronRight, Tags } from 'lucide-react';
 import { ROUTES, ADMIN_NAV_ITEMS } from '../../config/routes.constants';
 
 interface AdminSidebarProps {
@@ -9,6 +9,7 @@ interface AdminSidebarProps {
 
 const iconMap = {
     LayoutDashboard,
+    Tags,
     Package,
     ShoppingBag,
     Users,

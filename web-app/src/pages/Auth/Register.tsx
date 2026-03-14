@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone, Github } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
 import { UI_CONFIG } from '../../config/ui.config';
 import Input from '../../components/ui/Input';
@@ -189,7 +189,7 @@ export default function Register() {
               Google
             </button>
             <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all text-sm font-medium text-gray-700">
-              <img src={images.socialIcons.github} alt="GitHub" className="w-4 h-4" />
+              <Github className="w-4 h-4 text-gray-800" />
               GitHub
             </button>
           </div>
