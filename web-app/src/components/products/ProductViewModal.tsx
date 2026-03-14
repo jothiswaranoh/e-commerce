@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import {
   X, Pencil, Check, GripVertical, Trash2,
-  Plus, Eye, Tag, Hash, Layers, Package,
-  ChevronLeft, ChevronRight, ChevronDown
+  Plus, Eye, Tag, Package,
+  ChevronLeft, ChevronRight, ChevronDown,
 } from "lucide-react";
 
 /* ─────────────────────────────────────────
@@ -10,7 +10,7 @@ import {
 ───────────────────────────────────────── */
 type Variant = {
   id?: number;
-  name?: string; 
+  name?: string;
   price: string;
   sku: string;
   stock: number;
@@ -28,7 +28,8 @@ type Product = {
   description?: string;
   slug: string;
   status: string;
-  images: ImageItem[];
+  /** API may return plain strings or ImageItem objects */
+  images: (string | ImageItem)[];
   category?: { id?: number; name: string };
   category_id?: number;
   variants?: Variant[];
@@ -45,22 +46,74 @@ interface Props {
 }
 
 /* ─────────────────────────────────────────
+   Helpers
+───────────────────────────────────────── */
+/** Normalise any image value to an ImageItem */
+const toImageItem = (img: string | ImageItem): ImageItem =>
+  typeof img === "string" ? { url: img } : img;
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
+      {children}
+      <span className="flex-1 h-px bg-gray-100" />
+    </p>
+  );
+}
+
+function InfoCard({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-gray-50 rounded-xl px-4 py-3.5 border border-gray-100 hover:border-gray-200 transition-colors">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <span className="text-gray-400">{icon}</span>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+          {label}
+        </p>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full h-9 px-3 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition-colors mt-0.5 disabled:bg-gray-50 disabled:text-gray-500";
+
+const selectCls =
+  "w-full h-9 px-3 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 appearance-none cursor-pointer transition-colors mt-0.5";
+
+/* ─────────────────────────────────────────
    Main Component
 ───────────────────────────────────────── */
-export default function ProductModal({ product, isOpen, onClose, onSave, categories = [], initialMode = "view" }: Props) {
+export default function ProductModal({
+  product,
+  isOpen,
+  onClose,
+  onSave,
+  categories = [],
+  initialMode = "view",
+}: Props) {
   const [mode, setMode] = useState<"view" | "edit">(initialMode);
-  const [draft, setDraft] = useState<Product | null>(null);
+  const [draft, setDraft] = useState<(Product & { images: ImageItem[] }) | null>(null);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [activeImg, setActiveImg] = useState(0);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [newImageDrop, setNewImageDrop] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
+  /* ── Sync draft when product changes ── */
   useEffect(() => {
     if (product) {
-      setDraft({ ...product, images: [...(product.images || [])] });
+      setDraft({ ...product, images: (product.images ?? []).map(toImageItem) });
       setNewFiles([]);
       setDeletedImageIds([]);
       setActiveImg(0);
@@ -68,19 +121,23 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
     }
   }, [product, initialMode]);
 
+  /* ── ESC to close ── */
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
     if (isOpen) window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isOpen]);
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOpen || !product || !draft) return null;
 
   const isEdit = mode === "edit";
 
+  /* ── Handlers ── */
   const handleClose = () => {
     setMode(initialMode);
-    setDraft(product ? { ...product, images: [...(product.images || [])] } : null);
+    setDraft(product ? { ...product, images: (product.images ?? []).map(toImageItem) } : null);
     setNewFiles([]);
     setDeletedImageIds([]);
     setActiveImg(0);
@@ -88,96 +145,66 @@ export default function ProductModal({ product, isOpen, onClose, onSave, categor
   };
 
   const set = <K extends keyof Product>(key: K, val: Product[K]) =>
-    setDraft(p => p ? { ...p, [key]: val } : p);
+    setDraft((p) => (p ? { ...p, [key]: val } : p));
 
-  const setVariant = <K extends keyof Variant>(key: K, val: Variant[K]) =>
-    setDraft(p => p ? {
-      ...p,
-      variants: p.variants?.map((v, i) => i === 0 ? { ...v, [key]: val } : v),
-    } : p);
+  const addVariant = () =>
+    setDraft((p) =>
+      p
+        ? { ...p, variants: [...(p.variants ?? []), { price: "", sku: "", stock: 0 }] }
+        : p
+    );
 
+  const updateVariant = (index: number, key: keyof Variant, value: any) =>
+    setDraft((p) =>
+      p
+        ? {
+          ...p,
+          variants: p.variants?.map((v, i) => (i === index ? { ...v, [key]: value } : v)),
+        }
+        : p
+    );
 
-  const addVariant = () => {
-  setDraft(p => p ? {
-    ...p,
-    variants: [
-      ...(p.variants || []),
-      {
-        price: "",
-        sku: "",
-        stock: 0,
+  const deleteVariant = (index: number) =>
+    setDraft((p) => {
+      if (!p?.variants) return p;
+      const variant = p.variants[index];
+      if (variant.id) {
+        return {
+          ...p,
+          variants: p.variants.map((v, i) => (i === index ? { ...v, _destroy: true } : v)),
+        };
       }
-    ]
-  } : p);
-};
-
-const updateVariant = (index: number, key: keyof Variant, value: any) => {
-  setDraft(p => p ? {
-    ...p,
-    variants: p.variants?.map((v, i) =>
-      i === index ? { ...v, [key]: value } : v
-    )
-  } : p);
-};
-
-const deleteVariant = (index: number) => {
-  setDraft(p => {
-    if (!p || !p.variants) return p;
-
-    const variant = p.variants[index];
-
-    if (variant.id) {
-      return {
-        ...p,
-        variants: p.variants.map((v, i) =>
-          i === index ? { ...v, _destroy: true } : v
-        ),
-      };
-    }
-
-    return {
-      ...p,
-      variants: p.variants.filter((_, i) => i !== index),
-    };
-  });
-};
+      return { ...p, variants: p.variants.filter((_, i) => i !== index) };
+    });
 
   const handleSave = () => {
-
-    const orderedImageIds = draft.images
-    .filter(img => img.id)
-    .map(img => img.id);
-
     if (!draft) return;
 
-      const payload: any = {
+    const orderedImageIds = draft.images.filter((img) => img.id).map((img) => img.id);
+
+    const payload: any = {
       ...draft,
       images: newFiles.length ? newFiles : undefined,
       delete_image_ids: deletedImageIds.length ? deletedImageIds : undefined,
-      image_order_ids: orderedImageIds
+      image_order_ids: orderedImageIds,
     };
 
-    // Backend expects variants_attributes for updates
     if (draft.variants && draft.variants.length > 0) {
-      payload.variants_attributes = draft.variants.map(v => ({
+      payload.variants_attributes = draft.variants.map((v) => ({
         id: v.id,
-        name: (v as any).name || "Default",
+        name: v.name ?? "Default",
         sku: v.sku,
         price:
-          v.price === "" || v.price == null
-            ? undefined
-            : parseFloat(v.price),
+          v.price === "" || v.price == null ? undefined : parseFloat(v.price),
         stock: v.stock,
-        _destroy: v._destroy || false
+        _destroy: v._destroy ?? false,
       }));
     }
 
-    onSave?.({
-      ...payload,
-      id: draft.id,
-    });
+    onSave?.({ ...payload, id: draft.id });
   };
 
+  /* ── Image drag-reorder ── */
   const handleDragStart = (i: number) => setDragIdx(i);
   const handleDragEnter = (i: number) => setDragOver(i);
   const handleDragEnd = () => {
@@ -185,7 +212,7 @@ const deleteVariant = (index: number) => {
       const imgs = [...draft.images];
       const [moved] = imgs.splice(dragIdx, 1);
       imgs.splice(dragOver, 0, moved);
-      setDraft(p => p ? { ...p, images: imgs } : p);
+      setDraft((p) => (p ? { ...p, images: imgs } : p));
       if (activeImg === dragIdx) setActiveImg(dragOver);
     }
     setDragIdx(null);
@@ -195,47 +222,51 @@ const deleteVariant = (index: number) => {
   const deleteImage = (i: number) => {
     const img = draft.images[i];
     if (img?.id) {
-      setDeletedImageIds(prev =>
+      setDeletedImageIds((prev) =>
         img.id && !prev.includes(img.id) ? [...prev, img.id] : prev
       );
     }
     const imgs = draft.images.filter((_, idx) => idx !== i);
-    setDraft(p => p ? { ...p, images: imgs } : p);
+    setDraft((p) => (p ? { ...p, images: imgs } : p));
     setActiveImg(Math.max(0, Math.min(activeImg, imgs.length - 1)));
   };
 
   const addImages = (files: FileList | null) => {
     if (!files) return;
-    const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
-    const urls = fileArray.map(f => ({
-      url: URL.createObjectURL(f)
-    }));
-
-    setNewFiles(prev => [...prev, ...fileArray]);
-    setDraft(p => p ? { ...p, images: [...p.images, ...urls] } : p);
+    const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    const items: ImageItem[] = fileArray.map((f) => ({ url: URL.createObjectURL(f) }));
+    setNewFiles((prev) => [...prev, ...fileArray]);
+    setDraft((p) => (p ? { ...p, images: [...p.images, ...items] } : p));
   };
 
-  const prevImg = () => setActiveImg(i => Math.max(0, i - 1));
-  const nextImg = () => setActiveImg(i => Math.min(draft.images.length - 1, i + 1));
+  const prevImg = () => setActiveImg((i) => Math.max(0, i - 1));
+  const nextImg = () => setActiveImg((i) => Math.min(draft.images.length - 1, i + 1));
 
-  const statusColor = (s: string) => ({
+  const statusColor = (s: string) =>
+  ({
     active: "bg-emerald-50 text-emerald-700 border-emerald-200",
     inactive: "bg-gray-100 text-gray-500 border-gray-200",
     draft: "bg-amber-50 text-amber-700 border-amber-200",
   }[s] ?? "bg-gray-100 text-gray-500 border-gray-200");
 
+  const heroSrc = draft.images[activeImg]?.url ?? null;
+
+  /* ─────────────────────────────────────────
+     Render
+  ───────────────────────────────────────── */
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
       style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
     >
       <div
         className="relative bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         style={{ width: "min(1140px, 96vw)", height: "min(800px, 92vh)" }}
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
-
         {/* ══ HEADER ══ */}
         <div className="flex-shrink-0 flex items-center justify-between px-7 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3.5">
@@ -244,15 +275,16 @@ const deleteVariant = (index: number) => {
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-1">
-                {draft?.id ? "Editing Product" : "Creating Product"}
+                {draft.id ? "Editing Product" : "Creating Product"}
               </p>
               {isEdit ? (
                 <input
                   value={draft.name}
-                  onChange={e => {
+                  onChange={(e) => {
                     const value = e.target.value;
                     set("name", value);
-                    set("slug",
+                    set(
+                      "slug",
                       value
                         .toLowerCase()
                         .trim()
@@ -273,7 +305,11 @@ const deleteVariant = (index: number) => {
               <>
                 <button
                   onClick={() => {
-                    setDraft(product ? { ...product, images: [...product.images] } : null);
+                    setDraft(
+                      product
+                        ? { ...product, images: (product.images ?? []).map(toImageItem) }
+                        : null
+                    );
                     setNewFiles([]);
                     setMode("view");
                   }}
@@ -300,7 +336,7 @@ const deleteVariant = (index: number) => {
               onClick={handleClose}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors ml-1"
             >
-              <X className="w-4.5 h-4.5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -316,11 +352,10 @@ const deleteVariant = (index: number) => {
               className="relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm group"
               style={{ aspectRatio: "4/3" }}
             >
-              {draft.images.length > 0 ? (
+              {heroSrc ? (
                 <img
-                  key={activeImg}
-                  src={draft.images[activeImg]?.url}
-                  alt=""
+                  src={heroSrc}
+                  alt={draft.name}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -349,7 +384,6 @@ const deleteVariant = (index: number) => {
                 </>
               )}
 
-              {/* Dot indicators */}
               {draft.images.length > 1 && (
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                   {draft.images.map((_, i) => (
@@ -357,8 +391,8 @@ const deleteVariant = (index: number) => {
                       key={i}
                       onClick={() => setActiveImg(i)}
                       className={`rounded-full transition-all duration-200 ${i === activeImg
-                        ? "w-5 h-2 bg-white shadow"
-                        : "w-2 h-2 bg-white/50 hover:bg-white/80"
+                          ? "w-5 h-2 bg-white shadow"
+                          : "w-2 h-2 bg-white/50 hover:bg-white/80"
                         }`}
                     />
                   ))}
@@ -374,7 +408,6 @@ const deleteVariant = (index: number) => {
                 </button>
               )}
 
-              {/* Badge */}
               {draft.images.length > 0 && (
                 <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white text-[10px] font-semibold">
                   {activeImg + 1} / {draft.images.length}
@@ -391,15 +424,19 @@ const deleteVariant = (index: number) => {
                   onDragStart={() => handleDragStart(i)}
                   onDragEnter={() => handleDragEnter(i)}
                   onDragEnd={handleDragEnd}
-                  onDragOver={e => e.preventDefault()}
+                  onDragOver={(e) => e.preventDefault()}
                   onClick={() => setActiveImg(i)}
                   className={`relative w-20 h-20 rounded-xl overflow-hidden cursor-pointer border-2 transition-all flex-shrink-0 ${activeImg === i
-                    ? "border-indigo-500 shadow-lg shadow-indigo-100 scale-105"
-                    : "border-transparent hover:border-gray-300 hover:shadow-md"
-                    } ${dragOver === i && dragIdx !== i ? "border-indigo-400 scale-105" : ""} ${dragIdx === i ? "opacity-30 scale-95" : ""
-                    }`}
+                      ? "border-indigo-500 shadow-lg shadow-indigo-100 scale-105"
+                      : "border-transparent hover:border-gray-300 hover:shadow-md"
+                    } ${dragOver === i && dragIdx !== i ? "border-indigo-400 scale-105" : ""
+                    } ${dragIdx === i ? "opacity-30 scale-95" : ""}`}
                 >
-                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={img.url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                   {isEdit && (
                     <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
                       <GripVertical className="w-5 h-5 text-white drop-shadow" />
@@ -410,17 +447,31 @@ const deleteVariant = (index: number) => {
 
               {isEdit && (
                 <label
-                  onDragOver={e => { e.preventDefault(); setNewImageDrop(true); }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setNewImageDrop(true);
+                  }}
                   onDragLeave={() => setNewImageDrop(false)}
-                  onDrop={e => { e.preventDefault(); setNewImageDrop(false); addImages(e.dataTransfer.files); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setNewImageDrop(false);
+                    addImages(e.dataTransfer.files);
+                  }}
                   className={`w-20 h-20 rounded-xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center gap-1 flex-shrink-0 transition-all ${newImageDrop
-                    ? "border-indigo-400 bg-indigo-50"
-                    : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50"
+                      ? "border-indigo-400 bg-indigo-50"
+                      : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50"
                     }`}
                 >
                   <Plus className="w-5 h-5 text-gray-400" />
                   <span className="text-[10px] text-gray-400 font-semibold">Add</span>
-                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => addImages(e.target.files)} />
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => addImages(e.target.files)}
+                  />
                 </label>
               )}
             </div>
@@ -442,7 +493,7 @@ const deleteVariant = (index: number) => {
                 {isEdit ? (
                   <textarea
                     value={draft.description ?? ""}
-                    onChange={e => set("description", e.target.value)}
+                    onChange={(e) => set("description", e.target.value)}
                     rows={4}
                     placeholder="Write a product description..."
                     className="w-full text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 placeholder:text-gray-300 leading-relaxed transition-colors"
@@ -465,19 +516,28 @@ const deleteVariant = (index: number) => {
                       <div className="relative">
                         <select
                           value={draft.status}
-                          onChange={e => set("status", e.target.value)}
+                          onChange={(e) => set("status", e.target.value)}
                           className={selectCls}
                         >
                           <option value="active">Active</option>
                           <option value="inactive">Inactive</option>
                           <option value="draft">Draft</option>
                         </select>
-                        <ChevronDown aria-hidden="true" className="absolute right-3 top-1/2 -translate-y-[20%] w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="absolute right-3 top-1/2 -translate-y-[20%] w-3.5 h-3.5 text-gray-400 pointer-events-none"
+                        />
                       </div>
                     ) : (
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border capitalize mt-0.5 ${statusColor(draft.status)}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${draft.status === "active" ? "bg-emerald-500" : "bg-gray-400"
-                          }`} />
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border capitalize mt-0.5 ${statusColor(
+                          draft.status
+                        )}`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${draft.status === "active" ? "bg-emerald-500" : "bg-gray-400"
+                            }`}
+                        />
                         {draft.status}
                       </span>
                     )}
@@ -487,16 +547,21 @@ const deleteVariant = (index: number) => {
                     {isEdit ? (
                       <div className="relative">
                         <select
-                          value={draft.category_id || draft.category?.id}
-                          onChange={e => set("category_id", Number(e.target.value))}
+                          value={draft.category_id ?? draft.category?.id ?? ""}
+                          onChange={(e) => set("category_id", Number(e.target.value))}
                           className={selectCls}
                         >
                           <option value="">Select Category</option>
-                          {categories.map(c => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
+                          {categories.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
                           ))}
                         </select>
-                        <ChevronDown aria-hidden="true" className="absolute right-3 top-1/2 -translate-y-[20%] w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="absolute right-3 top-1/2 -translate-y-[20%] w-3.5 h-3.5 text-gray-400 pointer-events-none"
+                        />
                       </div>
                     ) : (
                       <p className="text-sm font-semibold text-gray-800 mt-0.5">
@@ -511,13 +576,13 @@ const deleteVariant = (index: number) => {
               <section>
                 <SectionLabel>Variants</SectionLabel>
 
-                {draft.variants && draft.variants.length > 0 ? (
+                {draft.variants && draft.variants.filter((v) => !v._destroy).length > 0 ? (
                   <div className="space-y-3">
                     {draft.variants.map((v, realIndex) => {
                       if (v._destroy) return null;
 
                       const visibleIndex =
-                        draft.variants?.filter(x => !x._destroy).indexOf(v) ?? 0;
+                        (draft.variants ?? []).filter((x) => !x._destroy).indexOf(v);
 
                       return (
                         <div
@@ -527,12 +592,12 @@ const deleteVariant = (index: number) => {
                           <div className="flex justify-between items-center">
                             <p className="text-sm font-semibold text-gray-700">
                               Variant #{visibleIndex + 1}
+                              {v.name ? ` — ${v.name}` : ""}
                             </p>
-
                             {isEdit && (
                               <button
                                 onClick={() => deleteVariant(realIndex)}
-                                className="text-red-500 hover:text-red-600"
+                                className="text-red-400 hover:text-red-600 transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -541,11 +606,11 @@ const deleteVariant = (index: number) => {
 
                           <div className="grid grid-cols-4 gap-3">
                             <input
-                              placeholder="Variant Name"
-                              value={(v as any).name || ""}
+                              placeholder="Name"
+                              value={v.name ?? ""}
                               disabled={!isEdit}
-                              onChange={e =>
-                                updateVariant(realIndex, "name" as any, e.target.value)
+                              onChange={(e) =>
+                                updateVariant(realIndex, "name" as keyof Variant, e.target.value)
                               }
                               className={inputCls}
                             />
@@ -554,18 +619,15 @@ const deleteVariant = (index: number) => {
                               placeholder="Price"
                               value={v.price}
                               disabled={!isEdit}
-                              onChange={e =>
-                                updateVariant(realIndex, "price", e.target.value)
-                              }
+                              onChange={(e) => updateVariant(realIndex, "price", e.target.value)}
                               className={inputCls}
                             />
-
                             <input
                               type="number"
                               placeholder="Stock"
                               value={v.stock ?? ""}
                               disabled={!isEdit}
-                              onChange={e =>
+                              onChange={(e) =>
                                 updateVariant(
                                   realIndex,
                                   "stock",
@@ -574,14 +636,11 @@ const deleteVariant = (index: number) => {
                               }
                               className={inputCls}
                             />
-
                             <input
                               placeholder="SKU"
                               value={v.sku}
                               disabled={!isEdit}
-                              onChange={e =>
-                                updateVariant(realIndex, "sku", e.target.value)
-                              }
+                              onChange={(e) => updateVariant(realIndex, "sku", e.target.value)}
                               className={inputCls}
                             />
                           </div>
@@ -590,15 +649,13 @@ const deleteVariant = (index: number) => {
                     })}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400 italic">
-                    No variants yet.
-                  </p>
+                  <p className="text-sm text-gray-400 italic">No variants yet.</p>
                 )}
 
                 {isEdit && (
                   <button
                     onClick={addVariant}
-                    className="mt-4 flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                    className="mt-4 flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Add Variant
@@ -609,15 +666,20 @@ const deleteVariant = (index: number) => {
               {/* Slug */}
               <section>
                 <SectionLabel>URL Slug</SectionLabel>
-                <InfoCard label="Slug" icon={<span className="text-sm font-bold text-gray-400">/</span>}>
+                <InfoCard
+                  label="Slug"
+                  icon={<span className="text-sm font-bold text-gray-400">/</span>}
+                >
                   {isEdit ? (
                     <input
                       value={draft.slug}
-                      onChange={e => set("slug", e.target.value)}
+                      onChange={(e) => set("slug", e.target.value)}
                       className={`${inputCls} font-mono`}
                     />
                   ) : (
-                    <p className="text-sm font-mono text-gray-600 break-all mt-0.5">{draft.slug}</p>
+                    <p className="text-sm font-mono text-gray-600 break-all mt-0.5">
+                      {draft.slug}
+                    </p>
                   )}
                 </InfoCard>
               </section>
@@ -630,39 +692,3 @@ const deleteVariant = (index: number) => {
     </div>
   );
 }
-
-/* ─────────────────────────────────────────
-   Helpers
-───────────────────────────────────────── */
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
-      {children}
-      <span className="flex-1 h-px bg-gray-100" />
-    </p>
-  );
-}
-
-function InfoCard({
-  label, icon, children,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="bg-gray-50 rounded-xl px-4 py-3.5 border border-gray-100 hover:border-gray-200 transition-colors">
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <span className="text-gray-400">{icon}</span>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-const inputCls =
-  "w-full h-9 px-3 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition-colors mt-0.5";
-
-const selectCls =
-  "w-full h-9 px-3 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 appearance-none cursor-pointer transition-colors mt-0.5";

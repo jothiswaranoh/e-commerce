@@ -20,7 +20,7 @@ type FilterSidebarProps = {
   setSearchQuery: (v: string) => void;
   hasActiveFilters: boolean;
   clearAll: () => void;
-  allProductsCount: number;   
+  allProductsCount: number;
   showMobileFilters: boolean;
   setShowMobileFilters: (v: boolean) => void;
 };
@@ -35,7 +35,7 @@ function FilterSidebar({
   setSearchQuery,
   hasActiveFilters,
   clearAll,
-  allProductsCount,   
+  allProductsCount,
 }: FilterSidebarProps) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -159,7 +159,7 @@ export default function Products() {
     };
 
     fetchProducts();
-  }, [searchParam]);
+  }, [searchParam, selectedCategory]);
 
   const displayed = useMemo(() => {
     let list = [...products];
@@ -210,7 +210,6 @@ export default function Products() {
       params.delete("search");
     } else {
       params.set("search", value);
-      params.delete("category");
     }
 
     navigate(`/products?${params.toString()}`, { replace: true });
