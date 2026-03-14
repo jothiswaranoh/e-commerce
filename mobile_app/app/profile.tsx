@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+    Alert,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react-native';
 import AppText from '@/components/AppText';
 import { BORDERS, COLORS, SHADOWS, SPACING } from '@/lib/theme';
+import { useAuth } from '@/context/AuthContext';
 
 type FieldProps = {
     label: string;
@@ -71,18 +73,46 @@ function Field({
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const [name, setName] = useState('Stark');
-    const [email, setEmail] = useState('stark@example.com');
+    const { user, updateProfile, refreshUser } = useAuth();
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('+1 (555) 000-0000');
     const [saving, setSaving] = useState(false);
 
-    const handleSave = () => {
-        setSaving(true);
-        setTimeout(() => {
-            setSaving(false);
+    useEffect(() => {
+        setName(user?.name ?? '');
+        setEmail(user?.email ?? '');
+    }, [user]);
+
+    useEffect(() => {
+        refreshUser().catch(() => undefined);
+    }, []);
+
+    const handleSave = async () => {
+        try {
+            setSaving(true);
+            await updateProfile({
+                name: name.trim(),
+                email: email.trim(),
+            });
             router.back();
-        }, 1000);
+        } catch (error) {
+            Alert.alert(
+                'Unable to save profile',
+                error instanceof Error ? error.message : 'Please try again.'
+            );
+        } finally {
+            setSaving(false);
+        }
     };
+
+    const avatarLabel = (user?.name || name || user?.email || email || 'U')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join('')
+        .slice(0, 2);
 
     return (
         <LinearGradient
@@ -141,7 +171,7 @@ export default function ProfileScreen() {
                                         style={styles.avatar}
                                     >
                                         <AppText variant="3xl" weight="bold" color={COLORS.neutral[0]}>
-                                            ST
+                                            {avatarLabel}
                                         </AppText>
                                     </LinearGradient>
                                     <TouchableOpacity style={styles.cameraButton} activeOpacity={0.85}>
@@ -150,7 +180,7 @@ export default function ProfileScreen() {
                                 </View>
 
                                 <AppText variant="xl" weight="bold" color={COLORS.neutral[0]} style={styles.heroName}>
-                                    Stark
+                                    {name || 'Your profile'}
                                 </AppText>
                             </View>
                             <View style={styles.heroStats}>

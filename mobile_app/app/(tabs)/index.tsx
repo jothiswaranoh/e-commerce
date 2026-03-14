@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,46 +16,58 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Search, Bell, Zap, ChevronRight, MapPin, ShoppingCart } from 'lucide-react-native';
 import AppText from '@/components/AppText';
 import ProductCard from '@/components/ProductCard';
-import {
-  MOCK_PRODUCTS,
-  CATEGORIES as CATEGORY_DATA,
-  BANNERS,
-  FLASH_DEALS,
-  Banner,
-  Deal,
-} from '@/lib/mock-data';
-import { COLORS, SPACING, BORDERS, SHADOWS, GRADIENTS } from '@/lib/theme';
-import { UI_TEXT, CATEGORIES } from '@/lib/constants';
+import { COLORS, SPACING, SHADOWS } from '@/lib/theme';
+import { CATEGORIES } from '@/lib/constants';
 import { useCart } from '@/context/CartContext';
+import { productApi } from '@/lib/api';
+import { mapBackendProduct } from '@/lib/product-utils';
+import { Product } from '@/types/product';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentBanner, setCurrentBanner] = useState(0);
-  const bannerScrollRef = useRef<ScrollView>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const { itemCount } = useCart();
+  const flashDealProducts = products.slice(0, 4);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
+    let isMounted = true;
+
+    async function loadProducts() {
+      try {
+        const response = await productApi.getProducts({ page: 1, per_page: 8 });
+
+        if (!isMounted) return;
+
+        setProducts(response.data.map(mapBackendProduct));
+        setError(null);
+      } catch (fetchError) {
+        if (!isMounted) return;
+
+        setError(fetchError instanceof Error ? fetchError.message : 'Failed to load products');
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const next = (currentBanner + 1) % BANNERS.length;
-      setCurrentBanner(next);
-      bannerScrollRef.current?.scrollTo({ x: next * (SCREEN_WIDTH - 40), animated: true });
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [currentBanner]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const diff = FLASH_DEALS[0].endsAt.getTime() - Date.now();
+      const endsAt = new Date(Date.now() + 6 * 60 * 60 * 1000);
+      const diff = endsAt.getTime() - Date.now();
       if (diff > 0) {
         setCountdown({
           hours: Math.floor(diff / (1000 * 60 * 60)),
@@ -75,85 +87,48 @@ export default function HomeScreen() {
     );
   }
 
-  const renderCategory = (category: any) => {
-    const IconComponent = category.icon;
-    return (
-      <TouchableOpacity key={category.id} style={styles.categoryItem} activeOpacity={0.7}>
-        <View style={[styles.categoryIcon, { backgroundColor: COLORS.neutral[100] }]}>
-          <IconComponent size={24} color={COLORS.neutral[900]} />
-        </View>
-        <AppText variant="xs" weight="medium" numberOfLines={1}>
-          {category.name}
-        </AppText>
-      </TouchableOpacity>
+  const renderDeal = (product: Product) => {
+    const originalPrice = product.originalPrice ?? product.price;
+    const savings = Math.max(
+      0,
+      Math.round(((originalPrice - product.price) / Math.max(originalPrice, 1)) * 100)
     );
-  };
-
-  const renderBanner = (banner: Banner) => (
-    <TouchableOpacity key={banner.id} style={styles.bannerWrapper} activeOpacity={0.95}>
-      <LinearGradient
-        colors={banner.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.bannerCard}
-      >
-        <View style={styles.bannerContent}>
-          <AppText variant="2xl" weight="bold" color={COLORS.neutral[0]}>
-            {banner.title}
-          </AppText>
-          <AppText variant="sm" color="rgba(255,255,255,0.9)">
-            {banner.subtitle}
-          </AppText>
-          <TouchableOpacity style={styles.shopNowButton}>
-            <AppText variant="sm" weight="bold" color={COLORS.neutral[0]}>
-              {UI_TEXT.SHOP_NOW}
-            </AppText>
-            <ChevronRight size={16} color={COLORS.neutral[0]} />
-          </TouchableOpacity>
-        </View>
-        <Image source={{ uri: banner.image }} style={styles.bannerImage} resizeMode="contain" />
-      </LinearGradient>
-    </TouchableOpacity>
-  );
-
-  const renderDeal = (deal: Deal) => {
-    const originalPrice = deal.product.price * (1 + (deal.product.discount || 0) / 100);
 
     return (
       <TouchableOpacity
-        key={deal.id}
+        key={product.id}
         style={styles.dealCard}
-        onPress={() => router.push(`/product/${deal.product.id}`)}
+        onPress={() => router.push(`/product/${product.id}`)}
         activeOpacity={0.9}
       >
         <View style={styles.dealImageWrapper}>
-          <Image source={{ uri: deal.product.image_url }} style={styles.dealImage} />
-          {deal.product.discount && (
+          <Image source={{ uri: product.image_url }} style={styles.dealImage} />
+          {savings > 0 && (
             <View style={styles.dealBadgeAmazon}>
               <AppText variant="xs" weight="bold" color="#fff">
-                -{deal.product.discount}%
+                -{savings}%
               </AppText>
             </View>
           )}
         </View>
         <View style={styles.dealInfo}>
           <AppText variant="sm" numberOfLines={2} weight="medium" style={styles.dealProductName}>
-            {deal.product.name}
+            {product.name}
           </AppText>
 
           <View style={styles.dealPriceRow}>
             <AppText variant="md" weight="bold" color={COLORS.neutral[900]}>
-              ${deal.product.price.toFixed(2)}
+              ${product.price.toFixed(2)}
             </AppText>
             <AppText variant="xs" color={COLORS.neutral[500]} style={styles.originalPriceAmazon}>
               ${originalPrice.toFixed(2)}
             </AppText>
           </View>
 
-          {deal.product.discount && (
+          {savings > 0 && (
             <View style={styles.discountBadgeAmazon}>
               <AppText variant="xs" weight="bold" color={COLORS.error.DEFAULT}>
-                Save {deal.product.discount}%
+                Save {savings}%
               </AppText>
             </View>
           )}
@@ -366,8 +341,16 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.flashDealsRow}
           >
-            {FLASH_DEALS.map(renderDeal)}
+            {flashDealProducts.map(renderDeal)}
           </ScrollView>
+
+          {!flashDealProducts.length && (
+            <View style={styles.emptyFlashDealsState}>
+              <AppText variant="sm" color={COLORS.neutral[500]}>
+                {error ?? 'No flash deals available right now.'}
+              </AppText>
+            </View>
+          )}
         </View>
         <View style={styles.recommendedSection}>
           {/*recommend header*/}
@@ -385,7 +368,7 @@ export default function HomeScreen() {
 
           {/*rec grid*/}
           <View style={styles.recommendedGrid}>
-            {MOCK_PRODUCTS.map((product) => (
+            {products.map((product) => (
               <View key={product.id} style={styles.recommendedItem}>
                 <ProductCard
                   product={product}
@@ -395,6 +378,14 @@ export default function HomeScreen() {
               </View>
             ))}
           </View>
+
+          {!loading && !products.length && (
+            <View style={styles.emptyProducts}>
+              <AppText variant="sm" color={COLORS.neutral[500]}>
+                {error ?? 'No products available right now.'}
+              </AppText>
+            </View>
+          )}
         </View>
         <View style={{ height: SPACING['3xl'] }} />
       </ScrollView>
@@ -861,6 +852,19 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     // android
     elevation: 6,
+  },
+
+  emptyProducts: {
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
+    backgroundColor: COLORS.neutral[0],
+  },
+
+  emptyFlashDealsState: {
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
   },
 
   recommendedItem: {

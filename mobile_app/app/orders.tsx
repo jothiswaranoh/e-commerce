@@ -1,103 +1,153 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, ChevronRight, CheckCircle, Clock, Truck, PackageCheck, Download, RefreshCw } from 'lucide-react-native';
+import { ArrowLeft, PackageCheck, Truck, Clock, Download, RefreshCw, CircleAlert } from 'lucide-react-native';
 import AppText from '@/components/AppText';
 import { COLORS, GRADIENTS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
+import { OrderData, orderApi } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
-const MOCK_ORDERS = [
-  {
-    id: '405-1234567-1234567',
-    date: 'Dec 12, 2023',
-    total: '$149.99',
-    status: 'Delivered',
-    statusIcon: PackageCheck,
-    items: [
-      { ...MOCK_PRODUCTS[0], qty: 1, price: 149.99 },
-    ],
-  },
-  {
-    id: '405-7654321-7654321',
-    date: 'Nov 28, 2023',
-    total: '$279.00',
-    status: 'Shipped',
-    statusIcon: Truck,
-    items: [
-      { ...MOCK_PRODUCTS[1], qty: 2, price: 139.50 },
-    ],
-  },
-  {
-    id: '405-9876543-9876543',
-    date: 'Nov 20, 2023',
-    total: '$89.99',
-    status: 'Processing',
-    statusIcon: Clock,
-    items: [
-      { ...MOCK_PRODUCTS[2], qty: 1, price: 89.99 },
-    ],
-  },
-];
+const STATUS_META = {
+  delivered: { label: 'Delivered', icon: PackageCheck, color: COLORS.success },
+  shipped: { label: 'Shipped', icon: Truck, color: COLORS.primary },
+  confirmed: { label: 'Processing', icon: Clock, color: COLORS.warning },
+  pending: { label: 'Processing', icon: Clock, color: COLORS.warning },
+  cancelled: { label: 'Cancelled', icon: CircleAlert, color: COLORS.error },
+} as const;
+
+type FilterKey = 'all' | 'delivered' | 'shipped' | 'processing' | 'cancelled';
+
+function formatOrderDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function matchesFilter(order: OrderData, filter: FilterKey) {
+  if (filter === 'all') {
+    return true;
+  }
+
+  if (filter === 'processing') {
+    return order.status === 'pending' || order.status === 'confirmed';
+  }
+
+  return order.status === filter;
+}
 
 export default function OrdersScreen() {
   const router = useRouter();
-  const [filter, setFilter] = useState('all');
+  const { isAuthenticated } = useAuth();
+  const [filter, setFilter] = useState<FilterKey>('all');
+  const [orders, setOrders] = useState<OrderData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredOrders = MOCK_ORDERS.filter(order => filter === 'all' || order.status.toLowerCase() === filter);
+  useEffect(() => {
+    let isMounted = true;
 
-  const renderStatus = (order: any) => {
-    const Icon = order.statusIcon;
-const statusColors = {
-      Delivered: COLORS.success,
-      Shipped: COLORS.primary,
-      Processing: COLORS.warning,
-    } as const;
+    async function loadOrders() {
+      if (!isAuthenticated) {
+        setOrders([]);
+        setIsLoading(false);
+        return;
+      }
 
-    const color = statusColors[order.status as keyof typeof statusColors] || { 
-      DEFAULT: COLORS.neutral[600], light: COLORS.neutral[100] };
+      try {
+        setIsLoading(true);
+        const response = await orderApi.getOrders({ page: 1, per_page: 20 });
+        if (!isMounted) return;
+        setOrders(response.data);
+        setError(null);
+      } catch (fetchError) {
+        if (!isMounted) return;
+        setOrders([]);
+        setError(fetchError instanceof Error ? fetchError.message : 'Failed to load orders');
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadOrders();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated]);
+
+  const filteredOrders = useMemo(
+    () => orders.filter((order) => matchesFilter(order, filter)),
+    [filter, orders]
+  );
+
+  const renderStatus = (order: OrderData) => {
+    const meta = STATUS_META[order.status as keyof typeof STATUS_META] ?? STATUS_META.pending;
+    const Icon = meta.icon;
 
     return (
-      <View style={[styles.statusBadge, { backgroundColor: color.light }]}>
-        <Icon size={16} color={color.DEFAULT} />
-        <AppText variant="xs" weight="medium" color={color.DEFAULT}>
-          {order.status}
+      <View style={[styles.statusBadge, { backgroundColor: meta.color.light }]}>
+        <Icon size={16} color={meta.color.DEFAULT} />
+        <AppText variant="xs" weight="medium" color={meta.color.DEFAULT}>
+          {meta.label}
         </AppText>
       </View>
     );
   };
 
-  const renderOrder = (order: any) => (
-    <TouchableOpacity key={order.id} style={styles.orderCard} activeOpacity={0.95}>
+  const renderOrder = (order: OrderData) => (
+    <TouchableOpacity
+      key={order.id}
+      style={styles.orderCard}
+      activeOpacity={0.95}
+      onPress={() => router.push(`/order/${order.id}`)}
+    >
       <View style={styles.orderHeader}>
         <View style={styles.orderMeta}>
-          <AppText variant="sm" color={COLORS.neutral[600]}>Order #{order.id}</AppText>
-          <AppText variant="xs" color={COLORS.neutral[500]}>{order.date}</AppText>
+          <AppText variant="sm" color={COLORS.neutral[600]}>
+            Order #{order.order_number}
+          </AppText>
+          <AppText variant="xs" color={COLORS.neutral[500]}>
+            {formatOrderDate(order.created_at)}
+          </AppText>
         </View>
         {renderStatus(order)}
       </View>
 
-      {order.items.map((item: any, index: number) => (
-        <View key={index} style={styles.itemRow}>
-          <View style={styles.itemImage} />
+      {order.order_items.map((item) => (
+        <View key={item.id} style={styles.itemRow}>
+          {item.product?.images?.[0] ? (
+            <Image source={{ uri: item.product.images[0] }} style={styles.itemImage} />
+          ) : (
+            <View style={styles.itemImage} />
+          )}
           <View style={styles.itemDetails}>
             <AppText variant="md" weight="semibold" numberOfLines={2}>
-              {item.name}
+              {item.product_name}
             </AppText>
             <AppText variant="sm" color={COLORS.neutral[600]}>
-              Qty {item.qty} • ${item.price.toFixed(2)}
+              Qty {item.quantity} • ${Number(item.price).toFixed(2)}
             </AppText>
           </View>
-          <TouchableOpacity style={styles.reorderBtn}>
+          <TouchableOpacity
+            style={styles.reorderBtn}
+            onPress={() => router.push(`/product/${item.product_id}`)}
+          >
             <RefreshCw size={16} color={COLORS.accent.DEFAULT} />
           </TouchableOpacity>
         </View>
       ))}
 
       <View style={styles.orderFooter}>
-        <AppText variant="lg" weight="bold">{order.total}</AppText>
-        <TouchableOpacity style={styles.invoiceBtn}>
+        <AppText variant="lg" weight="bold">
+          ${Number(order.total).toFixed(2)}
+        </AppText>
+        <TouchableOpacity style={styles.invoiceBtn} onPress={() => router.push(`/order/${order.id}`)}>
           <Download size={18} color={COLORS.primary.DEFAULT} />
           <AppText variant="sm" weight="medium" color={COLORS.primary.DEFAULT}>
             Invoice
@@ -113,18 +163,17 @@ const statusColors = {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <ArrowLeft size={24} color="#fff" />
         </TouchableOpacity>
-        <AppText variant="xl" weight="bold" color="#fff">Your Orders</AppText>
+        <AppText variant="xl" weight="bold" color="#fff">
+          Your Orders
+        </AppText>
         <View style={{ width: 44 }} />
       </LinearGradient>
 
       <View style={styles.filterRow}>
-        {['all', 'delivered', 'shipped', 'processing'].map((tab) => (
+        {(['all', 'delivered', 'shipped', 'processing', 'cancelled'] as FilterKey[]).map((tab) => (
           <TouchableOpacity
             key={tab}
-            style={[
-              styles.filterTab,
-              filter === tab && styles.activeFilterTab,
-            ]}
+            style={[styles.filterTab, filter === tab && styles.activeFilterTab]}
             onPress={() => setFilter(tab)}
           >
             <AppText
@@ -138,21 +187,39 @@ const statusColors = {
         ))}
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map(renderOrder)
-        ) : (
-          <View style={styles.emptyState}>
-            <PackageCheck size={64} color={COLORS.neutral[400]} />
-            <AppText variant="lg" weight="semibold" color={COLORS.neutral[900]}>
-              No orders yet
-            </AppText>
-            <AppText variant="sm" color={COLORS.neutral[500]}>
-              Your shopping journey begins when you place your first order.
-            </AppText>
-          </View>
-        )}
-      </ScrollView>
+      {isLoading ? (
+        <View style={styles.centeredState}>
+          <ActivityIndicator size="large" color={COLORS.primary.DEFAULT} />
+        </View>
+      ) : (
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+          {error ? (
+            <View style={styles.emptyState}>
+              <CircleAlert size={64} color={COLORS.error.DEFAULT} />
+              <AppText variant="lg" weight="semibold" color={COLORS.neutral[900]}>
+                Orders unavailable
+              </AppText>
+              <AppText variant="sm" color={COLORS.neutral[500]}>
+                {error}
+              </AppText>
+            </View>
+          ) : filteredOrders.length > 0 ? (
+            filteredOrders.map(renderOrder)
+          ) : (
+            <View style={styles.emptyState}>
+              <PackageCheck size={64} color={COLORS.neutral[400]} />
+              <AppText variant="lg" weight="semibold" color={COLORS.neutral[900]}>
+                {isAuthenticated ? 'No orders yet' : 'Sign in to view orders'}
+              </AppText>
+              <AppText variant="sm" color={COLORS.neutral[500]}>
+                {isAuthenticated
+                  ? 'Your shopping journey begins when you place your first order.'
+                  : 'Orders are stored in your account on the backend.'}
+              </AppText>
+            </View>
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -177,7 +244,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    backdropFilter: 'blur(10px)',
   },
   filterRow: {
     flexDirection: 'row',
@@ -194,6 +260,11 @@ const styles = StyleSheet.create({
   activeFilterTab: {
     borderBottomWidth: 2,
     borderBottomColor: COLORS.accent.DEFAULT,
+  },
+  centeredState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scrollView: {
     flex: 1,
@@ -258,23 +329,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: SPACING.lg,
     paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.neutral[200],
+    borderTopColor: COLORS.neutral[100],
   },
   invoiceBtn: {
     flexDirection: 'row',
-    gap: 4,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-    backgroundColor: COLORS.neutral[100],
-    borderRadius: 6,
     alignItems: 'center',
+    gap: 6,
   },
   emptyState: {
     alignItems: 'center',
-    paddingTop: 120,
-    gap: SPACING.lg,
+    justifyContent: 'center',
+    paddingVertical: SPACING['3xl'],
+    gap: SPACING.md,
   },
 });
-

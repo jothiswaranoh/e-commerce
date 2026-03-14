@@ -85,8 +85,9 @@ export const MOCK_ADDRESSES = [
     },
 ];
 
-//API
-export const API_BASE_URL = 'http://10.20.234.215:3000/api/v1'; //simulator+mac ip
+// API
+export const API_BASE_URL =
+    process.env.EXPO_PUBLIC_API_BASE_URL?.trim() || 'http://localhost:3000/api/v1';
 
 export const UI_TEXT = {
     SIGN_OUT: 'Sign Out',

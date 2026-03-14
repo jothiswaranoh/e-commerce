@@ -8,9 +8,7 @@ import AppText from '@/components/AppText';
 import { COLORS, GRADIENTS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
 
 const MOCK_PAYMENTS = [
-  { id: '1', type: 'visa', last4: '1234', isDefault: true },
   { id: '2', type: 'master', last4: '5678', isDefault: false },
-  { id: '3', type: 'applepay', name: 'Apple Pay', isDefault: false },
   { id: '4', type: 'upi', name: 'UPI', isDefault: false },
 ];
 

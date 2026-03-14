@@ -20,6 +20,7 @@ import {
 } from 'lucide-react-native';
 import AppText from '@/components/AppText';
 import { BORDERS, COLORS, SHADOWS, SPACING } from '@/lib/theme';
+import { useAuth } from '@/context/AuthContext';
 import {
     ACCOUNT_SETTINGS,
     APP_SETTINGS,
@@ -63,6 +64,7 @@ const ITEM_ACCENTS: Record<string, string> = {
 
 export default function SettingsScreen() {
     const router = useRouter();
+    const { user, logout } = useAuth();
     const [settings, setSettings] = useState<Record<string, boolean>>({
         notif: true,
         dark: false,
@@ -78,10 +80,21 @@ export default function SettingsScreen() {
             {
                 text: UI_TEXT.SIGN_OUT,
                 style: 'destructive',
-                onPress: () => router.replace('/(auth)/login'),
+                onPress: async () => {
+                    await logout();
+                    router.replace('/(auth)/login');
+                },
             },
         ]);
     };
+
+    const avatarLabel = (user?.name || user?.email || 'U')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join('')
+        .slice(0, 2);
 
     const handlePress = (item: SettingsItem) => {
         if (item.type === 'link' && 'route' in item && item.route) {
@@ -226,16 +239,16 @@ export default function SettingsScreen() {
                                 style={styles.avatar}
                             >
                                 <AppText variant="xl" weight="bold" color={COLORS.neutral[0]}>
-                                    ST
+                                    {avatarLabel}
                                 </AppText>
                             </LinearGradient>
 
                             <View style={styles.profileContent}>
                                 <AppText variant="xl" weight="bold" color={COLORS.neutral[0]}>
-                                    Stark
+                                    {user?.name || 'Guest User'}
                                 </AppText>
                                 <AppText variant="sm" color="rgba(255,255,255,0.72)">
-                                    stark@example.com
+                                    {user?.email || 'Sign in to sync your account'}
                                 </AppText>
                             </View>
 

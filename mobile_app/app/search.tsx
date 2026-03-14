@@ -9,21 +9,33 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, X, Clock, ArrowLeft } from 'lucide-react-native';
 import AppText from '@/components/AppText';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
 import { COLORS, SPACING } from '@/lib/theme';
 import { Animated } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { productApi } from '@/lib/api';
+import { mapBackendProduct } from '@/lib/product-utils';
+import { Product } from '@/types/product';
+
+type SortOption = 'relevance' | 'price_low' | 'price_high' | 'name';
+type StockFilter = 'all' | 'in_stock';
 
 export default function SearchScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>('relevance');
+  const [stockFilter, setStockFilter] = useState<StockFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const inputRef = useRef<TextInput>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -43,6 +55,49 @@ export default function SearchScreen() {
     loadRecent();
   }, []);
 
+  useEffect(() => {
+    const trimmedQuery = searchQuery.trim();
+
+    if (!trimmedQuery) {
+      setResults([]);
+      setIsSearching(false);
+      setSearchError(null);
+      return;
+    }
+
+    let isMounted = true;
+    setIsSearching(true);
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await productApi.getProducts({
+          page: 1,
+          per_page: 20,
+          search: trimmedQuery,
+        });
+
+        if (!isMounted) return;
+
+        setResults(response.data.map(mapBackendProduct));
+        setSearchError(null);
+      } catch (error) {
+        if (!isMounted) return;
+
+        setResults([]);
+        setSearchError(error instanceof Error ? error.message : 'Failed to search products');
+      } finally {
+        if (isMounted) {
+          setIsSearching(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [searchQuery]);
+
   const saveRecentSearch = async (text: string) => {
     if (!text.trim()) return;
     const updated = [
@@ -61,30 +116,15 @@ export default function SearchScreen() {
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
-    if (text.trim()) {
-      const filtered = MOCK_PRODUCTS.filter((p) =>
-        p.name.toLowerCase().includes(text.toLowerCase())
-      );
-      setResults(filtered);
-    } else {
-      setResults([]);
-    }
   };
 
-  const handleProductSelect = (productName: string) => {
-    saveRecentSearch(productName);
-    const product = MOCK_PRODUCTS.find(p => p.name === productName);
-    if (product) {
-      router.push(`/product/${product.id}`);
-    }
+  const handleProductSelect = (product: Product) => {
+    saveRecentSearch(product.name);
+    router.push(`/product/${product.id}`);
   };
 
   const handleTrendingPress = (item: string) => {
     setSearchQuery(item);
-    const filtered = MOCK_PRODUCTS.filter((p) =>
-      p.name.toLowerCase().includes(item.toLowerCase())
-    );
-    setResults(filtered);
   };
 
   const clearSearch = () => {
@@ -92,6 +132,36 @@ export default function SearchScreen() {
     setResults([]);
     inputRef.current?.focus();
   };
+
+  const availableCategories = Array.from(
+    new Set(results.map((product) => product.category).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
+
+  const displayedResults = results
+    .filter((product) => {
+      if (stockFilter === 'in_stock' && !product.inStock) {
+        return false;
+      }
+
+      if (categoryFilter !== 'all' && product.category !== categoryFilter) {
+        return false;
+      }
+
+      return true;
+    })
+    .sort((left, right) => {
+      switch (sortBy) {
+        case 'price_low':
+          return left.price - right.price;
+        case 'price_high':
+          return right.price - left.price;
+        case 'name':
+          return left.name.localeCompare(right.name);
+        case 'relevance':
+        default:
+          return 0;
+      }
+    });
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
@@ -132,18 +202,120 @@ export default function SearchScreen() {
           </View>
 
           <View style={styles.content}>
+            {searchQuery.length > 0 && !isSearching && results.length > 0 && (
+              <View style={styles.controlsSection}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.controlsRow}
+                >
+                  {[
+                    { id: 'relevance', label: 'Relevance' },
+                    { id: 'price_low', label: 'Price: Low' },
+                    { id: 'price_high', label: 'Price: High' },
+                    { id: 'name', label: 'Name' },
+                  ].map((option) => (
+                    <TouchableOpacity
+                      key={option.id}
+                      style={[
+                        styles.controlChip,
+                        sortBy === option.id && styles.controlChipActive,
+                      ]}
+                      onPress={() => setSortBy(option.id as SortOption)}
+                    >
+                      <AppText
+                        variant="sm"
+                        color={sortBy === option.id ? COLORS.neutral[0] : COLORS.neutral[600]}
+                      >
+                        {option.label}
+                      </AppText>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.controlsRow}
+                >
+                  {[
+                    { id: 'all', label: 'All Items' },
+                    { id: 'in_stock', label: 'In Stock' },
+                  ].map((option) => (
+                    <TouchableOpacity
+                      key={option.id}
+                      style={[
+                        styles.controlChipSecondary,
+                        stockFilter === option.id && styles.controlChipSecondaryActive,
+                      ]}
+                      onPress={() => setStockFilter(option.id as StockFilter)}
+                    >
+                      <AppText
+                        variant="sm"
+                        color={stockFilter === option.id ? COLORS.primary.DEFAULT : COLORS.neutral[600]}
+                      >
+                        {option.label}
+                      </AppText>
+                    </TouchableOpacity>
+                  ))}
+
+                  <TouchableOpacity
+                    style={[
+                      styles.controlChipSecondary,
+                      categoryFilter === 'all' && styles.controlChipSecondaryActive,
+                    ]}
+                    onPress={() => setCategoryFilter('all')}
+                  >
+                    <AppText
+                      variant="sm"
+                      color={categoryFilter === 'all' ? COLORS.primary.DEFAULT : COLORS.neutral[600]}
+                    >
+                      All Categories
+                    </AppText>
+                  </TouchableOpacity>
+
+                  {availableCategories.map((category) => (
+                    <TouchableOpacity
+                      key={category}
+                      style={[
+                        styles.controlChipSecondary,
+                        categoryFilter === category && styles.controlChipSecondaryActive,
+                      ]}
+                      onPress={() => setCategoryFilter(category)}
+                    >
+                      <AppText
+                        variant="sm"
+                        color={categoryFilter === category ? COLORS.primary.DEFAULT : COLORS.neutral[600]}
+                      >
+                        {category}
+                      </AppText>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
             {/*search dropdown(typeing)*/}
-            {searchQuery.length > 0 && results.length > 0 && (
+            {searchQuery.length > 0 && isSearching && (
+              <View style={styles.loadingResultsContainer}>
+                <ActivityIndicator size="small" color={COLORS.info.DEFAULT} />
+                <AppText variant="sm" color={COLORS.neutral[500]}>
+                  Searching products...
+                </AppText>
+              </View>
+            )}
+
+            {searchQuery.length > 0 && !isSearching && displayedResults.length > 0 && (
               <View style={styles.searchDropdownOverlay}>
                 <FlatList
-                  data={results}
+                  data={displayedResults}
                   keyExtractor={(item) => item.id}
                   keyboardShouldPersistTaps="handled"
                   contentContainerStyle={styles.resultsList}
                   renderItem={({ item }) => (
                     <TouchableOpacity
                       style={styles.resultItem}
-                      onPress={() => handleProductSelect(item.name)}
+                      onPress={() => handleProductSelect(item)}
                     >
                       <Image 
                         source={{ uri: item.image_url }} 
@@ -163,16 +335,16 @@ export default function SearchScreen() {
               </View>
             )}
 
-            {searchQuery.length > 0 && results.length === 0 && (
+            {searchQuery.length > 0 && !isSearching && displayedResults.length === 0 && (
               <View style={styles.noResultsContainer}>
                 <View style={styles.noResultsIcon}>
                   <Search size={48} color={COLORS.neutral[300]} />
                 </View>
                 <AppText variant="lg" weight="semibold" color={COLORS.neutral[900]} style={styles.noResultsTitle}>
-                  No results found
+                  {searchError ? 'Search unavailable' : 'No results found'}
                 </AppText>
                 <AppText variant="md" color={COLORS.neutral[500]} style={styles.noResultsText}>
-                  Try different keywords or check your spelling
+                  {searchError ?? 'Try different keywords or check your spelling'}
                 </AppText>
                 <View style={styles.suggestionChips}>
                   {['Electronics', 'Clothing', 'Accessories', 'Home'].map((suggestion, index) => (
@@ -297,6 +469,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.neutral[50],
   },
+  controlsSection: {
+    paddingTop: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  controlsRow: {
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
+  },
+  controlChip: {
+    backgroundColor: COLORS.neutral[200],
+    borderRadius: 999,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  controlChipActive: {
+    backgroundColor: COLORS.primary.DEFAULT,
+  },
+  controlChipSecondary: {
+    backgroundColor: COLORS.neutral[0],
+    borderRadius: 999,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.neutral[300],
+  },
+  controlChipSecondaryActive: {
+    borderColor: COLORS.primary.DEFAULT,
+    backgroundColor: COLORS.primary.light,
+  },
+  loadingResultsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
+  },
   //search dd
   searchDropdownOverlay: {
     position: 'absolute',
@@ -416,4 +625,3 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 });
-

@@ -6,6 +6,8 @@ backend-api/.bundle/
 
 # Ignore all environment files.
 backend-api/.env*
+mobile_app/.env*
+!mobile_app/.env.example
 
 # Ignore all logfiles and tempfiles.
 backend-api/log/*

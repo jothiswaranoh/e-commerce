@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,21 +14,59 @@ import AppText from '@/components/AppText';
 import AppButton from '@/components/AppButton';
 import { useCart } from '@/context/CartContext';
 import { COLORS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
+import { orderApi } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CheckoutScreen() {
   const router = useRouter();
-  const { cart, totalPrice, clearCart } = useCart();
+  const { cart, totalPrice, clearCart, refreshCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const subtotal = totalPrice;
   const shipping = 0;
   const tax = totalPrice * 0.08;
   const total = subtotal + shipping + tax;
 
-  const handlePlaceOrder = () => {
-    const orderId = Math.random().toString(36).substr(2, 9).toUpperCase();
-    clearCart();
-    router.replace(`/order-confirmation/${orderId}`);
+  const handlePlaceOrder = async () => {
+    if (cart.length === 0) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      const orderId = Math.random().toString(36).slice(2, 11).toUpperCase();
+      await clearCart();
+      router.replace(`/order-confirmation/${orderId}`);
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const order = await orderApi.createOrder({
+        shipping_fee: shipping,
+        items: cart.map((item) => ({
+          product_id: item.productId,
+          product_variant_id: item.productVariantId,
+          quantity: item.quantity,
+        })),
+      });
+      await refreshCart();
+      router.replace({
+        pathname: '/order-confirmation/[id]',
+        params: {
+          id: order.id,
+          orderNumber: order.order_number,
+        },
+      });
+    } catch (error) {
+      Alert.alert(
+        'Order failed',
+        error instanceof Error ? error.message : 'Unable to place the order right now.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -138,6 +177,7 @@ export default function CheckoutScreen() {
             size="lg"
             fullWidth
             style={styles.orderBtn}
+            loading={isSubmitting}
           />
         </View>
 

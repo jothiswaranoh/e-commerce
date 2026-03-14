@@ -12,10 +12,10 @@ import { useRouter } from 'expo-router';
 import { Star } from 'lucide-react-native';
 import AppText from './AppText';
 import { COLORS, SPACING } from '@/lib/theme';
-import { Product } from '@/lib/mock-data';
 import { Heart } from 'lucide-react-native';
 import { useFavourite } from '@/context/FavouriteContext';
 import { BlurView } from 'expo-blur';
+import { Product } from '@/types/product';
 
 interface ProductCardProps {
   product: Product;
