@@ -118,7 +118,8 @@ admin_user.update!(
   password_confirmation: "password123",
   role: :admin,
   organization: org,
-  name: "Admin"
+  name: "Admin",
+  phone_number: "9876543210"
 )
 puts "✅ Admin user '#{admin_email}' ready."
 
@@ -130,7 +131,8 @@ customer_user.update!(
   password_confirmation: "password123",
   role: :customer,
   organization: org,
-  name: "Customer"
+  name: "Customer",
+  phone_number: "9876543211"
 )
 puts "✅ Customer user '#{customer_email}' ready."
 

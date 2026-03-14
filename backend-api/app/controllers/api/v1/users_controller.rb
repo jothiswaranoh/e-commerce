@@ -60,6 +60,7 @@ module Api
         params.require(:user).permit(
           :name,
           :email_address,
+          :phone_number,
           :password,
           :role
         )
