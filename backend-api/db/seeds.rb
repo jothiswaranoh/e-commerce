@@ -110,10 +110,11 @@ products_data.each do |p_data|
   variant = product.variants.find_or_initialize_by(sku: p_data[:sku])
   variant.name = "#{p_data[:name]} - Default"
   variant.price = p_data[:price]
-  variant.stock = variant.stock.presence || rand(10..100)
+  variant.stock = rand(10..100)
   variant.is_active = true
 
   product.save!
+  variant.save!
 
   puts "✅ Product '#{product.name}' ready."
 end

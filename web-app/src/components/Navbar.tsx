@@ -6,6 +6,7 @@ import { ROUTES } from '../config/routes.constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { NAVBAR, BRAND } from '../config/ui.config';
+import { addWishlistListener, getWishlistCount } from '../utils/wishlist';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,6 +17,7 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { clearCart } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   const navLinks = [
     { label: NAVBAR.nav.home, path: ROUTES.HOME },
@@ -31,6 +33,12 @@ export default function Navbar() {
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const syncWishlist = () => setWishlistCount(getWishlistCount());
+    syncWishlist();
+    return addWishlistListener(syncWishlist);
   }, []);
 
   const handleLogout = async () => {
@@ -101,10 +109,15 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {/* Wishlist */}
             <Link
-              to="#"
+              to={isAuthenticated ? `${ROUTES.PROFILE}?tab=wishlist` : ROUTES.LOGIN}
               className="hidden sm:flex p-2.5 hover:bg-neutral-100 rounded-lg transition-colors relative"
             >
               <Heart className="w-5 h-5 text-neutral-700" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-primary-600 to-accent-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
 
             {/* Cart */}
@@ -152,6 +165,14 @@ export default function Navbar() {
                     <UserIcon className="w-4 h-4" />
                   {NAVBAR.menu.myProfile}
                   </Link>
+<Link
+  to={`${ROUTES.PROFILE}?tab=wishlist`}
+  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+  onClick={() => setIsUserMenuOpen(false)}
+>
+  <Heart className="w-4 h-4" />
+  {NAVBAR.menu.myWishlist}
+</Link>
 
 <Link
   to="/profile?tab=orders"
@@ -255,6 +276,13 @@ export default function Navbar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {NAVBAR.menu.myProfile}
+                  </Link>
+                  <Link
+                    to={`${ROUTES.PROFILE}?tab=wishlist`}
+                    className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                  {NAVBAR.menu.myWishlist}
                   </Link>
                   <Link
                     to="/profile?tab=orders"

@@ -72,6 +72,7 @@ export default function FeaturedProductsSection() {
     id={String(product.id)}
     name={product.name}
     price={product.variants?.[0]?.price ?? 0}
+    stock={product.variants?.[0]?.stock ?? 0}
     category={product.category?.name ?? 'Uncategorized'}
     images={product.images}   // ✅ THIS IS THE FIX
   />
