@@ -4,6 +4,7 @@ import type { User, AuthResponse } from '../types';
 
 // Auth Service
 export const authService = {
+
     loginUser: async (identifier: string, password: string): Promise<AuthResponse> => {
         try {
             const response = await service<any>({
@@ -14,13 +15,13 @@ export const authService = {
 
             if (response.success && response.data?.token) {
 
-                // 🔥 ensure token is stored before any next request
+                // store token first
                 await TokenManager.setToken(response.data.token);
 
-                // 🔥 wait one microtask so axios interceptors read updated token
+                // allow interceptors to read token
                 await Promise.resolve();
 
-                // Fetch the user profile after login
+                // fetch profile
                 const userResult = await authService.getCurrentUser();
 
                 return {
@@ -35,6 +36,7 @@ export const authService = {
                 success: false,
                 message: response.data?.error || 'Invalid credentials',
             };
+
         } catch (error: any) {
             return {
                 success: false,
@@ -68,11 +70,9 @@ export const authService = {
 
             if (response.success && response.data?.token) {
 
-                // 🔥 same fix here
                 await TokenManager.setToken(response.data.token);
                 await Promise.resolve();
 
-                // Fetch the user profile after signup
                 const userResult = await authService.getCurrentUser();
 
                 return {
@@ -88,6 +88,7 @@ export const authService = {
                 success: false,
                 message: response.data?.errors?.join(', ') || 'Registration failed',
             };
+
         } catch (error: any) {
             return {
                 success: false,
@@ -103,6 +104,7 @@ export const authService = {
             console.error('Logout request failed:', error);
         } finally {
             await TokenManager.clearToken();
+
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('shophub_current_user');
             }
@@ -117,6 +119,7 @@ export const authService = {
             const response = await apiService.get('/me');
 
             if (response.success && response.data) {
+
                 const userData = response.data;
 
                 const user: User = {
@@ -127,7 +130,7 @@ export const authService = {
                     role: userData.role || 'customer',
                     emailVerified: true,
                     createdAt: userData.created_at || new Date().toISOString(),
-                    organization: userData.organization || null,
+                    organization: userData.organization || null
                 };
 
                 localStorage.setItem('shophub_current_user', JSON.stringify(user));
@@ -139,6 +142,7 @@ export const authService = {
             }
 
             return null;
+
         } catch (error) {
             console.error('Error fetching current user:', error);
             return null;
@@ -154,7 +158,11 @@ export const authService = {
     },
 
     resetPasswordWithToken: async (token: string, password: string): Promise<any> => {
-        return apiService.put(`/passwords/${token}`, { token, password, password_confirmation: password });
+        return apiService.put(`/passwords/${token}`, {
+            token,
+            password,
+            password_confirmation: password
+        });
     },
 
     isAdmin: (user: User | null): boolean => {
