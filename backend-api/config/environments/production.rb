@@ -10,6 +10,9 @@ Rails.application.configure do
   # Disable full error reports
   config.consider_all_requests_local = false
 
+  # Ensures rails generates https urls for images and redirects
+  config.force_ssl = true
+
   # Cache public files for 1 year
   config.public_file_server.headers = {
     "cache-control" => "public, max-age=#{1.year.to_i}"
@@ -33,14 +36,14 @@ Rails.application.configure do
 
   # Mailer URL configuration
   config.action_mailer.default_url_options = {
-    host: "34.192.69.120",
-    protocol: "http"
+    host: "looksmen.freedynamicdns.org",
+    protocol: "https"
   }
 
   # URL helpers (important for ActiveStorage / serializers / Blueprinter)
   Rails.application.routes.default_url_options = {
-    host: "34.192.69.120",
-    protocol: "http"
+    host: "looksmen.freedynamicdns.org",
+    protocol: "https"
   }
 
   # I18n fallback
