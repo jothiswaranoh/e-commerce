@@ -1,4 +1,4 @@
-import { apiService, service } from './apiService';
+import { apiService } from './apiService';
 import { TokenManager } from '../services/TokenManager';
 import type { User, AuthResponse } from '../types';
 
@@ -6,10 +6,9 @@ import type { User, AuthResponse } from '../types';
 export const authService = {
     loginUser: async (email: string, password: string): Promise<AuthResponse> => {
         try {
-            const response = await service<any>({
-                url: '/login',
-                method: 'post',
-                data: { email_address: email, password },
+            const response = await apiService.post('/login', {
+                email_address: email,
+                password,
             });
 
             if (response.success && response.data?.token) {
@@ -45,19 +44,15 @@ export const authService = {
         phone?: string;
     }): Promise<AuthResponse> => {
         try {
-            const response = await service<any>({
-                url: '/signup',
-                method: 'post',
-                data: {
-                    user: {
-                        name: userData.name,
-                        email_address: userData.email,
-                        password: userData.password,
-                        password_confirmation: userData.password,
-                        org_id: 1,
-                        role: 'customer'
-                    }
-                },
+            const response = await apiService.post('/signup', {
+                user: {
+                    name: userData.name,
+                    email_address: userData.email,
+                    password: userData.password,
+                    password_confirmation: userData.password,
+                    org_id: 1,
+                    role: 'customer'
+                }
             });
 
             if (response.success && response.data?.token) {
@@ -101,38 +96,38 @@ export const authService = {
     },
 
     getCurrentUser: async (): Promise<{ success: boolean; user?: User } | null> => {
-    try {
-        const hasToken = await TokenManager.hasValidToken();
-        if (!hasToken) return null;
+        try {
+            const hasToken = await TokenManager.hasValidToken();
+            if (!hasToken) return null;
 
-        const response = await apiService.get('/me');
+            const response = await apiService.get('/me');
 
-        if (response.success && response.data) {
-            const userData = response.data; // 🔥 FIXED HERE
+            if (response.success && response.data) {
+                const userData = response.data;
 
-            const user: User = {
-                id: userData.id.toString(),
-                name: userData.name || userData.email_address?.split('@')[0] || 'User',
-                email: userData.email_address,
-                role: userData.role || 'customer',
-                emailVerified: true,
-                createdAt: userData.created_at || new Date().toISOString()
-            };
+                const user: User = {
+                    id: userData.id.toString(),
+                    name: userData.name || userData.email_address?.split('@')[0] || 'User',
+                    email: userData.email_address,
+                    role: userData.role || 'customer',
+                    emailVerified: true,
+                    createdAt: userData.created_at || new Date().toISOString()
+                };
 
-            localStorage.setItem('shophub_current_user', JSON.stringify(user));
+                localStorage.setItem('shophub_current_user', JSON.stringify(user));
 
-            return {
-                success: true,
-                user
-            };
+                return {
+                    success: true,
+                    user
+                };
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+            return null;
         }
-
-        return null;
-    } catch (error) {
-        console.error('Error fetching current user:', error);
-        return null;
-    }
-},
+    },
 
     isAuthenticated: (): boolean => {
         return TokenManager.hasValidToken();
@@ -143,7 +138,11 @@ export const authService = {
     },
 
     resetPasswordWithToken: async (token: string, password: string): Promise<any> => {
-        return apiService.put(`/passwords/${token}`, { token, password, password_confirmation: password });
+        return apiService.put(`/passwords/${token}`, {
+            token,
+            password,
+            password_confirmation: password
+        });
     },
 
     isAdmin: (user: User | null): boolean => {
