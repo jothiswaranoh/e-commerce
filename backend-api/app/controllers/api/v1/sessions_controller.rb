@@ -34,7 +34,11 @@ module Api
       private
 
       def authenticate_user
-        @user = User.find_by(email_address: params[:email_address] || params[:email])
+        identifier = params[:identifier] || params[:email_address] || params[:email] || params[:phone]
+        normalized_phone = identifier.to_s.gsub(/\D/, "")
+
+        @user = User.find_by(email_address: identifier.to_s.strip.downcase)
+        @user ||= User.find_by(phone_number: normalized_phone) if normalized_phone.present?
 
         if @user.nil?
           handle_response(success: false, error: "User not found", status: :not_found)

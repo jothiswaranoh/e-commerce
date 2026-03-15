@@ -41,7 +41,7 @@ export const ADMIN_NAV_ITEMS = [
     {
         label: 'Categories',
         path: ROUTES.ADMIN_CATEGORY,
-        icon: 'Users',
+        icon: 'Tags',
     },
     {
         label: 'Products',

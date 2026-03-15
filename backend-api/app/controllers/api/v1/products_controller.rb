@@ -28,6 +28,30 @@ module Api
         )
       end
 
+      def create
+        product = model_class.new(resource_params.except(:images))
+        product.org_id = current_org.id if product.respond_to?(:org_id)
+
+        if product.save
+          if resource_params[:images].present?
+            resource_params[:images].each do |img|
+              product.images.attach(img)
+            end
+          end
+
+          product.reload
+
+          render_success(
+            ProductBlueprint.render_as_json(product),
+            create_response_key,
+            nil,
+            :created
+          )
+        else
+          handle_response(product)
+        end
+      end
+
       def update
         product = model_class.find(params[:id])
         delete_ids = resource_params[:delete_image_ids]
@@ -41,16 +65,17 @@ module Api
 
         if product.update(resource_params.except(:images, :delete_image_ids, :image_order_ids))
 
-          if params[:product][:image_order_ids].present?
-            ordered_ids = params[:product][:image_order_ids].map(&:to_i)
+          if resource_params[:image_order_ids].present?
+            ordered_ids = resource_params[:image_order_ids].map(&:to_i)
 
             attachments = product.images.attachments.where(id: ordered_ids).index_by(&:id)
 
+            ordered_blobs = ordered_ids.map { |id| attachments[id]&.blob }.compact
+
             product.images.detach
 
-            ordered_ids.each do |id|
-              attachment = attachments[id]
-              product.images.attach(attachment.blob) if attachment
+            ordered_blobs.each do |blob|
+              product.images.attach(blob)
             end
           end
 

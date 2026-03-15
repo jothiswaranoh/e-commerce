@@ -17,7 +17,7 @@ type Product = {
         price: number;
         stock: number;
     }>;
-    images?: string[];
+    images?: { id: number; url: string }[];
     created_at: string;
 };
 
@@ -72,7 +72,7 @@ export default function ProductDataGrid({
             sortable: false,
             renderCell: (params) => {
                 const product = params.row;
-                const primaryImage = product.images?.[0];
+                const primaryImage = product.images?.[0]?.url;
 
                 return (
                     <div className="flex items-center justify-center w-full h-full">

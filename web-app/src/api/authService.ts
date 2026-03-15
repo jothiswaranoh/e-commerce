@@ -4,11 +4,12 @@ import type { User, AuthResponse } from '../types';
 
 // Auth Service
 export const authService = {
-    loginUser: async (email: string, password: string): Promise<AuthResponse> => {
+    loginUser: async (identifier: string, password: string): Promise<AuthResponse> => {
         try {
-            const response = await apiService.post('/login', {
-                email_address: email,
-                password,
+            const response = await service<any>({
+                url: '/login',
+                method: 'post',
+                data: { identifier, password },
             });
 
             if (response.success && response.data?.token) {
@@ -44,15 +45,20 @@ export const authService = {
         phone?: string;
     }): Promise<AuthResponse> => {
         try {
-            const response = await apiService.post('/signup', {
-                user: {
-                    name: userData.name,
-                    email_address: userData.email,
-                    password: userData.password,
-                    password_confirmation: userData.password,
-                    org_id: 1,
-                    role: 'customer'
-                }
+            const response = await service<any>({
+                url: '/signup',
+                method: 'post',
+                data: {
+                    user: {
+                        name: userData.name,
+                        email_address: userData.email,
+                        phone_number: userData.phone,
+                        password: userData.password,
+                        password_confirmation: userData.password,
+                        org_id: 1,
+                        role: 'customer'
+                    }
+                },
             });
 
             if (response.success && response.data?.token) {
@@ -96,9 +102,24 @@ export const authService = {
     },
 
     getCurrentUser: async (): Promise<{ success: boolean; user?: User } | null> => {
-        try {
-            const hasToken = await TokenManager.hasValidToken();
-            if (!hasToken) return null;
+    try {
+        const hasToken = await TokenManager.hasValidToken();
+        if (!hasToken) return null;
+
+        const response = await apiService.get('/me');
+
+        if (response.success && response.data) {
+            const userData = response.data; // 🔥 FIXED HERE
+
+            const user: User = {
+                id: userData.id.toString(),
+                name: userData.name || userData.email_address?.split('@')[0] || 'User',
+                email: userData.email_address,
+                phone: userData.phone_number,
+                role: userData.role || 'customer',
+                emailVerified: true,
+                createdAt: userData.created_at || new Date().toISOString()
+            };
 
             const response = await apiService.get('/me');
 

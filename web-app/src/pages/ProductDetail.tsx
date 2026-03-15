@@ -9,19 +9,7 @@ import { Product, ProductVariant } from '../types/product';
 import { useCart } from '../contexts/CartContext';
 import { toast } from 'react-toastify';
 import { ProductDetailSkeleton } from '../components/ui/Skeleton';
-
-/* ── localStorage wishlist helpers ── */
-function getWishlist(): Set<string> {
-  try {
-    const raw = localStorage.getItem('wishlist');
-    return new Set(raw ? JSON.parse(raw) : []);
-  } catch { return new Set(); }
-}
-function toggleWishlistItem(id: string): boolean {
-  const wl = getWishlist();
-  if (wl.has(id)) { wl.delete(id); localStorage.setItem('wishlist', JSON.stringify([...wl])); return false; }
-  wl.add(id); localStorage.setItem('wishlist', JSON.stringify([...wl])); return true;
-}
+import { getWishlist, toggleWishlistItem } from '../utils/wishlist';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -64,7 +52,17 @@ export default function ProductDetail() {
     if (!product || !selectedVariant) return;
     try {
       await addToCart(product.id, quantity, selectedVariant.id);
-      toast.success(`${product.name} added to cart! 🛒`);
+      toast.success('Product successfully added to cart');
+    } catch {
+      toast.error('Failed to add to cart. Please try again.');
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!product || !selectedVariant) return;
+    try {
+      await addToCart(product.id, quantity, selectedVariant.id);
+      navigate('/checkout');
     } catch {
       toast.error('Failed to add to cart. Please try again.');
     }
@@ -103,7 +101,7 @@ export default function ProductDetail() {
   }
   const images =
     product.images && product.images.length > 0
-      ? product.images
+      ? product.images.map((img: any) => img.url || img.image_url)
       : ['https://via.placeholder.com/600?text=No+Image'];
 
   const goNext = () => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
@@ -134,6 +132,22 @@ export default function ProductDetail() {
           {/* ── LEFT: Image Gallery ── */}
           <div>
             <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm mb-4 group">
+              <button
+                onClick={handleWishlist}
+                className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-xl border-2 flex items-center justify-center backdrop-blur-sm shadow-sm transition-all active:scale-90 ${
+                  isWishlisted
+                    ? 'border-red-300 bg-red-50/95 text-red-500'
+                    : 'border-white/80 bg-white/90 text-gray-400 hover:text-indigo-500 hover:border-indigo-200'
+                }`}
+                aria-label="Toggle wishlist"
+              >
+                <Heart
+                  className={`w-5 h-5 transition-all duration-200 ${
+                    isWishlisted ? 'fill-red-500 text-red-500 scale-110' : ''
+                  }`}
+                />
+              </button>
+
               <img
                 src={images[currentImageIndex]}
                 alt={product.name}
@@ -255,62 +269,58 @@ export default function ProductDetail() {
               />
             )}
 
-            {/* Quantity */}
-            <div className="mb-6">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Quantity</p>
-              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden w-fit">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                  className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <Minus className="w-3.5 h-3.5" />
-                </button>
-                <span className="w-12 text-center text-sm font-bold text-gray-800">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
             {/* Action Buttons */}
-            <div className="flex gap-3 mb-8">
-              <button
-                onClick={handleAddToCart}
-                disabled={isCartLoading || !selectedVariant || selectedVariant.stock === 0}
-                className="flex-1 h-12 flex items-center justify-center gap-2 text-sm font-bold
-                           bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl
-                           transition-all shadow-sm hover:shadow-indigo-200 hover:shadow-md
-                           disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
-              >
-                {isCartLoading ? (
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                ) : (
-                  <ShoppingCart className="w-4 h-4" />
-                )}
-                {isCartLoading ? 'Adding…' : 'Add to Cart'}
-              </button>
+            <div className="mb-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Quantity & Actions</p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                <div className="flex items-center bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-12 text-center text-sm font-bold text-gray-800">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-              {/* Like / Wishlist button — Functional */}
-              <button
-                onClick={handleWishlist}
-                className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all active:scale-90 ${isWishlisted
-                  ? 'border-red-300 bg-red-50 text-red-500'
-                  : 'border-gray-200 hover:border-indigo-300 text-gray-400 hover:text-indigo-500'
-                  }`}
-                aria-label="Toggle wishlist"
-              >
-                <Heart
-                  className={`w-5 h-5 transition-all duration-200 ${isWishlisted ? 'fill-red-500 text-red-500 scale-110' : ''
-                    }`}
-                />
-              </button>
+                <div className="flex flex-1 flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={isCartLoading || !selectedVariant || selectedVariant.stock === 0}
+                    className="flex-1 h-12 flex items-center justify-center gap-2 text-sm font-bold
+                               bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl
+                               transition-all shadow-sm hover:shadow-indigo-200 hover:shadow-md
+                               disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    {isCartLoading ? (
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                    ) : (
+                      <ShoppingCart className="w-4 h-4" />
+                    )}
+                    {isCartLoading ? 'Adding…' : 'Add to Cart'}
+                  </button>
+
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={isCartLoading || !selectedVariant || selectedVariant.stock === 0}
+                    className="sm:min-w-[150px] h-12 px-6 flex items-center justify-center gap-2 text-sm font-bold
+                               bg-white border border-indigo-200 text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50
+                               rounded-2xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Trust badges */}

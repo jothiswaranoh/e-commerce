@@ -17,11 +17,12 @@ class User < ApplicationRecord
 
   validates :role, inclusion: { in: roles.keys }
   validates :name, presence: true
+  validates :phone_number, uniqueness: true, allow_blank: true
 
   belongs_to :organization, foreign_key: :org_id
   normalizes :email_address, with: ->(e) { e.strip.downcase }
+  normalizes :phone_number, with: ->(phone) { phone.to_s.gsub(/\D/, "") }
 end
-
 
 
 

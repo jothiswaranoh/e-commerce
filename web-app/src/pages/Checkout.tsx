@@ -21,6 +21,7 @@ export default function Checkout() {
   const [paymentInfo, setPaymentInfo] = useState({
     cardNumber: '', cardName: '', expiryDate: '', cvv: '',
   });
+  const [expiryMonthValue, setExpiryMonthValue] = useState('');
   const [placingOrder, setPlacingOrder] = useState(false);
 
   const steps = [
@@ -38,6 +39,103 @@ export default function Checkout() {
 
   const getCurrentStepIndex = () => steps.findIndex(s => s.id === currentStep);
 
+  const renderStepActions = (sidebar = false) => {
+    const wrapperClass = sidebar
+      ? 'flex flex-col gap-3 border-t border-gray-100 px-6 py-5'
+      : 'flex justify-between pt-2';
+
+    if (currentStep === 'shipping') {
+      return (
+        <div className={wrapperClass}>
+          <Link to={ROUTES.CART} className={sidebar ? 'block order-1' : ''}>
+            <button
+              type="button"
+              className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
+                sidebar
+                  ? 'w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                  : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+              }`}
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to Cart
+            </button>
+          </Link>
+          <button
+            type="submit"
+            form="checkout-shipping-form"
+            className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${
+              sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
+            }`}
+          >
+            Continue to Payment <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      );
+    }
+
+    if (currentStep === 'payment') {
+      return (
+        <div className={wrapperClass}>
+          <button
+            type="button"
+            onClick={() => setCurrentStep('shipping')}
+            className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
+              sidebar
+                ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+            }`}
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <button
+            type="submit"
+            form="checkout-payment-form"
+            className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${
+              sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
+            }`}
+          >
+            Review Order <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className={wrapperClass}>
+        <button
+          type="button"
+          onClick={() => setCurrentStep('payment')}
+          className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
+            sidebar
+              ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+              : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+          }`}
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+        <button
+          type="button"
+          onClick={handlePlaceOrder}
+          disabled={placingOrder}
+          className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed ${
+            sidebar ? 'order-2 w-full px-8 py-3' : 'px-8 py-3'
+          }`}
+        >
+          {placingOrder ? (
+            <>
+              <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+              Placing Order…
+            </>
+          ) : (
+            <>Place Order <CheckCircle2 className="w-4 h-4" /></>
+          )}
+        </button>
+      </div>
+    );
+  };
+
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep('payment');
@@ -48,7 +146,40 @@ export default function Checkout() {
     setCurrentStep('review');
   };
 
+  const handleCardNumberChange = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, '').slice(0, 16);
+    const formatted = digitsOnly.replace(/(\d{4})(?=\d)/g, '$1 ');
+    setPaymentInfo({ ...paymentInfo, cardNumber: formatted });
+  };
+
+  const handleCardNameChange = (value: string) => {
+    const sanitized = value.replace(/[^a-zA-Z\s]/g, '').replace(/\s{2,}/g, ' ');
+    setPaymentInfo({ ...paymentInfo, cardName: sanitized });
+  };
+
+  const handleExpiryDateChange = (value: string) => {
+    setExpiryMonthValue(value);
+    if (!value) {
+      setPaymentInfo({ ...paymentInfo, expiryDate: '' });
+      return;
+    }
+
+    const [year, month] = value.split('-');
+    if (!year || !month) return;
+    setPaymentInfo({ ...paymentInfo, expiryDate: `${month}/${year.slice(-2)}` });
+  };
+
+  const handleCvvChange = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, '').slice(0, 3);
+    setPaymentInfo({ ...paymentInfo, cvv: digitsOnly });
+  };
+
   const handlePlaceOrder = async () => {
+    if (items.length === 0) {
+      toast.error('Your cart is empty.');
+      return;
+    }
+
     setPlacingOrder(true);
     try {
       const payload = {
@@ -68,8 +199,16 @@ export default function Checkout() {
         await refreshCart();
         navigate('/profile?tab=orders');
       }
-    } catch {
-      toast.error('Failed to place order. Please try again.');
+    } catch (error: any) {
+      const message =
+        error?.message ||
+        error?.error?.error ||
+        error?.error?.message ||
+        (Array.isArray(error?.error?.errors) ? error.error.errors.join(', ') : null) ||
+        (error?.status === 401 ? 'Please log in again to place your order.' : null) ||
+        'Failed to place order. Please try again.';
+
+      toast.error(message);
     } finally {
       setPlacingOrder(false);
     }
@@ -162,7 +301,7 @@ export default function Checkout() {
                     <p className="text-xs text-gray-400">Where should we deliver your order?</p>
                   </div>
                 </div>
-                <form onSubmit={handleShippingSubmit} className="px-6 py-6 space-y-5">
+                <form id="checkout-shipping-form" onSubmit={handleShippingSubmit} className="px-6 py-6 space-y-5">
                   <Input
                     label="Full Name"
                     placeholder="John Doe"
@@ -208,15 +347,8 @@ export default function Checkout() {
                       required
                     />
                   </div>
-                  <div className="flex justify-between pt-2">
-                    <Link to={ROUTES.CART}>
-                      <button type="button" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> Back to Cart
-                      </button>
-                    </Link>
-                    <button type="submit" className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-indigo-200">
-                      Continue to Payment <ArrowRight className="w-4 h-4" />
-                    </button>
+                  <div className="lg:hidden">
+                    {renderStepActions()}
                   </div>
                 </form>
               </div>
@@ -234,31 +366,45 @@ export default function Checkout() {
                     <p className="text-xs text-gray-400">Enter your payment information</p>
                   </div>
                 </div>
-                <form onSubmit={handlePaymentSubmit} className="px-6 py-6 space-y-5">
+                <form id="checkout-payment-form" onSubmit={handlePaymentSubmit} className="px-6 py-6 space-y-5">
                   <Input
                     label="Card Number" placeholder="1234 5678 9012 3456"
                     value={paymentInfo.cardNumber}
-                    onChange={(e) => setPaymentInfo({ ...paymentInfo, cardNumber: e.target.value })}
+                    onChange={(e) => handleCardNumberChange(e.target.value)}
                     leftIcon={<CreditCard className="w-4 h-4" />} required
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    maxLength={19}
                   />
                   <Input
                     label="Cardholder Name" placeholder="John Doe"
                     value={paymentInfo.cardName}
-                    onChange={(e) => setPaymentInfo({ ...paymentInfo, cardName: e.target.value })}
+                    onChange={(e) => handleCardNameChange(e.target.value)}
                     required
+                    autoComplete="cc-name"
                   />
                   <div className="grid sm:grid-cols-2 gap-5">
-                    <Input
-                      label="Expiry Date" placeholder="MM/YY"
-                      value={paymentInfo.expiryDate}
-                      onChange={(e) => setPaymentInfo({ ...paymentInfo, expiryDate: e.target.value })}
-                      required
-                    />
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                        Expiry Date
+                      </label>
+                      <input
+                        type="month"
+                        value={expiryMonthValue}
+                        onChange={(e) => handleExpiryDateChange(e.target.value)}
+                        required
+                        min={new Date().toISOString().slice(0, 7)}
+                        autoComplete="cc-exp"
+                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
                     <Input
                       label="CVV" placeholder="123" type="password" maxLength={3}
                       value={paymentInfo.cvv}
-                      onChange={(e) => setPaymentInfo({ ...paymentInfo, cvv: e.target.value })}
+                      onChange={(e) => handleCvvChange(e.target.value)}
                       leftIcon={<Lock className="w-4 h-4" />} required
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
                     />
                   </div>
                   {/* Secure note */}
@@ -269,15 +415,8 @@ export default function Checkout() {
                       <p className="text-xs text-indigo-600">Your payment is encrypted and secure. We never store your card details.</p>
                     </div>
                   </div>
-                  <div className="flex justify-between pt-2">
-                    <button type="button" onClick={() => setCurrentStep('shipping')}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors">
-                      <ArrowLeft className="w-4 h-4" /> Back
-                    </button>
-                    <button type="submit"
-                      className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-indigo-200">
-                      Review Order <ArrowRight className="w-4 h-4" />
-                    </button>
+                  <div className="lg:hidden">
+                    {renderStepActions()}
                   </div>
                 </form>
               </div>
@@ -333,28 +472,8 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                <div className="flex justify-between">
-                  <button onClick={() => setCurrentStep('payment')}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors">
-                    <ArrowLeft className="w-4 h-4" /> Back
-                  </button>
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={placingOrder}
-                    className="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    {placingOrder ? (
-                      <>
-                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                        Placing Order…
-                      </>
-                    ) : (
-                      <>Place Order <CheckCircle2 className="w-4 h-4" /></>
-                    )}
-                  </button>
+                <div className="lg:hidden">
+                  {renderStepActions()}
                 </div>
               </div>
             )}
@@ -414,6 +533,10 @@ export default function Checkout() {
                     <p className="text-xs text-emerald-600">SSL encrypted payment processing</p>
                   </div>
                 </div>
+              </div>
+
+              <div className="hidden lg:block">
+                {renderStepActions(true)}
               </div>
             </div>
           </div>

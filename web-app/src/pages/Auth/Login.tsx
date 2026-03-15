@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Package, Shield, Sparkles, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Package, Shield, Sparkles, Eye, EyeOff, Phone, Github } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
 import { UI_CONFIG } from '../../config/ui.config';
 import Input from '../../components/ui/Input';
@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 const { auth, brand, messages, images } = UI_CONFIG;
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuth();
@@ -22,7 +22,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await login(email, password);
+      const response = await login(identifier, password);
       if (response.success) {
         toast.success(messages.success.loginSuccess);
         const user = (response as any).user;
@@ -40,7 +40,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex">
 
       {/* ── LEFT: Form ── */}
       <div className="flex-1 flex items-center justify-center px-6 py-14">
@@ -65,12 +65,16 @@ export default function Login() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              type="email"
-              label={auth.register.fields.email.label}
-              placeholder={auth.register.fields.email.placeholder}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              leftIcon={<Mail className="w-4 h-4" />}
+              type="text"
+              label={auth.login.identifierLabel}
+              placeholder={auth.login.identifierPlaceholder}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              leftIcon={
+                identifier.replace(/\D/g, '').length >= 6
+                  ? <Phone className="w-4 h-4" />
+                  : <Mail className="w-4 h-4" />
+              }
               required
             />
 
@@ -158,7 +162,7 @@ export default function Login() {
               Google
             </button>
             <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all text-sm font-medium text-gray-700">
-              <img src={images.socialIcons.github} alt="GitHub" className="w-4 h-4" />
+              <Github className="w-4 h-4 text-gray-800" />
               GitHub
             </button>
           </div>

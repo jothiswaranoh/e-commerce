@@ -24,6 +24,7 @@ export default function AdminCategories() {
   const [pageSize, setPageSize] = useState(10);
 
   const { data, isLoading } = useCategories(page, pageSize);
+  const { data: allCategoriesData } = useCategories(1, 200);
   const [isViewOpen, setIsViewOpen] = useState(false);
 
   const rawCategories = data?.data ?? [];
@@ -38,6 +39,10 @@ export default function AdminCategories() {
         return aOrder - bOrder;
       });
   const meta = data?.meta;
+  const activeCategoryCount =
+    allCategoriesData?.data?.filter((category) => category.is_active).length ?? 0;
+  const inactiveCategoryCount =
+    allCategoriesData?.data?.filter((category) => !category.is_active).length ?? 0;
 
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
@@ -123,7 +128,7 @@ export default function AdminCategories() {
       </div>
 
       {meta && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           <Card>
             <div className="flex items-center justify-between">
@@ -157,7 +162,7 @@ export default function AdminCategories() {
               <div>
                 <p className="text-sm text-neutral-600">Active Categories</p>
                 <p className="text-2xl font-bold text-green-700 mt-1">
-                  {categories.filter((c) => c.is_active).length}
+                  {activeCategoryCount}
                 </p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -172,6 +177,32 @@ export default function AdminCategories() {
                     strokeLinejoin="round"
                     strokeWidth={2}
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-600">Inactive Categories</p>
+                <p className="text-2xl font-bold text-amber-700 mt-1">
+                  {inactiveCategoryCount}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-amber-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18.364 5.636l-1.414-1.414L12 9.172 7.05 4.222 5.636 5.636 10.586 10.586 5.636 15.536 7.05 16.95 12 12l4.95 4.95 1.414-1.414-4.95-4.95 4.95-4.95z"
                   />
                 </svg>
               </div>

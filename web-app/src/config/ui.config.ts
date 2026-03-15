@@ -33,6 +33,7 @@ export const NAVBAR = {
     login: 'Login',
     menu: {
         myProfile: 'My Profile',
+        myWishlist: 'My Wishlist',
         myOrders: 'My Orders',
         adminDashboard: 'Admin Dashboard',
         signOut: 'Sign Out',
@@ -141,6 +142,8 @@ export const AUTH = {
         title: 'Welcome Back',
         subtitle: 'Sign in to your account to continue shopping',
         submitButton: 'Sign In',
+        identifierLabel: 'Email Address or Phone Number',
+        identifierPlaceholder: 'you@example.com or +1 (555) 000-0000',
         forgotPassword: 'Forgot password?',
         noAccount: "Don't have an account?",
         createAccount: 'Create account',
