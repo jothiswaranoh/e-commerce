@@ -1,4 +1,4 @@
-import { apiService, service } from './apiService';
+import { apiService } from './apiService';
 import { TokenManager } from '../services/TokenManager';
 import type { User, AuthResponse } from '../types';
 
@@ -121,20 +121,34 @@ export const authService = {
                 createdAt: userData.created_at || new Date().toISOString()
             };
 
-            localStorage.setItem('shophub_current_user', JSON.stringify(user));
+            const response = await apiService.get('/me');
 
-            return {
-                success: true,
-                user
-            };
+            if (response.success && response.data) {
+                const userData = response.data;
+
+                const user: User = {
+                    id: userData.id.toString(),
+                    name: userData.name || userData.email_address?.split('@')[0] || 'User',
+                    email: userData.email_address,
+                    role: userData.role || 'customer',
+                    emailVerified: true,
+                    createdAt: userData.created_at || new Date().toISOString()
+                };
+
+                localStorage.setItem('shophub_current_user', JSON.stringify(user));
+
+                return {
+                    success: true,
+                    user
+                };
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+            return null;
         }
-
-        return null;
-    } catch (error) {
-        console.error('Error fetching current user:', error);
-        return null;
-    }
-},
+    },
 
     isAuthenticated: (): boolean => {
         return TokenManager.hasValidToken();
@@ -145,7 +159,11 @@ export const authService = {
     },
 
     resetPasswordWithToken: async (token: string, password: string): Promise<any> => {
-        return apiService.put(`/passwords/${token}`, { token, password, password_confirmation: password });
+        return apiService.put(`/passwords/${token}`, {
+            token,
+            password,
+            password_confirmation: password
+        });
     },
 
     isAdmin: (user: User | null): boolean => {
