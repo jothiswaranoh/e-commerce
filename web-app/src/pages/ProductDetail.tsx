@@ -7,14 +7,17 @@ import {
 import { productService } from '../services/productService';
 import { Product, ProductVariant } from '../types/product';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { ProductDetailSkeleton } from '../components/ui/Skeleton';
 import { getWishlist, toggleWishlistItem } from '../utils/wishlist';
+import { ROUTES } from '../config/routes.constants';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart, isLoading: isCartLoading } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,6 +73,13 @@ export default function ProductDetail() {
 
   const handleWishlist = () => {
     if (!id) return;
+
+    if (!isAuthenticated) {
+      toast.info('Please login to add favourites');
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
     const nowLiked = toggleWishlistItem(id);
     setIsWishlisted(nowLiked);
     if (nowLiked) {

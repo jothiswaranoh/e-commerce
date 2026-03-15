@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  User, Shield, Package, Heart, ChevronDown, ChevronUp, ArrowLeft
+  User, Package, Heart, ChevronDown, ChevronUp, ArrowLeft
 } from 'lucide-react';
 
 import { useAuth } from '../contexts/AuthContext';
@@ -14,11 +14,10 @@ import ProductCard from '../components/ProductCard';
 import type { Product } from '../types/product';
 import { addWishlistListener, getWishlist } from '../utils/wishlist';
 
-type Tab = 'profile' | 'security' | 'orders' | 'wishlist';
+type Tab = 'profile' | 'orders' | 'wishlist';
 
 const TAB_META: Record<Tab, { icon: typeof User; label: string }> = {
   profile: { icon: User, label: 'Profile' },
-  security: { icon: Shield, label: 'Security' },
   orders: { icon: Package, label: 'Orders' },
   wishlist: { icon: Heart, label: 'Wishlist' },
 };
@@ -36,7 +35,12 @@ export default function Profile() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialTab = (searchParams.get('tab') as Tab) || 'profile';
+  const getTabFromSearchParams = (): Tab => {
+    const tab = searchParams.get('tab');
+    return tab && tab in TAB_META ? (tab as Tab) : 'profile';
+  };
+
+  const initialTab = getTabFromSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   const [orders, setOrders] = useState<any[]>([]);
@@ -50,6 +54,11 @@ export default function Profile() {
   useEffect(() => {
     setSearchParams({ tab: activeTab });
   }, [activeTab, setSearchParams]);
+
+  useEffect(() => {
+    const nextTab = getTabFromSearchParams();
+    setActiveTab((current) => (current === nextTab ? current : nextTab));
+  }, [searchParams]);
 
   const fetchOrders = async () => {
     setOrdersLoading(true);
@@ -147,12 +156,48 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="min-w-0">
+            {activeTab === "profile" && (
+              <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-6 py-6 border-b border-gray-100">
+                  <h2 className="text-2xl font-bold text-gray-900">My Profile</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    View your account details and saved information.
+                  </p>
+                </div>
 
-        <div className="flex flex-col lg:flex-row gap-7">
-
-          <div className="flex-1 min-w-0">
+                <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Full Name</p>
+                    <p className="mt-2 text-base font-semibold text-gray-900">{user.name || 'Not provided'}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Email</p>
+                    <p className="mt-2 text-base font-semibold text-gray-900">{user.email || 'Not provided'}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Phone</p>
+                    <p className="mt-2 text-base font-semibold text-gray-900">{user.phone || 'Not provided'}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Role</p>
+                    <p className="mt-2 text-base font-semibold text-gray-900 capitalize">{user.role}</p>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4 md:col-span-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Member Since</p>
+                    <p className="mt-2 text-base font-semibold text-gray-900">
+                      {new Date(user.createdAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {activeTab === "orders" && (
               <div className="space-y-4">

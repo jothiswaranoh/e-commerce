@@ -1,4 +1,4 @@
-import { apiService } from './apiService';
+import { apiService, service } from './apiService';
 import { TokenManager } from '../services/TokenManager';
 import type { User, AuthResponse } from '../types';
 
@@ -17,12 +17,19 @@ export const authService = {
 
                 // Fetch the user profile after login
                 const userResult = await authService.getCurrentUser();
+                if (!userResult?.user) {
+                    await TokenManager.clearToken();
+                    return {
+                        success: false,
+                        message: 'Login failed to load user profile',
+                    };
+                }
 
                 return {
                     success: true,
                     message: 'Login successful',
                     token: response.data.token,
-                    user: userResult?.user
+                    user: userResult.user
                 };
             }
 
@@ -66,12 +73,19 @@ export const authService = {
 
                 // Fetch the user profile after signup
                 const userResult = await authService.getCurrentUser();
+                if (!userResult?.user) {
+                    await TokenManager.clearToken();
+                    return {
+                        success: false,
+                        message: 'Registration failed to load user profile',
+                    };
+                }
 
                 return {
                     success: true,
                     message: 'Registration successful',
                     token: response.data.token,
-                    user: userResult?.user,
+                    user: userResult.user,
                     role: response.data.role || 'customer'
                 };
             }
@@ -102,15 +116,17 @@ export const authService = {
     },
 
     getCurrentUser: async (): Promise<{ success: boolean; user?: User } | null> => {
-    try {
-        const hasToken = await TokenManager.hasValidToken();
-        if (!hasToken) return null;
+        try {
+            const hasToken = TokenManager.hasValidToken();
+            if (!hasToken) return null;
 
-        const response = await apiService.get('/me');
+            const response = await apiService.get('/me');
 
-        if (response.success && response.data) {
-            const userData = response.data; // 🔥 FIXED HERE
+            if (!response.success || !response.data) {
+                return null;
+            }
 
+            const userData = response.data;
             const user: User = {
                 id: userData.id.toString(),
                 name: userData.name || userData.email_address?.split('@')[0] || 'User',
@@ -118,32 +134,15 @@ export const authService = {
                 phone: userData.phone_number,
                 role: userData.role || 'customer',
                 emailVerified: true,
-                createdAt: userData.created_at || new Date().toISOString()
+                createdAt: userData.created_at || new Date().toISOString(),
             };
 
-            const response = await apiService.get('/me');
+            localStorage.setItem('shophub_current_user', JSON.stringify(user));
 
-            if (response.success && response.data) {
-                const userData = response.data;
-
-                const user: User = {
-                    id: userData.id.toString(),
-                    name: userData.name || userData.email_address?.split('@')[0] || 'User',
-                    email: userData.email_address,
-                    role: userData.role || 'customer',
-                    emailVerified: true,
-                    createdAt: userData.created_at || new Date().toISOString()
-                };
-
-                localStorage.setItem('shophub_current_user', JSON.stringify(user));
-
-                return {
-                    success: true,
-                    user
-                };
-            }
-
-            return null;
+            return {
+                success: true,
+                user,
+            };
         } catch (error) {
             console.error('Error fetching current user:', error);
             return null;

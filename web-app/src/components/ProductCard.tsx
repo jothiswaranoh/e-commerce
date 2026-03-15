@@ -103,10 +103,17 @@ export default function ProductCard({
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.info('Please login to add favourites');
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
     const nowLiked = toggleWishlistItem(id);
     setIsWishlisted(nowLiked);
     if (nowLiked) {
-      toast.success('Added to wishlist ❤️');
+      toast.success('Added to wishlist');
     } else {
       toast.info('Removed from wishlist');
     }
@@ -126,10 +133,11 @@ export default function ProductCard({
                     h-full flex flex-col">
 
       {/* ── IMAGE ── */}
-      <Link
-        to={`/product/${id}`}
-        className="relative block aspect-square bg-gray-50 overflow-hidden"
-      >
+      <div className="relative aspect-square bg-gray-50 overflow-hidden">
+        <Link
+          to={`/product/${id}`}
+          className="absolute inset-0 block"
+        >
         {/* Skeleton while loading */}
         {!isImageLoaded && (
           <div className="absolute inset-0 bg-gray-200 animate-pulse" />
@@ -165,10 +173,21 @@ export default function ProductCard({
           )}
         </div>
 
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent
+                        opacity-0 group-hover:opacity-100
+                        transition-opacity duration-300
+                        flex items-end justify-center pb-4">
+          <span className="text-white text-xs font-bold tracking-wide uppercase">
+            View Details
+          </span>
+        </div>
+        </Link>
+
         {/* Like / Wishlist button */}
         <button
           onClick={handleWishlist}
-          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm
+          className="absolute top-3 right-3 z-10 p-2 bg-white/90 backdrop-blur-sm
                      rounded-full hover:bg-white transition-all duration-200
                      shadow-sm hover:shadow-md
                      opacity-100 sm:opacity-0 sm:group-hover:opacity-100
@@ -182,17 +201,7 @@ export default function ProductCard({
               }`}
           />
         </button>
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent
-                        opacity-0 group-hover:opacity-100
-                        transition-opacity duration-300
-                        flex items-end justify-center pb-4">
-          <span className="text-white text-xs font-bold tracking-wide uppercase">
-            View Details
-          </span>
-        </div>
-      </Link>
+      </div>
 
       {/* ── CONTENT ── */}
       <div className="p-4 flex flex-col flex-grow">
