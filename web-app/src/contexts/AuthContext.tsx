@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { User } from '../types';
+import type { User, AuthResponse } from '../types';
 import authService from '../api/authService';
 
 interface AuthContextType {
@@ -7,8 +7,8 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     isAdmin: boolean;
-    login: (identifier: string, password: string) => Promise<{ success: boolean; message: string }>;
-    register: (userData: { name: string; email: string; password: string; phone?: string }) => Promise<{ success: boolean; message: string }>;
+    login: (identifier: string, password: string) => Promise<AuthResponse>;
+    register: (userData: { name: string; email: string; password: string; phone?: string }) => Promise<AuthResponse>;
     logout: () => Promise<void>;
     updateUser: (user: User) => void;
 }
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (response.success && response.user) {
                 setUser(response.user);
             }
-            return { success: response.success, message: response.message };
+            return response;
         } finally {
             setIsLoading(false);
         }
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (response.success && response.user) {
                 setUser(response.user);
             }
-            return { success: response.success, message: response.message };
+            return response;
         } finally {
             setIsLoading(false);
         }

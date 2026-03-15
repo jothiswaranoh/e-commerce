@@ -8,6 +8,7 @@ module Api
 
       # 🔥 IMPORTANT: Skip Crudable's set_resource for :me
       skip_before_action :set_resource, only: [:me]
+      skip_load_and_authorize_resource only: [:me]
 
       DEFAULT_PAGE     = 1
       DEFAULT_PER_PAGE = 10
@@ -34,6 +35,7 @@ module Api
       # -----------------------------------
       def me
         return render_unauthorized unless current_user
+        authorize! :read, current_user
 
         render_success(
           UserBlueprint.render_as_json(current_user),

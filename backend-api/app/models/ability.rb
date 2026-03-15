@@ -16,6 +16,7 @@ class Ability
   can :read, [Category, Product], org_id: user.org_id
   can :read, ProductVariant
 
+  can :read, User, id: user.id
   can :create, Order
   can :read, Order, user_id: user.id
   can :update, Order, user_id: user.id

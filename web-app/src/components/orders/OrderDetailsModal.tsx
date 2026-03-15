@@ -157,9 +157,10 @@ export default function OrderDetailsModal({ order, onUpdateStatus, onUpdatePayme
                     <Button
                         size="sm"
                         onClick={() => {
-                    if (isLocked) return;
-                    onUpdateStatus(s.value);
-}}
+                            if (isLocked) return;
+                            onUpdatePayment("paid");
+                        }}
+                        disabled={isLoading || isLocked}
                         isLoading={isLoading}
                     >
                         Mark as Paid
