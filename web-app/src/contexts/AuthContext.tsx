@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { User } from '../types';
+import type { User, AuthResponse } from '../types';
 import authService from '../api/authService';
 
 interface AuthContextType {
@@ -7,8 +7,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
-  login: (identifier: string, password: string) => Promise<{ success: boolean; message: string }>;
-  register: (userData: { name: string; email: string; password: string; phone?: string }) => Promise<{ success: boolean; message: string }>;
+  login: (identifier: string, password: string) => Promise<AuthResponse>;
+  register: (userData: { name: string; email: string; password: string; phone?: string }) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
 }
@@ -46,7 +46,7 @@ const applyTheme = (org: any) => {
   const toRgb = ([rv, gv, bv]: number[]) => `${rv} ${gv} ${bv}`;
   const root = document.documentElement;
 
-  root.style.setProperty("--color-primary-50",  toRgb(lighten(r, g, b, 45)));
+  root.style.setProperty("--color-primary-50", toRgb(lighten(r, g, b, 45)));
   root.style.setProperty("--color-primary-100", toRgb(lighten(r, g, b, 38)));
   root.style.setProperty("--color-primary-200", toRgb(lighten(r, g, b, 28)));
   root.style.setProperty("--color-primary-300", toRgb(lighten(r, g, b, 18)));
@@ -62,6 +62,7 @@ const applyTheme = (org: any) => {
 
 const resetTheme = () => {
   const root = document.documentElement;
+
   root.style.removeProperty("--color-primary-50");
   root.style.removeProperty("--color-primary-100");
   root.style.removeProperty("--color-primary-200");
@@ -72,7 +73,8 @@ const resetTheme = () => {
   root.style.removeProperty("--color-primary-700");
   root.style.removeProperty("--color-primary-800");
   root.style.removeProperty("--color-primary-900");
-  document.title = 'ShopHub';
+
+  document.title = "ShopHub";
 };
 
 /* -----------------------------
@@ -80,20 +82,29 @@ const resetTheme = () => {
 ------------------------------ */
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Restore session once on mount
   useEffect(() => {
+
     const loadUser = async () => {
       try {
         const result = await authService.getCurrentUser();
+
         if (result?.user) {
           setUser(result.user);
-          if (result.user.organization) applyTheme(result.user.organization);
+
+          if (result.user.organization) {
+            applyTheme(result.user.organization);
+          }
+
         } else {
           setUser(null);
           resetTheme();
         }
+
       } finally {
         setIsLoading(false);
       }
@@ -101,45 +112,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     loadUser();
 
+    // Handle forced logout (e.g. API 401)
     const handleAuthLogout = () => {
       setUser(null);
       resetTheme();
     };
 
     window.addEventListener("auth-logout", handleAuthLogout);
-    return () => window.removeEventListener("auth-logout", handleAuthLogout);
+
+    return () => {
+      window.removeEventListener("auth-logout", handleAuthLogout);
+    };
+
   }, []);
 
-  const login = async (identifier: string, password: string) => {
+  const login = async (identifier: string, password: string): Promise<AuthResponse> => {
+
     setIsLoading(true);
+
     try {
       const response = await authService.loginUser(identifier, password);
+
       if (response.success && response.user) {
         setUser(response.user);
-        if (response.user.organization) applyTheme(response.user.organization);
+
+        if (response.user.organization) {
+          applyTheme(response.user.organization);
+        }
       }
-      return { success: response.success, message: response.message };
+
+      return response;
+
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (userData: { name: string; email: string; password: string; phone?: string }) => {
+  const register = async (
+    userData: { name: string; email: string; password: string; phone?: string }
+  ): Promise<AuthResponse> => {
+
     setIsLoading(true);
+
     try {
       const response = await authService.registerUser(userData);
+
       if (response.success && response.user) {
         setUser(response.user);
-        if (response.user.organization) applyTheme(response.user.organization);
+
+        if (response.user.organization) {
+          applyTheme(response.user.organization);
+        }
       }
-      return { success: response.success, message: response.message };
+
+      return response;
+
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = async () => {
+
     setIsLoading(true);
+
     try {
       await authService.logoutUser();
       setUser(null);
@@ -150,8 +186,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateUser = (updatedUser: User) => {
+
     setUser(updatedUser);
-    if (updatedUser.organization) applyTheme(updatedUser.organization);
+
+    if (updatedUser.organization) {
+      applyTheme(updatedUser.organization);
+    }
   };
 
   return (
@@ -164,7 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
-        updateUser,
+        updateUser
       }}
     >
       {children}
@@ -173,7 +213,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
+
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
   return context;
 }

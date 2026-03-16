@@ -9,16 +9,15 @@ class Ability
     if user.admin?
       can :manage, [Category, Product, Order], org_id: user.org_id
       can :manage, User
-
       can :manage, ProductVariant, product: { org_id: user.org_id }
 
-   elsif user.customer?
-  can :read, User, id: user.id  # 👈 add this line
-  can :read, [Category, Product], org_id: user.org_id
-  can :read, ProductVariant
-  can :create, Order
-  can :read, Order, user_id: user.id
-  can :update, Order, user_id: user.id
-end
+    elsif user.customer?
+      can :read, User, id: user.id
+      can :read, [Category, Product], org_id: user.org_id
+      can :read, ProductVariant
+      can :create, Order
+      can :read, Order, user_id: user.id
+      can :update, Order, user_id: user.id
+    end
   end
 end

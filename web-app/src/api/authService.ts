@@ -24,11 +24,19 @@ export const authService = {
                 // fetch profile
                 const userResult = await authService.getCurrentUser();
 
+                if (!userResult?.user) {
+                    await TokenManager.clearToken();
+                    return {
+                        success: false,
+                        message: 'Login failed to load user profile',
+                    };
+                }
+
                 return {
                     success: true,
                     message: 'Login successful',
                     token: response.data.token,
-                    user: userResult?.user
+                    user: userResult.user
                 };
             }
 
@@ -75,11 +83,19 @@ export const authService = {
 
                 const userResult = await authService.getCurrentUser();
 
+                if (!userResult?.user) {
+                    await TokenManager.clearToken();
+                    return {
+                        success: false,
+                        message: 'Registration failed to load user profile',
+                    };
+                }
+
                 return {
                     success: true,
                     message: 'Registration successful',
                     token: response.data.token,
-                    user: userResult?.user,
+                    user: userResult.user,
                     role: response.data.role || 'customer'
                 };
             }
@@ -113,35 +129,37 @@ export const authService = {
 
     getCurrentUser: async (): Promise<{ success: boolean; user?: User } | null> => {
         try {
-            const hasToken = await TokenManager.hasValidToken();
+
+            const hasToken = TokenManager.hasValidToken();
             if (!hasToken) return null;
 
             const response = await apiService.get('/me');
 
-            if (response.success && response.data) {
-
-                const userData = response.data;
-
-                const user: User = {
-                    id: userData.id.toString(),
-                    name: userData.name || userData.email_address?.split('@')[0] || 'User',
-                    email: userData.email_address,
-                    phone: userData.phone_number,
-                    role: userData.role || 'customer',
-                    emailVerified: true,
-                    createdAt: userData.created_at || new Date().toISOString(),
-                    organization: userData.organization || null
-                };
-
-                localStorage.setItem('shophub_current_user', JSON.stringify(user));
-
-                return {
-                    success: true,
-                    user
-                };
+            if (!response.success || !response.data) {
+                return null;
             }
 
-            return null;
+            const userData = response.data;
+
+            const user: User = {
+                id: userData.id.toString(),
+                name: userData.name || userData.email_address?.split('@')[0] || 'User',
+                email: userData.email_address,
+                phone: userData.phone_number,
+                role: userData.role || 'customer',
+                emailVerified: true,
+                createdAt: userData.created_at || new Date().toISOString(),
+
+                // keep white-label organization support
+                organization: userData.organization || null
+            };
+
+            localStorage.setItem('shophub_current_user', JSON.stringify(user));
+
+            return {
+                success: true,
+                user
+            };
 
         } catch (error) {
             console.error('Error fetching current user:', error);

@@ -8,6 +8,7 @@ module Api
 
       # Skip Crudable's set_resource for :me
       skip_before_action :set_resource, only: [:me]
+      skip_load_and_authorize_resource only: [:me]
 
       DEFAULT_PAGE     = 1
       DEFAULT_PER_PAGE = 10
@@ -33,13 +34,14 @@ module Api
       # GET /api/v1/me
       # -----------------------------------
       def me
-  return render_unauthorized unless current_user
+        return render_unauthorized unless current_user
+        authorize! :read, current_user
 
-  render_success(
-    UserBlueprint.render_as_json(current_user),
-    success_response_key
-  )
-end
+        render_success(
+          UserBlueprint.render_as_json(current_user),
+          success_response_key
+        )
+      end
 
       # show, create, update, destroy inherited from Crudable
 
@@ -109,16 +111,16 @@ end
       # Organization payload
       # --------------------
       def organization_payload
-  return nil unless current_user&.organization
+        return nil unless current_user&.organization
 
-  {
-    id: current_user.organization.id,
-    store_name: current_user.organization.store_name,
-    primary_color: current_user.organization.primary_color,
-    secondary_color: current_user.organization.secondary_color,
-    logo_url: current_user.organization.logo_url
-  }
-end
+        {
+          id: current_user.organization.id,
+          store_name: current_user.organization.store_name,
+          primary_color: current_user.organization.primary_color,
+          secondary_color: current_user.organization.secondary_color,
+          logo_url: current_user.organization.logo_url
+        }
+      end
     end
   end
 end
