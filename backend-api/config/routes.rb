@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      get "theme", to: "theme#show"
       # Auth
       post   "signup", to: "registrations#create"
       post   "login",  to: "sessions#create"

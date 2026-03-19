@@ -7,9 +7,6 @@ import axios, {
 import { TokenManager } from '../services/TokenManager';
 import { toast } from 'react-toastify';
 
-// --------------------
-// API Response Types
-// --------------------
 export interface ApiResponse<T = any> {
     success: boolean;
     data?: T;
@@ -19,9 +16,6 @@ export interface ApiResponse<T = any> {
     headers?: any;
 }
 
-// --------------------
-// Axios Instance
-// --------------------
 export const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const apiClient = axios.create({
@@ -43,7 +37,7 @@ apiClient.interceptors.request.use(
             config.url?.includes('/refresh');
 
         if (!isAuthEndpoint) {
-            const token = await TokenManager.getAccessToken();
+            const token = TokenManager.getAccessToken();
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
@@ -82,12 +76,10 @@ apiClient.interceptors.response.use(
             );
         }
 
-        // Handle 401 Unauthorized
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && !error.config?.url?.includes('/me')) {
             const originalRequest = error.config;
             if (!originalRequest?.url?.includes('/login') && !originalRequest?.url?.includes('/signup')) {
                 await TokenManager.clearToken();
-                // Redirect to login or dispatch an event if needed
                 if (typeof window !== 'undefined') {
                     window.dispatchEvent(new CustomEvent('auth-logout', { detail: { reason: 'unauthorized' } }));
                 }

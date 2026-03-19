@@ -1,4 +1,3 @@
-
 import { ShoppingCart, Search, Menu, X, User as UserIcon, Heart, Package, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
@@ -62,17 +61,35 @@ export default function Navbar() {
     return user?.name?.split(' ')[0] || 'User';
   };
 
+  const storeName = user?.organization?.store_name || BRAND.name;
+  const logoUrl = user?.organization?.logo_url;
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50 border-b border-neutral-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+
+          {/* LOGO */}
           <div className="flex items-center gap-8">
             <Link to={ROUTES.HOME} className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold gradient-text hidden sm:block">{BRAND.name}</span>
+
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={storeName}
+                  className="h-10 w-auto"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
+                  <Package className="w-6 h-6 text-white" />
+                </div>
+              )}
+
+              <span className="text-2xl font-bold gradient-text hidden sm:block">
+                {storeName}
+              </span>
+
             </Link>
 
             {/* Desktop Navigation */}
@@ -90,10 +107,11 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Search Bar - Desktop */}
+          {/* Search */}
           <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+
               <input
                 type="text"
                 placeholder={NAVBAR.searchPlaceholder}
@@ -110,8 +128,9 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Right Actions */}
+          {/* RIGHT SIDE */}
           <div className="flex items-center gap-3">
+
             {/* Wishlist */}
             <Link
               to={isAuthenticated ? `${ROUTES.PROFILE}?tab=wishlist` : ROUTES.LOGIN}
@@ -125,12 +144,13 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Cart */}
+            {/* CART */}
             <Link
               to={ROUTES.CART}
               className="relative p-2.5 hover:bg-neutral-100 rounded-lg transition-colors"
             >
               <ShoppingCart className="w-5 h-5 text-neutral-700" />
+
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-primary-600 to-accent-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
                   {cartCount}
@@ -138,55 +158,70 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* User Menu */}
+            {/* USER MENU */}
             {isAuthenticated && user ? (
               <div className="relative" ref={dropdownRef}>
+
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="hidden sm:flex items-center gap-2 p-1.5 pr-3 rounded-lg hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
                 >
+
                   <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                     {getUserInitial()}
                   </div>
+
                   <span className="font-medium text-sm text-neutral-700 max-w-[100px] truncate">
                     {getUserFirstName()}
                   </span>
+
                   <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+
                 </button>
 
-                {/* Dropdown */}
                 {isUserMenuOpen && (
+
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-100 py-2 animate-fade-in z-50">
+
                     <div className="px-4 py-3 border-b border-neutral-100">
-                      <p className="text-sm font-semibold text-neutral-900 truncate">{user.name || 'User'}</p>
-                      <p className="text-xs text-neutral-500 truncate">{user.email || ''}</p>
+                      <p className="text-sm font-semibold text-neutral-900 truncate">
+                        {user.name || 'User'}
+                      </p>
+
+                      <p className="text-xs text-neutral-500 truncate">
+                        {user.email || ''}
+                      </p>
                     </div>
 
                     <div className="py-1">
-                      <Link
-                      to={ROUTES.PROFILE}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600" onClick={() => setIsUserMenuOpen(false)}
-                      >
-                    <UserIcon className="w-4 h-4" />
-                  {NAVBAR.menu.myProfile}
-                  </Link>
-<Link
-  to={`${ROUTES.PROFILE}?tab=wishlist`}
-  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
-  onClick={() => setIsUserMenuOpen(false)}
->
-  <Heart className="w-4 h-4" />
-  {NAVBAR.menu.myWishlist}
-</Link>
 
-<Link
-  to="/profile?tab=orders"
-  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
-  onClick={() => setIsUserMenuOpen(false)}
->
-  <Package className="w-4 h-4" />
-  {NAVBAR.menu.myOrders}
-</Link>
+                      <Link
+                        to={ROUTES.PROFILE}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <UserIcon className="w-4 h-4" />
+                        {NAVBAR.menu.myProfile}
+                      </Link>
+
+                      <Link
+                        to={`${ROUTES.PROFILE}?tab=wishlist`}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <Heart className="w-4 h-4" />
+                        {NAVBAR.menu.myWishlist}
+                      </Link>
+
+                      <Link
+                        to="/profile?tab=orders"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <Package className="w-4 h-4" />
+                        {NAVBAR.menu.myOrders}
+                      </Link>
+
                       {user.role === 'admin' && (
                         <Link
                           to={ROUTES.ADMIN_DASHBOARD}
@@ -197,9 +232,11 @@ export default function Navbar() {
                           {NAVBAR.menu.adminDashboard}
                         </Link>
                       )}
+
                     </div>
 
                     <div className="border-t border-neutral-100 mt-1 pt-1">
+
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -207,11 +244,14 @@ export default function Navbar() {
                         <LogOut className="w-4 h-4" />
                         {NAVBAR.menu.signOut}
                       </button>
+
                     </div>
+
                   </div>
                 )}
               </div>
             ) : (
+
               <Link
                 to={ROUTES.LOGIN}
                 className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-md hover:shadow-lg"
@@ -219,39 +259,47 @@ export default function Navbar() {
                 <UserIcon className="w-4 h-4" />
                 <span className="font-semibold">{NAVBAR.login}</span>
               </Link>
+
             )}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
             >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6 text-neutral-700" />
-              ) : (
-                <Menu className="w-6 h-6 text-neutral-700" />
-              )}
+              {isMobileMenuOpen
+                ? <X className="w-6 h-6 text-neutral-700" />
+                : <Menu className="w-6 h-6 text-neutral-700" />
+              }
             </button>
+
           </div>
         </div>
 
         {/* Mobile Search */}
         <div className="md:hidden pb-3">
+
           <div className="relative">
+
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+
             <input
               type="text"
               placeholder={NAVBAR.searchPlaceholder}
               className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
+
           </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
+
         <div className="md:hidden border-t border-neutral-200 bg-white animate-fade-in">
+
           <div className="px-4 py-4 space-y-3">
+
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -263,65 +311,6 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {isAuthenticated && user ? (
-              <>
-                <div className="border-t border-neutral-100 my-2 pt-2">
-                  <div className="px-4 py-2 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
-                      {getUserInitial()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-neutral-900">{user.name || 'User'}</p>
-                      <p className="text-xs text-neutral-500">{user.email || ''}</p>
-                    </div>
-                  </div>
-                  <Link
-                    to={ROUTES.PROFILE}
-                    className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {NAVBAR.menu.myProfile}
-                  </Link>
-                  <Link
-                    to={`${ROUTES.PROFILE}?tab=wishlist`}
-                    className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                  {NAVBAR.menu.myWishlist}
-                  </Link>
-                  <Link
-                    to="/profile?tab=orders"
-                    className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {NAVBAR.menu.myOrders}
-                  </Link>
-                  {user.role === 'admin' && (
-                    <Link
-                      to={ROUTES.ADMIN_DASHBOARD}
-                      className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {NAVBAR.menu.adminDashboard}
-                    </Link>
-                  )}
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
-                  >
-                    {NAVBAR.menu.signOut}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <Link
-                to={ROUTES.LOGIN}
-                className="block px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg font-semibold text-center"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {NAVBAR.login}
-              </Link>
-            )}
           </div>
         </div>
       )}

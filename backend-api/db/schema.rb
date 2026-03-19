@@ -115,6 +115,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_14_161000) do
     t.boolean "is_active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "store_name"
+    t.string "logo_url"
+    t.string "primary_color"
+    t.string "secondary_color"
+    t.string "support_email"
+    t.string "support_phone"
   end
 
   create_table "payments", force: :cascade do |t|
