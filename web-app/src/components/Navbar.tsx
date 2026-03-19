@@ -36,10 +36,15 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setWishlistCount(0);
+      return;
+    }
+
     const syncWishlist = () => setWishlistCount(getWishlistCount());
     syncWishlist();
     return addWishlistListener(syncWishlist);
-  }, []);
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     await logout();
@@ -113,7 +118,7 @@ export default function Navbar() {
               className="hidden sm:flex p-2.5 hover:bg-neutral-100 rounded-lg transition-colors relative"
             >
               <Heart className="w-5 h-5 text-neutral-700" />
-              {wishlistCount > 0 && (
+              {isAuthenticated && wishlistCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-primary-600 to-accent-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
                   {wishlistCount}
                 </span>
