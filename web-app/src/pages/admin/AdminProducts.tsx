@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Package } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Package, Sparkles, Boxes } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import { TableRowSkeleton } from "../../components/ui/Skeleton";
 
@@ -19,6 +18,7 @@ import { useCategories } from "../../hooks/useCategory";
 
 import ProductDataGrid from "../../components/products/ProductDataGrid";
 import ProductViewModal from "../../components/products/ProductViewModal";
+import { extractApiErrorMessage, extractApiErrorMessages } from "../../utils/apiError";
 
 export default function AdminProducts() {
   const [page, setPage] = useState(1);
@@ -48,16 +48,14 @@ export default function AdminProducts() {
 
   const handleCreate = async (payload: any) => {
     try {
-    await createMutation.mutateAsync(payload);
-    toast.success("Product created");
-    setIsCreateOpen(false);
-  } catch (err: any) {
-    const message = err?.message || "Validation failed";
-    message.split(",").forEach((msg: string) => {
-      toast.error(msg.trim());
-    });
-  }
-};
+      await createMutation.mutateAsync(payload);
+      toast.success("Product created");
+      setIsCreateOpen(false);
+    } catch (err: any) {
+      extractApiErrorMessages(err, "We couldn’t save the product. Please try again.")
+        .forEach((msg) => toast.error(msg));
+    }
+  };
 
   const handleUpdate = async (payload: any) => {
     if (!payload?.id) {
@@ -75,17 +73,9 @@ export default function AdminProducts() {
       setIsViewOpen(false);
       setViewProduct(null);
     } catch (err: any) {
-        const messages =
-          Array.isArray(err?.message)
-            ? err.message
-            : typeof err?.message === "string"
-            ? err.message.split(",")
-            : ["Validation failed"];
-
-        messages.forEach((msg: string) => {
-          toast.error(msg.trim());
-        });
-      }
+      extractApiErrorMessages(err, "We couldn’t update the product. Please try again.")
+        .forEach((msg) => toast.error(msg));
+    }
   };
 
   const handleView = (product: any) => {
@@ -111,31 +101,14 @@ export default function AdminProducts() {
       setSelectedProduct(null);
 
     } catch (err: any) {
-      const message =
-        err?.message ||
-        err?.error ||
-        err?.response?.data?.message ||
-        "Cannot delete product";
-
-      toast.error(message);
+      toast.error(extractApiErrorMessage(err, "We couldn’t delete the product."));
     }
-};
+  };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
     setPage(1);
   };
-
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    category_id: '',
-    description: '',
-    images: [],
-    variants: [
-      { sku: '', price: '', stock: '' }
-    ],
-  });
 
   // Calculate statistics
 const activeProducts = products.filter(
@@ -161,136 +134,94 @@ const outOfStockProducts = products.filter((p: any) => {
 }).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-neutral-900">Products</h1>
-          <p className="text-neutral-600 mt-1">
-            Manage your product catalog
-          </p>
-        </div>
+    <div className="space-y-8">
+      <div className="admin-hero-panel p-6 md:p-8">
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="admin-kicker">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Catalog Control
+            </span>
+            <h1 className="admin-title mt-4 text-4xl font-semibold text-neutral-900 md:text-5xl">Products</h1>
+            <p className="admin-copy mt-3 text-base md:text-lg">
+              Manage your product catalog with the same premium control surface as the dashboard.
+            </p>
+          </div>
 
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Package className="w-5 h-5" />
-          Add Product
-        </Button>
+          <Button onClick={() => setIsCreateOpen(true)} className="self-start lg:self-auto">
+            <Package className="w-5 h-5" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {meta && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Total Products</p>
-                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                <p className="text-sm text-neutral-500">Total Products</p>
+                <p className="mt-2 text-3xl font-bold text-neutral-900">
                   {meta.total_count}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600">
+                <Boxes className="h-6 w-6" />
               </div>
             </div>
           </Card>
 
-          <Card>
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Active</p>
-                <p className="text-2xl font-bold text-green-700 mt-1">
+                <p className="text-sm text-neutral-500">Active</p>
+                <p className="mt-2 text-3xl font-bold text-green-700">
                   {activeProducts}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-600">
+                <CheckCircle2 className="h-6 w-6" />
               </div>
             </div>
           </Card>
 
-          <Card>
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Low Stock</p>
-                <p className="text-2xl font-bold text-amber-700 mt-1">
+                <p className="text-sm text-neutral-500">Low Stock</p>
+                <p className="mt-2 text-3xl font-bold text-amber-700">
                   {lowStockProducts}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-amber-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                <AlertTriangle className="h-6 w-6" />
               </div>
             </div>
           </Card>
 
-          <Card>
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Out of Stock</p>
-                <p className="text-2xl font-bold text-red-700 mt-1">
+                <p className="text-sm text-neutral-500">Out of Stock</p>
+                <p className="mt-2 text-3xl font-bold text-red-700">
                   {outOfStockProducts}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-red-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+                <Package className="h-6 w-6" />
               </div>
             </div>
           </Card>
         </div>
       )}
 
-      <Card padding="none">
+      <Card padding="none" className="rounded-[30px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
         {isLoading ? (
           <div className="p-6">
             <table className="w-full">
               <tbody>
                 {[...Array(pageSize)].map((_, i) => (
-                  <TableRowSkeleton key={i} columns={5} />
+                  <TableRowSkeleton key={i} cols={5} />
                 ))}
               </tbody>
             </table>

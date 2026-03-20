@@ -17,7 +17,7 @@ export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart, isLoading: isCartLoading } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ export default function ProductDetail() {
         if (response.success && response.data) {
           setProduct(response.data);
           setCurrentImageIndex(0);
-          setIsWishlisted(getWishlist().has(id));
+          setIsWishlisted(isAuthenticated ? getWishlist().has(id) : false);
           const variants = response.data.variants || [];
           if (variants.length > 0) {
             const cheapest = [...variants].sort((a, b) => a.price - b.price)[0];
@@ -49,7 +49,12 @@ export default function ProductDetail() {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, isAuthenticated, user?.id]);
+
+  useEffect(() => {
+    if (!id) return;
+    setIsWishlisted(isAuthenticated ? getWishlist().has(id) : false);
+  }, [id, isAuthenticated, user?.id]);
 
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;
@@ -145,7 +150,7 @@ export default function ProductDetail() {
               <button
                 onClick={handleWishlist}
                 className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-xl border-2 flex items-center justify-center backdrop-blur-sm shadow-sm transition-all active:scale-90 ${
-                  isWishlisted
+                  isAuthenticated && isWishlisted
                     ? 'border-red-300 bg-red-50/95 text-red-500'
                     : 'border-white/80 bg-white/90 text-gray-400 hover:text-indigo-500 hover:border-indigo-200'
                 }`}
@@ -153,7 +158,7 @@ export default function ProductDetail() {
               >
                 <Heart
                   className={`w-5 h-5 transition-all duration-200 ${
-                    isWishlisted ? 'fill-red-500 text-red-500 scale-110' : ''
+                    isAuthenticated && isWishlisted ? 'fill-red-500 text-red-500 scale-110' : ''
                   }`}
                 />
               </button>

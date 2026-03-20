@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, Clock, CheckCircle, TrendingUp } from "lucide-react";
+import { Package, Clock, CheckCircle, TrendingUp, Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Card from "../../components/ui/Card";
@@ -64,74 +64,77 @@ export default function AdminOrders() {
     const totalRevenue = orders.reduce((acc, o) => acc + Number(o?.total ?? 0), 0);
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-neutral-900">Orders</h1>
-                    <p className="text-neutral-600 mt-1">
-                        Manage customer orders and fulfillment
+        <div className="space-y-8">
+            <div className="admin-hero-panel p-6 md:p-8">
+                <div className="relative z-10 max-w-2xl">
+                    <span className="admin-kicker">
+                        <Sparkles className="mr-2 h-3.5 w-3.5" />
+                        Fulfillment Control
+                    </span>
+                    <h1 className="admin-title mt-4 text-4xl font-semibold text-neutral-900 md:text-5xl">Orders</h1>
+                    <p className="admin-copy mt-3 text-base md:text-lg">
+                        Manage customer orders and fulfillment with the same premium visual language as the dashboard.
                     </p>
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-neutral-600">Total Orders</p>
-                            <p className="text-2xl font-bold text-neutral-900 mt-1">{totalOrders}</p>
+                            <p className="text-sm text-neutral-500">Total Orders</p>
+                            <p className="mt-2 text-3xl font-bold text-neutral-900">{totalOrders}</p>
                         </div>
-                        <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                            <Package className="w-6 h-6 text-primary-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600">
+                            <Package className="h-6 w-6" />
                         </div>
                     </div>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-neutral-600">Pending</p>
-                            <p className="text-2xl font-bold text-amber-700 mt-1">{pendingOrders}</p>
+                            <p className="text-sm text-neutral-500">Pending</p>
+                            <p className="mt-2 text-3xl font-bold text-amber-700">{pendingOrders}</p>
                         </div>
-                        <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-amber-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                            <Clock className="h-6 w-6" />
                         </div>
                     </div>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-neutral-600">Completed</p>
-                            <p className="text-2xl font-bold text-green-700 mt-1">{completedOrders}</p>
+                            <p className="text-sm text-neutral-500">Completed</p>
+                            <p className="mt-2 text-3xl font-bold text-green-700">{completedOrders}</p>
                         </div>
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-600">
+                            <CheckCircle className="h-6 w-6" />
                         </div>
                     </div>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-neutral-600">Revenue (Page)</p>
-                            <p className="text-2xl font-bold text-indigo-700 mt-1">₹{totalRevenue.toFixed(2)}</p>
+                            <p className="text-sm text-neutral-500">Revenue (Page)</p>
+                            <p className="mt-2 text-3xl font-bold text-indigo-700">₹{totalRevenue.toFixed(2)}</p>
                         </div>
-                        <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-indigo-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
+                            <TrendingUp className="h-6 w-6" />
                         </div>
                     </div>
                 </Card>
             </div>
 
-            <Card padding="none">
+            <Card padding="none" className="rounded-[30px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
                 {isLoading ? (
                     <div className="p-6">
                         <table className="w-full">
                             <tbody>
                                 {[...Array(pageSize)].map((_, i) => (
-                                    <TableRowSkeleton key={i} columns={6} />
+                                    <TableRowSkeleton key={i} cols={6} />
                                 ))}
                             </tbody>
                         </table>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { orderService } from '../services/orderService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -14,6 +14,7 @@ import Input from '../components/ui/Input';
 type CheckoutStep = 'shipping' | 'payment' | 'review';
 
 export default function Checkout() {
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('shipping');
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '', email: '', phone: '', address: '', city: '', state: '', zipCode: '',
@@ -30,12 +31,18 @@ export default function Checkout() {
     { id: 'review' as CheckoutStep, label: 'Review', icon: CheckCircle2 },
   ];
 
-  const { items, subtotal, refreshCart } = useCart();
+  const { items, refreshCart } = useCart();
   const navigate = useNavigate();
+  const selectedCartItemIds = (location.state as { selectedCartItemIds?: number[] } | null)?.selectedCartItemIds;
+  const checkoutItems =
+    Array.isArray(selectedCartItemIds) && selectedCartItemIds.length > 0
+      ? items.filter((item) => selectedCartItemIds.includes(item.id))
+      : items;
+  const checkoutSubtotal = checkoutItems.reduce((acc, item) => acc + item.total, 0);
 
-  const shipping = subtotal > 999 ? 0 : 50;
-  const tax = subtotal * 0.18;
-  const total = subtotal + shipping + tax;
+  const shipping = checkoutSubtotal > 999 ? 0 : checkoutSubtotal > 0 ? 50 : 0;
+  const tax = checkoutSubtotal * 0.18;
+  const total = checkoutSubtotal + shipping + tax;
 
   const getCurrentStepIndex = () => steps.findIndex(s => s.id === currentStep);
 
@@ -175,8 +182,9 @@ export default function Checkout() {
   };
 
   const handlePlaceOrder = async () => {
-    if (items.length === 0) {
-      toast.error('Your cart is empty.');
+    if (checkoutItems.length === 0) {
+      toast.error('No cart items selected for checkout.');
+      navigate(ROUTES.CART);
       return;
     }
 
@@ -187,7 +195,7 @@ export default function Checkout() {
           tax: Math.round(tax),
           shipping_fee: shipping,
         },
-        items: items.map(item => ({
+        items: checkoutItems.map(item => ({
           product_id: item.product_id,
           product_variant_id: (item as any).product_variant_id ?? 0,
           quantity: item.quantity,
@@ -484,11 +492,11 @@ export default function Checkout() {
             <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden sticky top-24">
               <div className="px-6 py-5 border-b border-gray-100">
                 <h3 className="text-base font-bold text-gray-900">Order Summary</h3>
-                <p className="text-xs text-gray-400 mt-0.5">{items.length} item{items.length !== 1 ? 's' : ''}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{checkoutItems.length} item{checkoutItems.length !== 1 ? 's' : ''}</p>
               </div>
 
               <div className="px-6 py-4 space-y-3 max-h-52 overflow-y-auto border-b border-gray-100">
-                {items.map((item) => (
+                {checkoutItems.map((item) => (
                   <div key={item.id} className="flex justify-between items-start gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{item.product_name}</p>
@@ -502,7 +510,7 @@ export default function Checkout() {
               <div className="px-6 py-4 space-y-3 border-b border-gray-100">
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-gray-900">₹{subtotal.toLocaleString()}</span>
+                  <span className="font-semibold text-gray-900">₹{checkoutSubtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Shipping</span>

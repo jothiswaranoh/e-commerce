@@ -6,6 +6,7 @@ import axios, {
 } from 'axios';
 import { TokenManager } from '../services/TokenManager';
 import { toast } from 'react-toastify';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 // --------------------
 // API Response Types
@@ -125,14 +126,15 @@ export async function service<T = any>(
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
             const backendError = error.response?.data;
-
-            const message =
-                backendError?.message ||
-                backendError?.data?.message ||
-                backendError?.error ||
-                error.response?.statusText ||
-                error.message ||
-                'Something went wrong';
+            const message = extractApiErrorMessage(
+                {
+                    status: error.response?.status,
+                    message: error.message,
+                    error: backendError,
+                    response: error.response,
+                },
+                error.response?.statusText || error.message || 'Something went wrong'
+            );
 
             return Promise.reject({
                 success: false,

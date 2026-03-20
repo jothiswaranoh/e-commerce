@@ -1,4 +1,14 @@
-import { TrendingUp, ShoppingBag, Users, DollarSign, ArrowUp, ArrowDown, Package, AlertCircle } from 'lucide-react';
+import {
+    AlertCircle,
+    ArrowDown,
+    ArrowUp,
+    DollarSign,
+    Package,
+    ShoppingBag,
+    Sparkles,
+    TrendingUp,
+    Users,
+} from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { useDashboard } from '../../hooks/useDashboard';
@@ -6,7 +16,6 @@ import { useDashboard } from '../../hooks/useDashboard';
 export default function Dashboard() {
     const { data: dashboardData, isLoading, error } = useDashboard();
 
-    // Safely access data
     const stats = dashboardData?.data?.stats || [];
     const recentOrders = dashboardData?.data?.recent_orders || [];
     const topProducts = dashboardData?.data?.top_products || [];
@@ -20,6 +29,7 @@ export default function Dashboard() {
             cancelled: 'error',
             failed: 'error',
         };
+
         return <Badge variant={variants[status.toLowerCase()] || 'neutral'}>{status}</Badge>;
     };
 
@@ -33,7 +43,7 @@ export default function Dashboard() {
     const getColor = (label: string) => {
         if (label.includes('Revenue')) return 'from-green-500 to-emerald-500';
         if (label.includes('Orders')) return 'from-blue-500 to-cyan-500';
-        if (label.includes('Customers')) return 'from-purple-500 to-pink-500';
+        if (label.includes('Customers')) return 'from-primary-500 to-accent-500';
         return 'from-orange-500 to-red-500';
     };
 
@@ -44,8 +54,8 @@ export default function Dashboard() {
 
     if (error) {
         return (
-            <div className="h-96 flex flex-col items-center justify-center text-red-500">
-                <AlertCircle className="w-12 h-12 mb-4" />
+            <div className="flex h-96 flex-col items-center justify-center text-red-500">
+                <AlertCircle className="mb-4 h-12 w-12" />
                 <h3 className="text-lg font-semibold">Failed to load dashboard data</h3>
                 <p className="text-sm text-neutral-500">Please try again later.</p>
             </div>
@@ -54,104 +64,149 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-8">
-            {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold text-neutral-900 mb-2">Dashboard</h1>
-                <p className="text-neutral-600">Welcome back! Here's what's happening with your store today.</p>
-            </div>
+            <section className="admin-hero-panel p-6 md:p-8">
+                <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="max-w-2xl">
+                        <span className="admin-kicker">
+                            <Sparkles className="mr-2 h-3.5 w-3.5" />
+                            Admin Overview
+                        </span>
+                        <h1 className="admin-title mt-4 text-4xl font-semibold text-neutral-900 md:text-5xl">
+                            Dashboard
+                        </h1>
+                        <p className="admin-copy mt-3 max-w-xl text-base md:text-lg">
+                            Welcome back! Here's what's happening with your store today.
+                        </p>
+                    </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="admin-surface-soft rounded-[28px] p-5">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Today</p>
+                            <p className="mt-3 text-3xl font-bold text-neutral-900">{recentOrders.length}</p>
+                            <p className="mt-2 text-sm text-neutral-600">Recent orders on the live dashboard</p>
+                        </div>
+                        <div className="rounded-[28px] bg-neutral-900 p-5 text-white shadow-2xl">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">Top Products</p>
+                            <p className="mt-3 text-3xl font-bold">{topProducts.length}</p>
+                            <p className="mt-2 text-sm text-white/70">Best performing products tracked here</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
                 {isLoading ? (
                     [...Array(4)].map((_, i) => (
-                        <div key={i} className="h-32 bg-white rounded-xl animate-pulse border border-gray-100" />
+                        <div key={i} className="admin-surface-soft h-36 rounded-[28px] animate-pulse" />
                     ))
                 ) : (
                     stats.map((stat, index) => {
                         const Icon = getIcon(stat.label);
                         const color = getColor(stat.label);
+
                         return (
-                            <Card key={index} variant="elevated" padding="lg" hoverable>
+                            <Card
+                                key={index}
+                                variant="glass"
+                                padding="lg"
+                                hoverable
+                                className="rounded-[28px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]"
+                            >
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <p className="text-sm text-neutral-600 mb-1">{stat.label}</p>
-                                        <h3 className="text-3xl font-bold text-neutral-900 mb-2">
+                                        <p className="text-sm font-medium text-neutral-500">{stat.label}</p>
+                                        <h3 className="mt-3 text-3xl font-bold text-neutral-900">
                                             {formatValue(stat.value, stat.type)}
                                         </h3>
-                                        <div className="flex items-center gap-1">
+                                        <div className="mt-3 flex items-center gap-1.5">
                                             {stat.isPositive ? (
-                                                <ArrowUp className="w-4 h-4 text-green-600" />
+                                                <ArrowUp className="h-4 w-4 text-green-600" />
                                             ) : (
-                                                <ArrowDown className="w-4 h-4 text-red-600" />
+                                                <ArrowDown className="h-4 w-4 text-red-600" />
                                             )}
                                             <span className={`text-sm font-semibold ${stat.isPositive ? 'text-green-600' : 'text-red-600'}`}>
                                                 {stat.change}
                                             </span>
-                                            <span className="text-sm text-neutral-500 ml-1">vs last month</span>
+                                            <span className="text-sm text-neutral-500">vs last month</span>
                                         </div>
                                     </div>
 
-                                    <div className={`p-3 bg-gradient-to-br ${color} rounded-lg shadow-sm`}>
-                                        <Icon className="w-6 h-6 text-white" />
+                                    <div className={`rounded-2xl bg-gradient-to-br ${color} p-3 text-white shadow-lg`}>
+                                        <Icon className="h-6 w-6" />
                                     </div>
                                 </div>
                             </Card>
                         );
                     })
                 )}
-            </div>
+            </section>
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue Chart Placeholder */}
-                <Card variant="elevated" padding="lg">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-neutral-900">Revenue Overview</h2>
-                        <select className="px-3 py-1.5 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_0.95fr]">
+                <Card
+                    variant="glass"
+                    padding="lg"
+                    className="rounded-[30px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]"
+                >
+                    <div className="mb-6 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Performance</p>
+                            <h2 className="mt-2 text-2xl font-semibold text-neutral-900">Revenue Overview</h2>
+                        </div>
+                        <select className="rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-700 outline-none focus:ring-2 focus:ring-primary-200">
                             <option>Last 30 days</option>
                         </select>
                     </div>
-                    <div className="h-64 bg-gradient-to-br from-primary-50 to-accent-50 rounded-lg flex items-center justify-center border border-primary-100/50">
+
+                    <div className="flex h-72 items-center justify-center rounded-[28px] border border-white/80 bg-gradient-to-br from-white via-primary-50/50 to-neutral-100">
                         <div className="text-center">
-                            <TrendingUp className="w-16 h-16 text-primary-400 mx-auto mb-2" />
-                            <p className="text-neutral-600 font-medium">Chart visualization coming soon</p>
+                            <TrendingUp className="mx-auto mb-3 h-16 w-16 text-primary-500" />
+                            <p className="font-medium text-neutral-700">Revenue visualization area</p>
+                            <p className="mt-1 text-sm text-neutral-500">Designed to feel lighter and more premium.</p>
                         </div>
                     </div>
                 </Card>
 
-                {/* Top Products */}
-                <Card variant="elevated" padding="lg">
-                    <h2 className="text-xl font-bold text-neutral-900 mb-6">Top Selling Products</h2>
+                <Card
+                    variant="glass"
+                    padding="lg"
+                    className="rounded-[30px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]"
+                >
+                    <div className="mb-6">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Sales</p>
+                        <h2 className="mt-2 text-2xl font-semibold text-neutral-900">Top Products</h2>
+                    </div>
+
                     <div className="space-y-4">
                         {isLoading ? (
-                            [...Array(5)].map((_, i) => (
-                                <div key={i} className="flex gap-4 items-center">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-lg animate-pulse" />
+                            [...Array(4)].map((_, i) => (
+                                <div key={i} className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-2xl bg-neutral-100 animate-pulse" />
                                     <div className="flex-1 space-y-2">
-                                        <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse" />
-                                        <div className="h-3 bg-gray-100 rounded w-1/4 animate-pulse" />
+                                        <div className="h-4 w-3/4 rounded bg-neutral-100 animate-pulse" />
+                                        <div className="h-3 w-1/3 rounded bg-neutral-100 animate-pulse" />
                                     </div>
                                 </div>
                             ))
                         ) : topProducts.length === 0 ? (
-                            <p className="text-neutral-500 text-center py-8">No sales data yet.</p>
+                            <p className="py-8 text-center text-neutral-500">No sales data yet.</p>
                         ) : (
                             topProducts.map((product) => (
-                                <div key={product.id} className="flex items-center gap-4 group">
-                                    <div className="w-12 h-12 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 border border-neutral-200">
+                                <div
+                                    key={product.id}
+                                    className="flex items-center gap-4 rounded-[24px] border border-white/90 bg-white/70 p-3 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                                >
+                                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
                                         {product.image ? (
-                                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                                            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
                                         ) : (
-                                            <Package className="w-6 h-6 text-neutral-400 m-auto" />
+                                            <Package className="h-5 w-5 text-neutral-400" />
                                         )}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-neutral-900 truncate group-hover:text-primary-600 transition-colors">
-                                            {product.name}
-                                        </p>
-                                        <p className="text-sm text-neutral-600">{product.sold} sold</p>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate font-semibold text-neutral-900">{product.name}</p>
+                                        <p className="text-sm text-neutral-500">{product.sold} sold</p>
                                     </div>
-                                    <p className="font-bold text-neutral-900 whitespace-nowrap">
+                                    <p className="whitespace-nowrap font-semibold text-neutral-900">
                                         ₹{Number(product.revenue).toLocaleString('en-IN')}
                                     </p>
                                 </div>
@@ -159,61 +214,65 @@ export default function Dashboard() {
                         )}
                     </div>
                 </Card>
-            </div>
+            </section>
 
-            {/* Recent Orders */}
-            <Card variant="elevated" padding="none">
-                <div className="p-6 border-b border-neutral-200">
-                    <h2 className="text-xl font-bold text-neutral-900">Recent Orders</h2>
+            <Card
+                variant="glass"
+                padding="none"
+                className="rounded-[30px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]"
+            >
+                <div className="border-b border-neutral-200/80 px-6 py-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Activity</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-neutral-900">Recent Orders</h2>
                 </div>
+
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-neutral-50 border-b border-neutral-200">
+                        <thead className="bg-white/60">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                                     Order ID
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                                     Customer
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                                     Amount
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                                     Status
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                                     Date
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-200">
+
+                        <tbody className="divide-y divide-neutral-200/80">
                             {isLoading ? (
                                 [...Array(5)].map((_, i) => (
                                     <tr key={i}>
                                         <td colSpan={5} className="px-6 py-4">
-                                            <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                                            <div className="h-4 animate-pulse rounded bg-neutral-100" />
                                         </td>
                                     </tr>
                                 ))
                             ) : recentOrders.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-neutral-500">
+                                    <td colSpan={5} className="px-6 py-10 text-center text-neutral-500">
                                         No recent orders found.
                                     </td>
                                 </tr>
                             ) : (
                                 recentOrders.map((order) => (
-                                    <tr key={order.id} className="hover:bg-neutral-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="font-semibold text-neutral-900">{order.id}</span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-neutral-700">{order.customer}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap font-semibold text-neutral-900">
+                                    <tr key={order.id} className="transition-colors hover:bg-white/60">
+                                        <td className="whitespace-nowrap px-6 py-4 font-semibold text-neutral-900">{order.id}</td>
+                                        <td className="whitespace-nowrap px-6 py-4 text-neutral-700">{order.customer}</td>
+                                        <td className="whitespace-nowrap px-6 py-4 font-semibold text-neutral-900">
                                             ₹{Number(order.amount).toLocaleString('en-IN')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(order.status)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-neutral-600">{order.date}</td>
+                                        <td className="whitespace-nowrap px-6 py-4">{getStatusBadge(order.status)}</td>
+                                        <td className="whitespace-nowrap px-6 py-4 text-neutral-500">{order.date}</td>
                                     </tr>
                                 ))
                             )}

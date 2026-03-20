@@ -62,26 +62,41 @@ export default function Home() {
       {/* ══════════════════════════════════════
           HERO
       ══════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#050816_0%,#0d1430_34%,#171d45_68%,#090d1d_100%)] text-white">
         {/* Decorative blobs */}
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 -left-24 w-80 h-80 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(79,70,229,0.22),transparent_0,transparent_28%),radial-gradient(circle_at_82%_12%,rgba(168,85,247,0.16),transparent_0,transparent_24%),radial-gradient(circle_at_72%_72%,rgba(59,130,246,0.12),transparent_0,transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_22%,transparent_78%,rgba(255,255,255,0.03))]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/25 via-black/10 to-transparent" />
+        <div className="pointer-events-none absolute -left-16 top-20 h-64 w-64 rounded-full border border-white/6 bg-white/[0.03] blur-2xl" />
+        <div className="pointer-events-none absolute right-12 top-16 h-40 w-40 rounded-full border border-white/6 bg-white/[0.04] blur-2xl" />
+        <div className="pointer-events-none absolute right-[8%] top-[18%] hidden h-[420px] w-[420px] rounded-full border border-white/6 bg-[radial-gradient(circle,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_42%,transparent_68%)] lg:block" />
+        <div className="pointer-events-none absolute right-[14%] top-[26%] hidden h-[280px] w-[280px] rounded-full border border-white/8 lg:block" />
+        <div className="pointer-events-none absolute right-[4%] top-[42%] hidden h-40 w-40 rounded-[32px] rotate-12 border border-white/8 bg-white/[0.03] shadow-[0_0_80px_rgba(255,255,255,0.04)] backdrop-blur-sm lg:block" />
+        <div className="pointer-events-none absolute right-[18%] top-[58%] hidden h-24 w-24 rounded-full bg-gradient-to-br from-primary-400/25 to-accent-400/10 blur-xl lg:block" />
+        <div className="pointer-events-none absolute bottom-[14%] right-[10%] hidden h-px w-[320px] bg-gradient-to-r from-transparent via-white/20 to-transparent lg:block" />
+        <div className="pointer-events-none absolute right-[10%] top-[20%] hidden lg:block">
+          <div className="rounded-[28px] border border-white/8 bg-white/[0.04] px-5 py-4 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,0,0,0.16)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-400">Shopping</p>
+            <p className="mt-2 text-lg font-semibold text-white/90">Discover standout pieces.</p>
+            <p className="mt-1 text-sm text-slate-400">Curated collections for smarter shopping.</p>
+          </div>
+        </div>
 
         {/* Subtle grid texture */}
         <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
+              'linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)',
+            backgroundSize: '54px 54px',
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 md:py-32">
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-14 md:py-18 lg:py-20">
           <div className="max-w-2xl">
+            <div className="max-w-2xl">
             {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full mb-7">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3.5 py-1.5 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
               <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
               <span className="text-xs font-bold tracking-wider uppercase text-indigo-200">
                 New Arrivals Every Week
@@ -89,27 +104,27 @@ export default function Home() {
             </div>
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+            <h1 className="mb-5 text-4xl font-bold leading-[0.98] tracking-[-0.05em] md:text-5xl lg:text-6xl">
               {HOME.hero.title}
-              <span className="block text-indigo-300 mt-1">
-                {/* subtitle slot — rendered from config */}
+              <span className="mt-2 block bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent">
+                Modern essentials, elevated.
               </span>
             </h1>
 
-            <p className="text-lg text-slate-400 mb-10 leading-relaxed max-w-lg">
+            <p className="mb-8 max-w-lg text-base leading-relaxed text-slate-300 md:text-lg">
               {HOME.hero.tagline}
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3">
               <Link to={ROUTES.PRODUCTS}>
-                <button className="inline-flex items-center gap-2 px-7 py-3.5 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-indigo-900/40 hover:shadow-indigo-900/60 hover:-translate-y-0.5">
+                <button className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-3.5 text-sm font-bold text-white transition-all shadow-[0_20px_40px_rgba(79,70,229,0.32)] hover:-translate-y-0.5 hover:shadow-[0_24px_54px_rgba(79,70,229,0.4)]">
                   {HOME.hero.primaryCTA}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>
               <Link to={ROUTES.PRODUCTS}>
-                <button className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/10 hover:bg-white/15 text-white text-sm font-semibold rounded-xl border border-white/15 transition-all backdrop-blur-sm">
+                <button className="inline-flex items-center gap-2 rounded-2xl border border-white/14 bg-white/7 px-7 py-3.5 text-sm font-semibold text-white transition-all backdrop-blur-md hover:bg-white/12">
                   {HOME.hero.secondaryCTA}
                   <ChevronRight className="w-4 h-4 text-white/60" />
                 </button>
@@ -117,7 +132,7 @@ export default function Home() {
             </div>
 
             {/* Social proof */}
-            <div className="mt-10 flex items-center gap-5">
+            <div className="mt-8 flex items-center gap-5">
               <div className="flex -space-x-2">
                 {['bg-indigo-400', 'bg-violet-400', 'bg-pink-400', 'bg-amber-400'].map((c, i) => (
                   <div key={i} className={`w-8 h-8 rounded-full ${c} border-2 border-slate-900`} />
@@ -126,6 +141,7 @@ export default function Home() {
               <p className="text-sm text-slate-400">
                 <span className="text-white font-semibold">2,400+</span> happy customers
               </p>
+            </div>
             </div>
           </div>
         </div>
