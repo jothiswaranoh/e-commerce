@@ -118,6 +118,78 @@
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+
+  .admin-shell {
+    @apply min-h-screen bg-neutral-100;
+    background:
+      radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 24%),
+      radial-gradient(circle at top right, rgba(219, 39, 119, 0.07), transparent 20%),
+      linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+  }
+
+  .admin-topbar-panel {
+    @apply border border-white/80 bg-white/85 backdrop-blur-2xl;
+    box-shadow:
+      0 18px 46px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .admin-sidebar-panel {
+    background: linear-gradient(180deg, rgba(23, 23, 23, 0.96) 0%, rgba(38, 38, 38, 0.98) 100%);
+    box-shadow:
+      24px 0 60px rgba(15, 23, 42, 0.18),
+      inset -1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .admin-surface-soft {
+    @apply border border-white/80 bg-white/80 backdrop-blur-lg;
+    box-shadow:
+      0 14px 40px rgba(15, 23, 42, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .admin-hero-panel {
+    @apply relative overflow-hidden rounded-[32px] border border-white/80 bg-white/80 backdrop-blur-xl;
+    box-shadow:
+      0 24px 64px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .admin-hero-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at top right, rgba(124, 58, 237, 0.12), transparent 28%),
+      linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.35) 40%, transparent 72%);
+  }
+
+  .admin-kicker {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em];
+    background: rgba(124, 58, 237, 0.08);
+    color: rgb(109 40 217);
+  }
+
+  .admin-title {
+    letter-spacing: -0.04em;
+  }
+
+  .admin-copy {
+    @apply text-neutral-500;
+  }
+
+  .admin-nav-item {
+    @apply rounded-2xl px-4 py-3 transition-all duration-300;
+  }
+
+  .admin-nav-item-active {
+    @apply bg-white text-neutral-900;
+    box-shadow:
+      0 12px 26px rgba(255, 255, 255, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
 }
 
 @layer utilities {
@@ -213,5 +285,10 @@
   
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-neutral-500;
+  }
+
+  .premium-data-grid .MuiDataGrid-root {
+    border: none;
+    background: transparent;
   }
 }

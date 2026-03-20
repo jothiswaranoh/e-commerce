@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { CheckCircle2, FolderTree, Plus, Sparkles, XCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import { TableRowSkeleton } from "../../components/ui/Skeleton";
 
@@ -112,112 +111,80 @@ export default function AdminCategories() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-neutral-900">Categories</h1>
-          <p className="text-sm text-neutral-500">
+    <div className="space-y-8">
+      <div className="admin-hero-panel p-6 md:p-8">
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="admin-kicker">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Category Management
+            </span>
+            <h1 className="admin-title mt-4 text-4xl font-semibold text-neutral-900 md:text-5xl">Categories</h1>
+            <p className="admin-copy mt-3 text-base md:text-lg">
             Manage product categories and hierarchy
-          </p>
-        </div>
+            </p>
+          </div>
 
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="w-5 h-5" />
-          Add Category
-        </Button>
+          <Button onClick={() => setIsCreateOpen(true)} className="self-start lg:self-auto">
+            <Plus className="w-5 h-5" />
+            Add Category
+          </Button>
+        </div>
       </div>
 
       {meta && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-          <Card>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                
-                <p className="text-sm text-neutral-600">Total Categories</p>
-                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                <p className="text-sm text-neutral-500">Total Categories</p>
+                <p className="mt-2 text-3xl font-bold text-neutral-900">
                   {meta.total_count}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600">
+                <FolderTree className="h-6 w-6" />
               </div>
             </div>
           </Card>
 
-          <Card>
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Active Categories</p>
-                <p className="text-2xl font-bold text-green-700 mt-1">
+                <p className="text-sm text-neutral-500">Active Categories</p>
+                <p className="mt-2 text-3xl font-bold text-green-700">
                   {activeCategoryCount}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-600">
+                <CheckCircle2 className="h-6 w-6" />
               </div>
             </div>
           </Card>
 
-          <Card>
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Inactive Categories</p>
-                <p className="text-2xl font-bold text-amber-700 mt-1">
+                <p className="text-sm text-neutral-500">Inactive Categories</p>
+                <p className="mt-2 text-3xl font-bold text-amber-700">
                   {inactiveCategoryCount}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-amber-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M18.364 5.636l-1.414-1.414L12 9.172 7.05 4.222 5.636 5.636 10.586 10.586 5.636 15.536 7.05 16.95 12 12l4.95 4.95 1.414-1.414-4.95-4.95 4.95-4.95z"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                <XCircle className="h-6 w-6" />
               </div>
             </div>
           </Card>
         </div>
       )}
 
-      <Card padding="none">
+      <Card padding="none" className="rounded-[30px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
         {isLoading ? (
           <div className="p-6">
             <table className="w-full">
               <tbody>
                 {[...Array(5)].map((_, i) => (
-                  <TableRowSkeleton key={i} columns={5} />
+                  <TableRowSkeleton key={i} cols={5} />
                 ))}
               </tbody>
             </table>

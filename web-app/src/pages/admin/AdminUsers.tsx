@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UserPlus } from "lucide-react";
+import { ShieldCheck, Sparkles, UserPlus, Users as UsersIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Card from "../../components/ui/Card";
@@ -82,84 +82,66 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-neutral-900">Users</h1>
-          <p className="text-neutral-600 mt-1">
-            Manage user accounts and permissions
-          </p>
-        </div>
+    <div className="space-y-8">
+      <div className="admin-hero-panel p-6 md:p-8">
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="admin-kicker">
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Access Management
+            </span>
+            <h1 className="admin-title mt-4 text-4xl font-semibold text-neutral-900 md:text-5xl">Users</h1>
+            <p className="admin-copy mt-3 text-base md:text-lg">
+              Manage user accounts and permissions with the same premium layout as the rest of the admin.
+            </p>
+          </div>
 
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <UserPlus className="w-5 h-5" />
-          Add User
-        </Button>
+          <Button onClick={() => setIsCreateOpen(true)} className="self-start lg:self-auto">
+            <UserPlus className="w-5 h-5" />
+            Add User
+          </Button>
+        </div>
       </div>
 
       {meta && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Total Users</p>
-                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                <p className="text-sm text-neutral-500">Total Users</p>
+                <p className="mt-2 text-3xl font-bold text-neutral-900">
                   {meta.total_count}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600">
+                <UsersIcon className="h-6 w-6" />
               </div>
             </div>
           </Card>
 
-          <Card>
+          <Card className="rounded-[28px] border border-white/80 bg-white/80 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Admins</p>
-                <p className="text-2xl font-bold text-primary-700 mt-1">
+                <p className="text-sm text-neutral-500">Admins</p>
+                <p className="mt-2 text-3xl font-bold text-primary-700">
                   {users.filter((u) => u.role === "admin").length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-amber-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                <ShieldCheck className="h-6 w-6" />
               </div>
             </div>
           </Card>
         </div>
       )}
 
-      <Card padding="none">
+      <Card padding="none" className="rounded-[30px] border border-white/80 bg-white/78 shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
         {isLoading ? (
           <div className="p-6">
             <table className="w-full">
               <tbody>
                 {[...Array(5)].map((_, i) => (
-                  <TableRowSkeleton key={i} columns={4} />
+                  <TableRowSkeleton key={i} cols={4} />
                 ))}
               </tbody>
             </table>

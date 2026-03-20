@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import {
-  X, Pencil, Check, GripVertical, Trash2,
-  Plus, Eye, Layers, Folder,
-  ChevronLeft, ChevronRight, ChevronDown
+  X, Pencil, Check, Trash2,
+  Plus, Eye, Layers, Folder
 } from "lucide-react";
 
 type Category = {
@@ -37,9 +36,6 @@ export default function CategoryModal({
   const [draft, setDraft] = useState<Category | null>(null);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [activeImg, setActiveImg] = useState(0);
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const [dragOver, setDragOver] = useState<number | null>(null);
-  const [newImageDrop, setNewImageDrop] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -124,23 +120,24 @@ export default function CategoryModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}
+      style={{ backgroundColor: "rgba(15,23,42,0.36)", backdropFilter: "blur(14px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="relative flex flex-col overflow-hidden rounded-[32px] border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,249,250,0.98))] shadow-[0_34px_100px_rgba(15,23,42,0.22)]"
         style={{ width: "min(1140px, 96vw)", height: "min(800px, 92vh)" }}
         onClick={e => e.stopPropagation()}
       >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/80 to-transparent" />
 
         {/* HEADER */}
-        <div className="flex-shrink-0 flex items-center justify-between px-7 py-4 border-b border-gray-100">
+        <div className="relative z-10 flex flex-shrink-0 items-center justify-between border-b border-neutral-200/90 bg-white/92 px-7 py-5">
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-              <Folder className="w-5 h-5 text-indigo-500" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-100 to-accent-100 shadow-[0_10px_24px_rgba(124,58,237,0.15)]">
+              <Folder className="h-5 w-5 text-primary-600" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                 {draft?.id ? "Editing Category" : "Creating Category"}
               </p>
               {isEdit ? (
@@ -156,10 +153,10 @@ export default function CategoryModal({
                     set("name", value);
                     set("slug", slug.charAt(0).toUpperCase() + slug.slice(1));
                   }}
-                  className="text-xl font-semibold text-gray-900 bg-transparent border-b-2 border-indigo-300 focus:outline-none focus:border-indigo-500"
+                  className="border-b-2 border-primary-300 bg-transparent text-xl font-semibold text-neutral-900 focus:border-primary-500 focus:outline-none"
                 />
               ) : (
-                <h2 className="text-xl font-semibold text-gray-900">{draft.name}</h2>
+                <h2 className="text-xl font-semibold text-neutral-900">{draft.name}</h2>
               )}
             </div>
           </div>
@@ -173,13 +170,13 @@ export default function CategoryModal({
                     setNewFiles([]);
                     setMode("view");
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100"
+                  className="flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
                 >
                   <X className="w-4 h-4" /> Discard
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-200"
+                  className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-600 to-accent-600 px-5 py-2 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(124,58,237,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(124,58,237,0.32)]"
                 >
                   <Check className="w-4 h-4" /> Save changes
                 </button>
@@ -194,14 +191,14 @@ export default function CategoryModal({
                   }
                   setMode("edit");
                 }}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700"
+                className="flex items-center gap-2 rounded-2xl bg-neutral-900 px-5 py-2 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(23,23,23,0.2)] transition-all hover:-translate-y-0.5 hover:bg-neutral-700"
               >
                 <Pencil className="w-4 h-4" /> Edit category
               </button>
             )}
             <button
               onClick={handleClose}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-100"
+              className="flex h-10 w-10 items-center justify-center rounded-2xl text-neutral-400 transition-colors hover:bg-neutral-100"
             >
               <X className="w-4 h-4" />
             </button>
@@ -212,11 +209,11 @@ export default function CategoryModal({
         <div className="flex-1 flex overflow-hidden min-h-0">
 
           {/* LEFT IMAGE PANEL identical structure */}
-          <div className="w-[46%] flex-shrink-0 flex flex-col gap-4 p-6 border-r border-gray-100 overflow-y-auto bg-gray-50/40">
+          <div className="flex w-[46%] flex-shrink-0 flex-col gap-5 overflow-y-auto border-r border-neutral-200/90 bg-[linear-gradient(180deg,#fafafa,#f4f4f5)] p-6">
 
             {/* Hero */}
             <div
-                className="relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
+                className="relative overflow-hidden rounded-[28px] border border-neutral-200/90 bg-white shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
                 style={{ aspectRatio: "4/3" }}
             >
                 {draft.images.length > 0 ? (
@@ -225,7 +222,7 @@ export default function CategoryModal({
                     className="w-full h-full object-cover"
                 />
                 ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-300">
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-gray-300">
                     <Folder className="w-16 h-16" />
                     <span className="text-sm font-medium">No image uploaded</span>
                 </div>
@@ -234,7 +231,7 @@ export default function CategoryModal({
                 {isEdit && draft.images.length > 0 && (
                 <button
                     onClick={() => deleteImage(activeImg)}
-                    className="absolute top-3 right-3 w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center"
+                    className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-2xl border border-neutral-200/80 bg-white shadow-sm"
                 >
                     <Trash2 className="w-4 h-4 text-red-500" />
                 </button>
@@ -247,9 +244,9 @@ export default function CategoryModal({
                 <div
                     key={i}
                     onClick={() => setActiveImg(i)}
-                    className={`w-20 h-20 rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
+                    className={`h-20 w-20 cursor-pointer overflow-hidden rounded-2xl border-2 bg-white transition-all ${
                     activeImg === i
-                        ? "border-indigo-500 shadow-lg shadow-indigo-100 scale-105"
+                        ? "scale-105 border-primary-500 shadow-lg shadow-primary-100"
                         : "border-transparent hover:border-gray-300 hover:shadow-md"
                     }`}
                 >
@@ -259,13 +256,14 @@ export default function CategoryModal({
 
                 {isEdit && draft.images.length === 0 && (
                 <label
-                    className="w-20 h-20 rounded-xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center gap-1 transition-all border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50"
+                    className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-gray-200 bg-white transition-all hover:border-primary-300 hover:bg-primary-50/50"
                 >
                     <Plus className="w-5 h-5 text-gray-400" />
                     <span className="text-[10px] text-gray-400 font-semibold">Add</span>
                     <input
                     type="file"
                     accept="image/*"
+                    ref={fileRef}
                     className="hidden"
                     onChange={(e) => addImage(e.target.files)}
                     />
@@ -281,8 +279,8 @@ export default function CategoryModal({
             </div>
 
           {/* RIGHT PANEL */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto px-7 py-6 space-y-7">
+          <div className="flex-1 flex flex-col overflow-hidden bg-[linear-gradient(180deg,#ffffff,#fcfcfd)]">
+            <div className="flex-1 space-y-7 overflow-y-auto px-7 py-6">
 
               <section>
                 <SectionLabel>General</SectionLabel>
@@ -384,17 +382,17 @@ export default function CategoryModal({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
+    <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
       {children}
-      <span className="flex-1 h-px bg-gray-100" />
+      <span className="h-px flex-1 bg-gray-100" />
     </p>
   );
 }
 
 function InfoCard({ label, icon, children }: any) {
   return (
-    <div className="bg-gray-50 rounded-xl px-4 py-3.5 border border-gray-100">
-      <div className="flex items-center gap-1.5 mb-1.5">
+    <div className="rounded-2xl border border-neutral-200/90 bg-[linear-gradient(180deg,#ffffff,#fbfbfc)] px-4 py-3.5 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
+      <div className="mb-1.5 flex items-center gap-1.5">
         {icon}
         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
       </div>
@@ -404,7 +402,7 @@ function InfoCard({ label, icon, children }: any) {
 }
 
 const inputCls =
-  "w-full h-9 px-3 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition-colors mt-0.5";
+  "mt-0.5 h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-800 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] transition-colors focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-50";
 
 const selectCls =
-  "w-full h-9 px-3 text-sm text-gray-800 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 appearance-none cursor-pointer transition-colors mt-0.5";
+  "mt-0.5 h-10 w-full cursor-pointer appearance-none rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-800 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] transition-colors focus:border-primary-400 focus:outline-none";

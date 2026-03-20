@@ -63,37 +63,38 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50 border-b border-neutral-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="sticky top-0 z-50 px-3 pt-3 sm:px-4 lg:px-6">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex h-[72px] items-center justify-between rounded-[28px] border border-white/80 bg-white/88 px-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-2xl sm:px-6">
           {/* Logo */}
           <div className="flex items-center gap-8">
-            <Link to={ROUTES.HOME} className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
+            <Link to={ROUTES.HOME} className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-600 to-accent-600 shadow-[0_12px_26px_rgba(124,58,237,0.22)]">
                 <Package className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold gradient-text hidden sm:block">{BRAND.name}</span>
+              <div className="hidden sm:block">
+                <span className="block text-xl font-bold gradient-text">{BRAND.name}</span>
+              </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex gap-6">
+            <div className="hidden rounded-full border border-neutral-200/80 bg-white/80 p-1 md:flex md:gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="text-neutral-700 hover:text-primary-600 font-medium transition-colors relative group"
+                  className="rounded-full px-4 py-2 text-sm font-medium text-neutral-700 transition-all hover:bg-neutral-100 hover:text-primary-600"
                 >
                   {link.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-600 group-hover:w-full transition-all duration-300" />
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
+          <div className="mx-8 hidden max-w-md flex-1 items-center gap-4 md:flex">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 type="text"
                 placeholder={NAVBAR.searchPlaceholder}
@@ -105,7 +106,7 @@ export default function Navbar() {
                     setSearchQuery("");
                   }
                 }}
-                className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                className="w-full rounded-full border border-neutral-200 bg-neutral-50/80 py-2.5 pl-10 pr-4 text-sm text-neutral-700 outline-none transition-all placeholder:text-neutral-400 focus:border-primary-300 focus:bg-white focus:ring-2 focus:ring-primary-200"
               />
             </div>
           </div>
@@ -115,7 +116,7 @@ export default function Navbar() {
             {/* Wishlist */}
             <Link
               to={isAuthenticated ? `${ROUTES.PROFILE}?tab=wishlist` : ROUTES.LOGIN}
-              className="hidden sm:flex p-2.5 hover:bg-neutral-100 rounded-lg transition-colors relative"
+              className="relative hidden rounded-2xl border border-transparent bg-white/50 p-2.5 transition-all hover:border-neutral-200 hover:bg-neutral-100 sm:flex"
             >
               <Heart className="w-5 h-5 text-neutral-700" />
               {isAuthenticated && wishlistCount > 0 && (
@@ -128,7 +129,7 @@ export default function Navbar() {
             {/* Cart */}
             <Link
               to={ROUTES.CART}
-              className="relative p-2.5 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="relative rounded-2xl border border-transparent bg-white/50 p-2.5 transition-all hover:border-neutral-200 hover:bg-neutral-100"
             >
               <ShoppingCart className="w-5 h-5 text-neutral-700" />
               {cartCount > 0 && (
@@ -143,9 +144,9 @@ export default function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="hidden sm:flex items-center gap-2 p-1.5 pr-3 rounded-lg hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all"
+                  className="hidden items-center gap-2 rounded-full border border-neutral-200/80 bg-white/90 p-1.5 pr-3 shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:bg-white sm:flex"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-accent-600 text-sm font-bold text-white shadow-[0_8px_20px_rgba(124,58,237,0.2)]">
                     {getUserInitial()}
                   </div>
                   <span className="font-medium text-sm text-neutral-700 max-w-[100px] truncate">
@@ -156,8 +157,8 @@ export default function Navbar() {
 
                 {/* Dropdown */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-100 py-2 animate-fade-in z-50">
-                    <div className="px-4 py-3 border-b border-neutral-100">
+                  <div className="absolute right-0 z-50 mt-3 w-60 animate-fade-in rounded-[24px] border border-white/90 bg-white/95 py-2 shadow-[0_24px_60px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
+                    <div className="border-b border-neutral-100 px-4 py-3">
                       <p className="text-sm font-semibold text-neutral-900 truncate">{user.name || 'User'}</p>
                       <p className="text-xs text-neutral-500 truncate">{user.email || ''}</p>
                     </div>
@@ -165,14 +166,14 @@ export default function Navbar() {
                     <div className="py-1">
                       <Link
                       to={ROUTES.PROFILE}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600" onClick={() => setIsUserMenuOpen(false)}
+                        className="mx-2 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-primary-600" onClick={() => setIsUserMenuOpen(false)}
                       >
                     <UserIcon className="w-4 h-4" />
                   {NAVBAR.menu.myProfile}
                   </Link>
 <Link
   to={`${ROUTES.PROFILE}?tab=wishlist`}
-  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+  className="mx-2 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-primary-600"
   onClick={() => setIsUserMenuOpen(false)}
 >
   <Heart className="w-4 h-4" />
@@ -181,7 +182,7 @@ export default function Navbar() {
 
 <Link
   to="/profile?tab=orders"
-  className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+  className="mx-2 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-primary-600"
   onClick={() => setIsUserMenuOpen(false)}
 >
   <Package className="w-4 h-4" />
@@ -190,7 +191,7 @@ export default function Navbar() {
                       {user.role === 'admin' && (
                         <Link
                           to={ROUTES.ADMIN_DASHBOARD}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+                          className="mx-2 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-primary-600"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <Settings className="w-4 h-4" />
@@ -199,10 +200,10 @@ export default function Navbar() {
                       )}
                     </div>
 
-                    <div className="border-t border-neutral-100 mt-1 pt-1">
+                    <div className="mt-1 border-t border-neutral-100 pt-1">
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        className="mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-2xl px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
                       >
                         <LogOut className="w-4 h-4" />
                         {NAVBAR.menu.signOut}
@@ -214,7 +215,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to={ROUTES.LOGIN}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-md hover:shadow-lg"
+                className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-primary-600 to-primary-500 px-4 py-2.5 text-white shadow-[0_12px_28px_rgba(124,58,237,0.2)] transition-all hover:-translate-y-0.5 hover:from-primary-700 hover:to-primary-600 hover:shadow-[0_16px_34px_rgba(124,58,237,0.26)] sm:flex"
               >
                 <UserIcon className="w-4 h-4" />
                 <span className="font-semibold">{NAVBAR.login}</span>
@@ -224,7 +225,7 @@ export default function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="rounded-2xl border border-transparent p-2 transition-colors hover:border-neutral-200 hover:bg-neutral-100 md:hidden"
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6 text-neutral-700" />
@@ -236,13 +237,13 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Search */}
-        <div className="md:hidden pb-3">
+        <div className="pb-3 md:hidden">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               type="text"
               placeholder={NAVBAR.searchPlaceholder}
-              className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full rounded-full border border-neutral-200 bg-white/80 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary-300 focus:ring-2 focus:ring-primary-200"
             />
           </div>
         </div>
@@ -250,13 +251,13 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-neutral-200 bg-white animate-fade-in">
-          <div className="px-4 py-4 space-y-3">
+        <div className="mx-auto mt-3 max-w-7xl animate-fade-in rounded-[28px] border border-white/85 bg-white/92 px-4 py-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:hidden">
+          <div className="space-y-3">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
+                className="block rounded-2xl px-4 py-3 font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {link.label}
@@ -265,9 +266,9 @@ export default function Navbar() {
 
             {isAuthenticated && user ? (
               <>
-                <div className="border-t border-neutral-100 my-2 pt-2">
-                  <div className="px-4 py-2 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
+                <div className="my-2 border-t border-neutral-100 pt-2">
+                  <div className="flex items-center gap-3 px-4 py-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 font-bold text-primary-600">
                       {getUserInitial()}
                     </div>
                     <div>
@@ -277,21 +278,21 @@ export default function Navbar() {
                   </div>
                   <Link
                     to={ROUTES.PROFILE}
-                    className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
+                    className="block rounded-2xl px-4 py-3 font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {NAVBAR.menu.myProfile}
                   </Link>
                   <Link
                     to={`${ROUTES.PROFILE}?tab=wishlist`}
-                    className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
+                    className="block rounded-2xl px-4 py-3 font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                   {NAVBAR.menu.myWishlist}
                   </Link>
                   <Link
                     to="/profile?tab=orders"
-                    className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
+                    className="block rounded-2xl px-4 py-3 font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {NAVBAR.menu.myOrders}
@@ -299,7 +300,7 @@ export default function Navbar() {
                   {user.role === 'admin' && (
                     <Link
                       to={ROUTES.ADMIN_DASHBOARD}
-                      className="block px-4 py-3 text-neutral-700 hover:bg-neutral-100 rounded-lg font-medium transition-colors"
+                      className="block rounded-2xl px-4 py-3 font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {NAVBAR.menu.adminDashboard}
@@ -307,7 +308,7 @@ export default function Navbar() {
                   )}
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
+                    className="w-full rounded-2xl px-4 py-3 text-left font-medium text-red-600 transition-colors hover:bg-red-50"
                   >
                     {NAVBAR.menu.signOut}
                   </button>
@@ -316,7 +317,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to={ROUTES.LOGIN}
-                className="block px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg font-semibold text-center"
+                className="block rounded-2xl bg-gradient-to-r from-primary-600 to-primary-500 px-4 py-3 text-center font-semibold text-white"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {NAVBAR.login}

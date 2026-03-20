@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     return (
-        <div className="min-h-screen bg-neutral-100">
+        <div className="admin-shell">
             {/* Sidebar */}
             <AdminSidebar
                 isCollapsed={isSidebarCollapsed}
@@ -19,12 +19,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
             {/* Main Content */}
             <div
-                className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+                className={`relative transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
                     }`}
             >
                 <AdminHeader />
 
-                <main className="p-4 md:p-8">
+                <main className="px-4 pb-8 pt-24 md:px-8 md:pb-10 lg:pt-8">
                     {children}
                 </main>
             </div>
