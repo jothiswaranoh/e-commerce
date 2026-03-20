@@ -85,7 +85,7 @@ export default function Profile() {
     if (activeTab === "wishlist") {
       fetchWishlist();
     }
-  }, [activeTab]);
+  }, [activeTab, user?.id]);
 
   const fetchWishlist = async () => {
     setWishlistLoading(true);
@@ -113,7 +113,7 @@ export default function Profile() {
   useEffect(() => {
     if (activeTab !== "wishlist") return;
     return addWishlistListener(fetchWishlist);
-  }, [activeTab]);
+  }, [activeTab, user?.id]);
 
   if (!user) return null;
 

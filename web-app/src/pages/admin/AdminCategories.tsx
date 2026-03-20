@@ -17,6 +17,7 @@ import {
 import CategoryModal from "../../components/categories/CategoryModal";
 import { Category, CategoryPayload } from "../../api/category";
 import CategoryDataGrid from "../../components/categories/CategoryDataGrid";
+import { extractApiErrorMessage, extractApiErrorMessages } from "../../utils/apiError";
 
 export default function AdminCategories() {
   const [page, setPage] = useState(1);
@@ -59,11 +60,9 @@ export default function AdminCategories() {
       toast.success("Category created");
       setIsCreateOpen(false);
     } catch (err: any) {
-        const message = err?.message || "Validation failed";
-        message.split(",").forEach((msg: string) => {
-          toast.error(msg.trim());
-        });
-      }
+      extractApiErrorMessages(err, "We couldn’t save the category. Please try again.")
+        .forEach((msg) => toast.error(msg));
+    }
   };
 
   const handleUpdate = async (payload: Partial<CategoryPayload>) => {
@@ -79,11 +78,9 @@ export default function AdminCategories() {
       setIsViewOpen(false); 
       setSelectedCategory(null);
     } catch (err: any) {
-        const message = err?.message || "Validation failed";
-        message.split(",").forEach((msg: string) => {
-          toast.error(msg.trim());
-        });
-      }
+      extractApiErrorMessages(err, "We couldn’t update the category. Please try again.")
+        .forEach((msg) => toast.error(msg));
+    }
   };
 
   const handleDelete = async () => {
@@ -95,14 +92,8 @@ export default function AdminCategories() {
       setIsDeleteOpen(false);
       setSelectedCategory(null);
     } catch (error: any) {
-        const message =
-          error?.message ||
-          error?.error?.error ||
-          error?.error?.message ||
-          "Failed to delete category";
-
-        toast.error(message);
-      }
+      toast.error(extractApiErrorMessage(error, "We couldn’t delete the category."));
+    }
   };
 
   const handlePageSizeChange = (newPageSize: number) => {

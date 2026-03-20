@@ -1,22 +1,47 @@
-import { useState } from 'react';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Package, Tag } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckSquare, Square } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../config/routes.constants';
 import { useCart } from '../contexts/CartContext';
 import { toast } from 'react-toastify';
 import { CartItemSkeleton } from '../components/ui/Skeleton';
 
 export default function Cart() {
-  const { items, subtotal, isLoading, updateQuantity, removeFromCart, error } = useCart();
+  const { items, isLoading, updateQuantity, removeFromCart } = useCart();
+  const navigate = useNavigate();
 
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
 
-  const shipping = subtotal > 999 ? 0 : 50;
-  const total = subtotal + shipping;
+  useEffect(() => {
+    setSelectedItemIds((current) => {
+      const itemIds = items.map((item) => item.id);
 
-  const freeShippingLeft = 1000 - subtotal;
-  const freeShippingProgress = Math.min((subtotal / 1000) * 100, 100);
+      if (current.length === 0) {
+        return itemIds;
+      }
+
+      const nextSelected = current.filter((id) => itemIds.includes(id));
+      const newItemIds = itemIds.filter((id) => !current.includes(id));
+      return [...nextSelected, ...newItemIds];
+    });
+  }, [items]);
+
+  const selectedItems = useMemo(
+    () => items.filter((item) => selectedItemIds.includes(item.id)),
+    [items, selectedItemIds]
+  );
+
+  const selectedSubtotal = selectedItems.reduce((acc, item) => acc + item.total, 0);
+  const shipping = selectedSubtotal > 999 ? 0 : selectedSubtotal > 0 ? 50 : 0;
+  const total = selectedSubtotal + shipping;
+
+  const freeShippingLeft = Math.max(1000 - selectedSubtotal, 0);
+  const freeShippingProgress = selectedSubtotal > 0
+    ? Math.min((selectedSubtotal / 1000) * 100, 100)
+    : 0;
+  const allSelected = items.length > 0 && selectedItemIds.length === items.length;
 
   const handleRemove = async (itemId: number, name: string) => {
     const confirmDelete = window.confirm(`Remove "${name}" from your cart?`);
@@ -46,6 +71,29 @@ export default function Cart() {
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const toggleItemSelection = (itemId: number) => {
+    setSelectedItemIds((current) =>
+      current.includes(itemId)
+        ? current.filter((id) => id !== itemId)
+        : [...current, itemId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedItemIds(allSelected ? [] : items.map((item) => item.id));
+  };
+
+  const handleCheckout = () => {
+    if (selectedItems.length === 0) {
+      toast.info('Select at least one cart item to continue.');
+      return;
+    }
+
+    navigate(ROUTES.CHECKOUT, {
+      state: { selectedCartItemIds: selectedItems.map((item) => item.id) },
+    });
   };
 
   /* ───────── Loading ───────── */
@@ -116,7 +164,7 @@ export default function Cart() {
           <h1 className="text-4xl font-bold">Shopping Cart</h1>
 
           <p className="text-slate-400 mt-2">
-            {items.length} items · ₹{subtotal.toLocaleString('en-IN')}
+            {selectedItems.length} of {items.length} items selected · ₹{selectedSubtotal.toLocaleString('en-IN')}
           </p>
         </div>
       </div>
@@ -144,10 +192,28 @@ export default function Cart() {
             </div>
           )}
 
+          <div className="bg-white border rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
+            <button
+              onClick={toggleSelectAll}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-800"
+            >
+              {allSelected ? (
+                <CheckSquare className="w-4 h-4 text-indigo-600" />
+              ) : (
+                <Square className="w-4 h-4 text-gray-400" />
+              )}
+              {allSelected ? 'Deselect all' : 'Select all'}
+            </button>
+            <span className="text-sm text-gray-500">
+              {selectedItems.length} selected
+            </span>
+          </div>
+
           {/* Items */}
           {items.map(item => {
             const isRemoving = removingId === item.id;
             const isUpdating = updatingId === item.id;
+            const isSelected = selectedItemIds.includes(item.id);
 
             return (
               <div
@@ -157,6 +223,19 @@ export default function Cart() {
                 }`}
               >
                 <div className="flex">
+                  <div className="border-r border-gray-100 px-4 flex items-center justify-center">
+                    <button
+                      onClick={() => toggleItemSelection(item.id)}
+                      className="text-gray-500 hover:text-indigo-600"
+                      aria-label={isSelected ? 'Deselect cart item' : 'Select cart item'}
+                    >
+                      {isSelected ? (
+                        <CheckSquare className="w-5 h-5 text-indigo-600" />
+                      ) : (
+                        <Square className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
 
                   {/* Image */}
                   <div className="w-28 bg-gray-50 flex items-center justify-center">
@@ -259,8 +338,8 @@ export default function Cart() {
           <h3 className="font-bold mb-4">Order Summary</h3>
 
           <div className="flex justify-between text-sm mb-2">
-            <span>Subtotal</span>
-            <span>₹{subtotal.toLocaleString('en-IN')}</span>
+            <span>Subtotal ({selectedItems.length} items)</span>
+            <span>₹{selectedSubtotal.toLocaleString('en-IN')}</span>
           </div>
 
           <div className="flex justify-between text-sm mb-4">
@@ -273,12 +352,14 @@ export default function Cart() {
             <span>₹{total.toLocaleString('en-IN')}</span>
           </div>
 
-          <Link to={ROUTES.CHECKOUT}>
-            <button className="w-full mt-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl flex justify-center gap-2">
-              Proceed to Checkout
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
+          <button
+            onClick={handleCheckout}
+            disabled={selectedItems.length === 0}
+            className="w-full mt-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl flex justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            Buy Selected Items
+            <ArrowRight className="w-4 h-4" />
+          </button>
 
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
@@ -31,14 +31,23 @@ export default function ProductCard({
   category = "Electronics",
 }: ProductCardProps) {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  const [isWishlisted, setIsWishlisted] = useState(() => getWishlist().has(id));
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { addToCart, items, updateQuantity, removeFromCart } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [isUpdatingQty, setIsUpdatingQty] = useState(false);
   const isOutOfStock = stock <= 0;
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    setIsWishlisted(getWishlist().has(String(id)));
+  }, [id, isAuthenticated, user?.id]);
 
   const cartItem = items.find((item) => {
     const sameProduct = String(item.product_id) === String(id);
@@ -195,7 +204,7 @@ export default function ProductCard({
           aria-label="Toggle wishlist"
         >
           <Heart
-            className={`w-4 h-4 transition-all duration-200 ${isWishlisted
+            className={`w-4 h-4 transition-all duration-200 ${isAuthenticated && isWishlisted
               ? 'fill-red-500 text-red-500 scale-110'
               : 'text-gray-500'
               }`}

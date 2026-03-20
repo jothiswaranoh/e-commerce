@@ -18,6 +18,7 @@ import { useCategories } from "../../hooks/useCategory";
 
 import ProductDataGrid from "../../components/products/ProductDataGrid";
 import ProductViewModal from "../../components/products/ProductViewModal";
+import { extractApiErrorMessage, extractApiErrorMessages } from "../../utils/apiError";
 
 export default function AdminProducts() {
   const [page, setPage] = useState(1);
@@ -47,16 +48,14 @@ export default function AdminProducts() {
 
   const handleCreate = async (payload: any) => {
     try {
-    await createMutation.mutateAsync(payload);
-    toast.success("Product created");
-    setIsCreateOpen(false);
-  } catch (err: any) {
-    const message = err?.message || "Validation failed";
-    message.split(",").forEach((msg: string) => {
-      toast.error(msg.trim());
-    });
-  }
-};
+      await createMutation.mutateAsync(payload);
+      toast.success("Product created");
+      setIsCreateOpen(false);
+    } catch (err: any) {
+      extractApiErrorMessages(err, "We couldn’t save the product. Please try again.")
+        .forEach((msg) => toast.error(msg));
+    }
+  };
 
   const handleUpdate = async (payload: any) => {
     if (!payload?.id) {
@@ -74,17 +73,9 @@ export default function AdminProducts() {
       setIsViewOpen(false);
       setViewProduct(null);
     } catch (err: any) {
-        const messages =
-          Array.isArray(err?.message)
-            ? err.message
-            : typeof err?.message === "string"
-            ? err.message.split(",")
-            : ["Validation failed"];
-
-        messages.forEach((msg: string) => {
-          toast.error(msg.trim());
-        });
-      }
+      extractApiErrorMessages(err, "We couldn’t update the product. Please try again.")
+        .forEach((msg) => toast.error(msg));
+    }
   };
 
   const handleView = (product: any) => {
@@ -110,15 +101,9 @@ export default function AdminProducts() {
       setSelectedProduct(null);
 
     } catch (err: any) {
-      const message =
-        err?.message ||
-        err?.error ||
-        err?.response?.data?.message ||
-        "Cannot delete product";
-
-      toast.error(message);
+      toast.error(extractApiErrorMessage(err, "We couldn’t delete the product."));
     }
-};
+  };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);

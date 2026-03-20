@@ -36,7 +36,7 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user?.id) {
       setWishlistCount(0);
       return;
     }
@@ -44,7 +44,7 @@ export default function Navbar() {
     const syncWishlist = () => setWishlistCount(getWishlistCount());
     syncWishlist();
     return addWishlistListener(syncWishlist);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.id]);
 
   const handleLogout = async () => {
     await logout();
