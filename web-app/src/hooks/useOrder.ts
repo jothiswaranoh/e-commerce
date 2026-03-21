@@ -49,3 +49,20 @@ export const useUpdateOrder = () => {
         },
     });
 };
+
+export const useCreateOrder = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (payload: any) => {
+            const res = await OrderAPI.create(payload);
+            if (!res.success) {
+                throw new Error(res.message || "Failed to create order");
+            }
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["orders"] });
+        },
+    });
+};

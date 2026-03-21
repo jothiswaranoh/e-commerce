@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { dashboardService, DashboardData } from '../api/dashboard';
+import { dashboardService, DashboardCounts } from '../api/dashboard';
 
 export const useDashboard = () => {
-    return useQuery<{ data: DashboardData }>({
+    return useQuery<DashboardCounts>({
         queryKey: ['dashboard'],
         queryFn: async () => {
             const res = await dashboardService.getStats();
             if (!res.success) throw new Error(res.message);
-            return res.data;
+            return res.data as DashboardCounts;
         },
     });
 };
