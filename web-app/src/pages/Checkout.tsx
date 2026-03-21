@@ -218,9 +218,9 @@ export default function Checkout() {
     <div className="min-h-screen bg-gray-50">
 
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900 text-white">
+        <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-accent-500/10 rounded-full blur-2xl pointer-events-none" />
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
@@ -229,17 +229,17 @@ export default function Checkout() {
             backgroundSize: '48px 48px',
           }}
         />
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
-            <span className="text-xs font-bold tracking-wider uppercase text-indigo-200">Secure Checkout</span>
+        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full mb-4 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-primary-300" />
+            <span className="text-xs font-bold tracking-wider uppercase text-primary-200">Secure Checkout</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">Checkout</h1>
-          <p className="text-slate-400 mt-2">Complete your purchase securely</p>
+          <h1 className="text-4xl sm:text-5xl font-display font-bold tracking-tight">Checkout</h1>
+          <p className="text-primary-100/80 mt-2 font-medium">Complete your purchase securely</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* ── Step Indicator ── */}
         <div className="mb-10">
@@ -284,10 +284,10 @@ export default function Checkout() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
 
           {/* ── Main Content ── */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-8">
 
             {/* Shipping */}
             {currentStep === 'shipping' && (
@@ -480,7 +480,7 @@ export default function Checkout() {
           </div>
 
           {/* ── Order Summary Sidebar ── */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-4 block mt-8 lg:mt-0">
             <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden sticky top-24">
               <div className="px-6 py-5 border-b border-gray-100">
                 <h3 className="text-base font-bold text-gray-900">Order Summary</h3>

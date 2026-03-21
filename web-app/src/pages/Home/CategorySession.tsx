@@ -39,7 +39,7 @@ export default function CategorySession() {
 
   return (
     <section className="py-16 bg-neutral-50">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-[1400px] mx-auto px-4">
 
         {/* HEADER (Now aligned like Featured Products) */}
         <div className="mb-12">

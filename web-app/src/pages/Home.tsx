@@ -5,8 +5,6 @@ import {
   Truck, Mail, CheckCircle2, ChevronRight
 } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
 import { HOME } from '../config/ui.config';
 import CategoriesSection from './Home/CategorySession';
 import FeaturedProductsSection from './Home/FeaturedProductsSession';
@@ -62,11 +60,11 @@ export default function Home() {
       {/* ══════════════════════════════════════
           HERO
       ══════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900 text-white">
         {/* Decorative blobs */}
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 -left-24 w-80 h-80 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 -left-24 w-80 h-80 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-accent-500/10 rounded-full blur-2xl pointer-events-none" />
 
         {/* Subtle grid texture */}
         <div
@@ -78,7 +76,7 @@ export default function Home() {
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 md:py-32">
+        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-20 md:py-32">
           <div className="max-w-2xl">
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full mb-7">
@@ -135,7 +133,7 @@ export default function Home() {
           FEATURE STRIP
       ══════════════════════════════════════ */}
       <section className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-0">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-0">
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-gray-100">
             {features.map((f, i) => (
               <div
@@ -163,12 +161,12 @@ export default function Home() {
       {/* ══════════════════════════════════════
           PROMOTIONAL BANNER
       ══════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+      <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900">
         {/* Blobs */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-violet-500/15 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/15 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20">
+        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-20">
           <div className="max-w-xl mx-auto text-center">
             <span className="inline-block px-3 py-1 bg-indigo-500/20 border border-indigo-500/30 rounded-full text-indigo-300 text-xs font-bold uppercase tracking-wider mb-5">
               Limited Time
@@ -198,7 +196,7 @@ export default function Home() {
           NEWSLETTER
       ══════════════════════════════════════ */}
       <section className="bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-16">
           <div className="max-w-2xl mx-auto text-center">
             {/* Icon */}
             <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-6">
