@@ -1,35 +1,12 @@
 import { apiService } from './apiService';
 
-export interface DashboardStats {
-    label: string;
-    value: number | string;
-    change: string;
-    isPositive: boolean;
-    type: 'currency' | 'number';
-}
-
-export interface RecentOrder {
-    id: string;
-    customer: string;
-    amount: number | string;
-    status: string;
-    date: string;
-}
-
-export interface TopProduct {
-    id: number;
-    name: string;
-    sold: number;
-    revenue: number;
-    image?: string;
-}
-
-export interface DashboardData {
-    stats: DashboardStats[];
-    recent_orders: RecentOrder[];
-    top_products: TopProduct[];
+export interface DashboardCounts {
+    users_count: number;
+    products_count: number;
+    orders_count: number;
+    categories_count: number;
 }
 
 export const dashboardService = {
-    getStats: () => apiService.get('/dashboard'),
+    getStats: () => apiService.get<DashboardCounts>('/dashboard'),
 };

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Users, Crown } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
+
 import Modal from "../../components/ui/Modal";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import { TableRowSkeleton } from "../../components/ui/Skeleton";
@@ -17,7 +17,7 @@ import {
 
 import UserForm from "../../components/users/UserForm";
 import UserDataGrid from "../../components/users/UserDataGrid";
-import { User, UserPayload } from "../../api/users";
+import { UserPayload } from "../../api/users";
 
 export default function AdminUsers() {
   const [page, setPage] = useState(1);
@@ -35,7 +35,7 @@ export default function AdminUsers() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const handleCreate = async (payload: Partial<UserPayload>) => {
     try {
@@ -83,73 +83,54 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900">Users</h1>
-          <p className="text-neutral-600 mt-1">
+          <h1 className="text-3xl font-display font-bold text-neutral-900 tracking-tight">Users</h1>
+          <p className="text-sm text-neutral-500 mt-1">
             Manage user accounts and permissions
           </p>
         </div>
 
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <UserPlus className="w-5 h-5" />
-          Add User
-        </Button>
+        <button
+          onClick={() => setIsCreateOpen(true)}
+          className="group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold text-white transition-all duration-300 bg-accent-600 rounded-xl hover:bg-accent-500 hover:shadow-lg hover:shadow-accent-500/20 hover:-translate-y-0.5 active:translate-y-0"
+        >
+          <UserPlus className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" />
+          <span>Add User</span>
+        </button>
       </div>
 
       {meta && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-500 to-accent-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Total Users</p>
-                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Total Users</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {meta.total_count}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-accent-50 transition-transform duration-300 group-hover:scale-110">
+                <Users className="w-6 h-6 text-accent-600" />
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Admins</p>
-                <p className="text-2xl font-bold text-primary-700 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Admins</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {users.filter((u) => u.role === "admin").length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-amber-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-amber-50 transition-transform duration-300 group-hover:scale-110">
+                <Crown className="w-6 h-6 text-amber-600" />
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       )}
 
@@ -158,15 +139,14 @@ export default function AdminUsers() {
           <div className="p-6">
             <table className="w-full">
               <tbody>
-                {[...Array(5)].map((_, i) => (
-                  <TableRowSkeleton key={i} columns={4} />
+                {[...Array(pageSize)].map((_, i) => (
+                  <TableRowSkeleton key={i} cols={4} />
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
           <UserDataGrid
-            autoHeight
             rows={users}
             page={page}
             pageSize={pageSize}

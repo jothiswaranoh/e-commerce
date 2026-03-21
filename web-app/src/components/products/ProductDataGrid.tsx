@@ -281,24 +281,44 @@ export default function ProductDataGrid({
                 pagination={showPagination || undefined}
                 pageSizeOptions={showPagination ? [5, 10, 20, 50] : []}
                 disableRowSelectionOnClick
+                getRowHeight={() => 'auto'}
                 sx={{
                     border: "none",
+                    fontFamily: "inherit",
                     "& .MuiDataGrid-cell": {
-                        borderBottom: "1px solid #f3f4f6",
+                        borderBottom: "1px solid #f1f5f9",
+                        paddingTop: "16px",
+                        paddingBottom: "16px",
                     },
                     "& .MuiDataGrid-columnHeaders": {
-                        backgroundColor: "#f9fafb",
-                        borderBottom: "2px solid #e5e7eb",
-                        fontWeight: 600,
-                        fontSize: "0.875rem",
-                        color: "#374151",
+                        backgroundColor: "#f8fafc",
+                        borderBottom: "1px solid #e2e8f0",
+                        borderTop: "none",
+                        fontWeight: 700,
+                        fontSize: "0.75rem",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        color: "#64748b",
+                    },
+                    "& .MuiDataGrid-row": {
+                        transition: "background-color 0.2s, transform 0.2s",
                     },
                     "& .MuiDataGrid-row:hover": {
-                        backgroundColor: "#f9fafb",
+                        backgroundColor: "#f8fafc",
+                        transform: "scale(1.001)",
                     },
                     "& .MuiDataGrid-footerContainer": {
-                        borderTop: "2px solid #e5e7eb",
-                        backgroundColor: "#fafafa",
+                        borderTop: "1px solid #e2e8f0",
+                        backgroundColor: "#ffffff",
+                    },
+                    "& .MuiDataGrid-virtualScroller": {
+                        backgroundColor: "#ffffff",
+                    },
+                    "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+                        outline: "none",
+                    },
+                    "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
+                        outline: "none",
                     },
                 }}
             />
