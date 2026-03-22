@@ -33,14 +33,14 @@ Rails.application.configure do
 
   # Mailer URL configuration
   config.action_mailer.default_url_options = {
-    host: "34.192.69.120",
-    protocol: "http"
+    host: "looksmen.freedynamicdns.org",
+    protocol: "https"
   }
 
   # URL helpers (important for ActiveStorage / serializers / Blueprinter)
   Rails.application.routes.default_url_options = {
-    host: "34.192.69.120",
-    protocol: "http"
+    host: "looksmen.freedynamicdns.org",
+    protocol: "https"
   }
 
   # I18n fallback
