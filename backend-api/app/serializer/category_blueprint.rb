@@ -3,7 +3,6 @@ class CategoryBlueprint < Blueprinter::Base
 
   fields :org_id,
          :name,
-         :slug,
          :parent_id,
          :is_active,
          :sort_order,

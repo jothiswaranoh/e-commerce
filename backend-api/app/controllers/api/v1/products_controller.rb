@@ -141,7 +141,6 @@ module Api
       def resource_params
         params.require(:product).permit(
           :name,
-          :slug,
           :category_id,
           :status,
           :description,

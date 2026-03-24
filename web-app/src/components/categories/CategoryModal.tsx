@@ -9,7 +9,6 @@ import {
 type Category = {
   id?: number;
   name: string;
-  slug: string;
   is_active: boolean;
   sort_order?: number | "";
   parent_id?: number | null;
@@ -18,10 +17,6 @@ type Category = {
 
 export const categorySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z
-    .string()
-    .min(2, "Slug must be at least 2 characters")
-    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
   is_active: z.boolean(),
   sort_order: z.union([z.number().min(0, "Must be >= 0"), z.literal("")]).optional(),
   parent_id: z.number().nullable().optional(),
@@ -127,7 +122,6 @@ export default function CategoryModal({
 
     const payload = {
       name: draft.name,
-      slug: draft.slug,
       parent_id: draft.parent_id ?? null,
       is_active: draft.is_active,
       sort_order:
@@ -191,9 +185,7 @@ export default function CategoryModal({
                     value={draft.name}
                     onChange={e => {
                       const value = e.target.value;
-                      const slug = value.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
                       set("name", value);
-                      set("slug", slug);
                     }}
                     className={`w-full bg-transparent text-xl sm:text-2xl font-display font-bold text-slate-900 placeholder:text-slate-300 outline-none transition-all ${
                       errors.name ? "border-b-2 border-rose-400" : "border-b-2 border-transparent focus:border-primary-200"
@@ -431,35 +423,6 @@ export default function CategoryModal({
                     ) : (
                     <p className="text-sm font-semibold text-slate-800 mt-2">
                         {categories.find(c => c.id === draft.parent_id)?.name || "— (Top Level)"}
-                    </p>
-                    )}
-                </InfoCard>
-              </section>
-
-              <section>
-                <SectionLabel icon={<Layers className="w-4 h-4" />}>Routing & SEO</SectionLabel>
-                <InfoCard label="URL Slug">
-                  {isEdit ? (
-                    <div data-err={errors.slug ? true : undefined}>
-                      <div className="flex overflow-hidden rounded-xl border border-slate-200 focus-within:ring-4 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all duration-300 shadow-sm">
-                        <span className="flex items-center border-r border-slate-200 bg-slate-50/50 px-4 text-sm font-mono text-slate-400 whitespace-nowrap">
-                          mysite.com/c/
-                        </span>
-                        <input
-                            ref={(el) => (inputRefs.current.slug = el)}
-                            value={draft.slug}
-                            onChange={e => set("slug", e.target.value)}
-                            className="flex-1 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm font-mono text-slate-800 outline-none placeholder:text-slate-300 disabled:bg-transparent"
-                        />
-                      </div>
-                      <FieldError error={errors.slug} />
-                      <p className="mt-2 text-xs text-slate-400 font-medium">
-                        Must be unique, lowercase, and use hyphens for spaces.
-                      </p>
-                    </div>
-                    ) : (
-                    <p className="text-sm font-mono text-primary-600 break-all mt-2 py-1.5 px-3 bg-primary-50/50 rounded border border-primary-100 w-fit">
-                        {draft.slug}
                     </p>
                     )}
                 </InfoCard>
