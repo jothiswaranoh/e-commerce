@@ -5,28 +5,30 @@ import { orderService } from '../services/orderService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  CreditCard, Truck, MapPin, User, Mail, Phone, Home,
-  CheckCircle2, ArrowRight, ArrowLeft, Lock, Sparkles
+  Truck, MapPin, User, Mail, Phone, Home,
+  CheckCircle2, ArrowRight, ArrowLeft, Sparkles
 } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
 import Input from '../components/ui/Input';
 
-type CheckoutStep = 'shipping' | 'payment' | 'review';
+type CheckoutStep = 'shipping' | 'review';
 
 export default function Checkout() {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('shipping');
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '', email: '', phone: '', address: '', city: '', state: '', zipCode: '',
   });
-  const [paymentInfo, setPaymentInfo] = useState({
+  {/*
+    const [paymentInfo, setPaymentInfo] = useState({
     cardNumber: '', cardName: '', expiryDate: '', cvv: '',
   });
-  const [expiryMonthValue, setExpiryMonthValue] = useState('');
+  const [expiryMonthValue, setExpiryMonthValue] = useState(''); 
+  */}
   const [placingOrder, setPlacingOrder] = useState(false);
 
   const steps = [
     { id: 'shipping' as CheckoutStep, label: 'Shipping', icon: Truck },
-    { id: 'payment' as CheckoutStep, label: 'Payment', icon: CreditCard },
+    //{ id: 'payment' as CheckoutStep, label: 'Payment', icon: CreditCard },
     { id: 'review' as CheckoutStep, label: 'Review', icon: CheckCircle2 },
   ];
 
@@ -50,11 +52,10 @@ export default function Checkout() {
           <Link to={ROUTES.CART} className={sidebar ? 'block order-1' : ''}>
             <button
               type="button"
-              className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
-                sidebar
-                  ? 'w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-                  : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-              }`}
+              className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${sidebar
+                ? 'w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                }`}
             >
               <ArrowLeft className="w-4 h-4" /> Back to Cart
             </button>
@@ -62,36 +63,37 @@ export default function Checkout() {
           <button
             type="submit"
             form="checkout-shipping-form"
-            className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${
-              sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
-            }`}
-          >
-            Continue to Payment <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      );
-    }
+            
+    //          className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${
+    //           sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
+    //         }`}
+    //       >
+    //         Continue to Payment <ArrowRight className="w-4 h-4" />
+    //       </button>
+    //     </div>
+    //   );
+    // }
 
-    if (currentStep === 'payment') {
-      return (
-        <div className={wrapperClass}>
-          <button
-            type="button"
-            onClick={() => setCurrentStep('shipping')}
-            className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
-              sidebar
-                ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-                : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-            }`}
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-          <button
-            type="submit"
-            form="checkout-payment-form"
-            className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${
-              sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
-            }`}
+    // if (currentStep === 'payment') {
+    //   return (
+    //     <div className={wrapperClass}>
+    //       <button
+    //         type="button"
+    //         onClick={() => setCurrentStep('shipping')}
+    //         className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
+    //           sidebar
+    //             ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+    //             : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+    //         }`}
+    //       >
+    //         <ArrowLeft className="w-4 h-4" /> Back
+    //       </button>
+    //       <button
+    //         type="submit"
+    //         form="checkout-payment-form" 
+            
+            className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
+              }`}
           >
             Review Order <ArrowRight className="w-4 h-4" />
           </button>
@@ -103,12 +105,12 @@ export default function Checkout() {
       <div className={wrapperClass}>
         <button
           type="button"
-          onClick={() => setCurrentStep('payment')}
-          className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
-            sidebar
-              ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-              : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-          }`}
+          //onClick={() => setCurrentStep('payment')}
+          onClick={() => setCurrentStep('shipping')}
+          className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${sidebar
+            ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+            : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+            }`}
         >
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
@@ -116,9 +118,8 @@ export default function Checkout() {
           type="button"
           onClick={handlePlaceOrder}
           disabled={placingOrder}
-          className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed ${
-            sidebar ? 'order-2 w-full px-8 py-3' : 'px-8 py-3'
-          }`}
+          className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed ${sidebar ? 'order-2 w-full px-8 py-3' : 'px-8 py-3'
+            }`}
         >
           {placingOrder ? (
             <>
@@ -138,13 +139,16 @@ export default function Checkout() {
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    {/* 
     setCurrentStep('payment');
   };
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); 
+    */}
     setCurrentStep('review');
-  };
+    {/* 
+      };
 
   const handleCardNumberChange = (value: string) => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 16);
@@ -154,10 +158,12 @@ export default function Checkout() {
 
   const handleCardNameChange = (value: string) => {
     const sanitized = value.replace(/[^a-zA-Z\s]/g, '').replace(/\s{2,}/g, ' ');
-    setPaymentInfo({ ...paymentInfo, cardName: sanitized });
+    setPaymentInfo({ ...paymentInfo, cardName: sanitized }); 
+    */}
   };
 
-  const handleExpiryDateChange = (value: string) => {
+  {/* 
+    const handleExpiryDateChange = (value: string) => {
     setExpiryMonthValue(value);
     if (!value) {
       setPaymentInfo({ ...paymentInfo, expiryDate: '' });
@@ -172,7 +178,8 @@ export default function Checkout() {
   const handleCvvChange = (value: string) => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 3);
     setPaymentInfo({ ...paymentInfo, cvv: digitsOnly });
-  };
+  }; 
+  */}
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
@@ -345,76 +352,77 @@ export default function Checkout() {
                       value={shippingInfo.zipCode}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
                       required
+                      
+            //             />
+            //       </div>
+            //       <div className="lg:hidden">
+            //         {renderStepActions()}
+            //       </div>
+            //     </form>
+            //   </div>
+            // )}
+            // {currentStep === 'payment' && (
+            //   <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+            //     <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
+            //       <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
+            //         <CreditCard className="w-4 h-4 text-indigo-600" />
+            //       </div>
+            //       <div>
+            //         <h2 className="text-lg font-bold text-gray-900">Payment Details</h2>
+            //         <p className="text-xs text-gray-400">Enter your payment information</p>
+            //       </div>
+            //     </div>
+            //     <form id="checkout-payment-form" onSubmit={handlePaymentSubmit} className="px-6 py-6 space-y-5">
+            //       <Input
+            //         label="Card Number" placeholder="1234 5678 9012 3456"
+            //         value={paymentInfo.cardNumber}
+            //         onChange={(e) => handleCardNumberChange(e.target.value)}
+            //         leftIcon={<CreditCard className="w-4 h-4" />} required
+            //         inputMode="numeric"
+            //         autoComplete="cc-number"
+            //         maxLength={19}
+            //       />
+            //       <Input
+            //         label="Cardholder Name" placeholder="John Doe"
+            //         value={paymentInfo.cardName}
+            //         onChange={(e) => handleCardNameChange(e.target.value)}
+            //         required
+            //         autoComplete="cc-name"
+            //       />
+            //       <div className="grid sm:grid-cols-2 gap-5">
+            //         <div className="w-full">
+            //           <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+            //             Expiry Date
+            //           </label>
+            //           <input
+            //             type="month"
+            //             value={expiryMonthValue}
+            //             onChange={(e) => handleExpiryDateChange(e.target.value)}
+            //             required
+            //             min={new Date().toISOString().slice(0, 7)}
+            //             autoComplete="cc-exp"
+            //             className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            //           />
+            //         </div>
+            //         <Input
+            //           label="CVV" placeholder="123" type="password" maxLength={3}
+            //           value={paymentInfo.cvv}
+            //           onChange={(e) => handleCvvChange(e.target.value)}
+            //           leftIcon={<Lock className="w-4 h-4" />} required
+            //           inputMode="numeric"
+            //           autoComplete="cc-csc" 
+                      
                     />
                   </div>
-                  <div className="lg:hidden">
-                    {renderStepActions()}
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* Payment */}
-            {currentStep === 'payment' && (
-              <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-                  <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
-                    <CreditCard className="w-4 h-4 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900">Payment Details</h2>
-                    <p className="text-xs text-gray-400">Enter your payment information</p>
-                  </div>
-                </div>
-                <form id="checkout-payment-form" onSubmit={handlePaymentSubmit} className="px-6 py-6 space-y-5">
-                  <Input
-                    label="Card Number" placeholder="1234 5678 9012 3456"
-                    value={paymentInfo.cardNumber}
-                    onChange={(e) => handleCardNumberChange(e.target.value)}
-                    leftIcon={<CreditCard className="w-4 h-4" />} required
-                    inputMode="numeric"
-                    autoComplete="cc-number"
-                    maxLength={19}
-                  />
-                  <Input
-                    label="Cardholder Name" placeholder="John Doe"
-                    value={paymentInfo.cardName}
-                    onChange={(e) => handleCardNameChange(e.target.value)}
-                    required
-                    autoComplete="cc-name"
-                  />
-                  <div className="grid sm:grid-cols-2 gap-5">
-                    <div className="w-full">
-                      <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                        Expiry Date
-                      </label>
-                      <input
-                        type="month"
-                        value={expiryMonthValue}
-                        onChange={(e) => handleExpiryDateChange(e.target.value)}
-                        required
-                        min={new Date().toISOString().slice(0, 7)}
-                        autoComplete="cc-exp"
-                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-                    <Input
-                      label="CVV" placeholder="123" type="password" maxLength={3}
-                      value={paymentInfo.cvv}
-                      onChange={(e) => handleCvvChange(e.target.value)}
-                      leftIcon={<Lock className="w-4 h-4" />} required
-                      inputMode="numeric"
-                      autoComplete="cc-csc"
-                    />
-                  </div>
-                  {/* Secure note */}
+                  {/* Secure note
                   <div className="flex items-start gap-3 px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-xl">
                     <Lock className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-xs font-bold text-indigo-900">Secure Payment</p>
                       <p className="text-xs text-indigo-600">Your payment is encrypted and secure. We never store your card details.</p>
                     </div>
-                  </div>
+                  </div> 
+                  */}
                   <div className="lg:hidden">
                     {renderStepActions()}
                   </div>
@@ -452,7 +460,7 @@ export default function Checkout() {
                       </div>
                     </div>
 
-                    {/* Payment */}
+                    {/* Payment
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-sm font-bold text-gray-900">Payment Method</h3>
@@ -468,7 +476,8 @@ export default function Checkout() {
                           <p className="text-xs text-gray-500">{paymentInfo.cardName}</p>
                         </div>
                       </div>
-                    </div>
+                    </div> 
+                    */}
                   </div>
                 </div>
 
