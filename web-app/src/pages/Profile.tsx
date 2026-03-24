@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  User, Package, Heart, ChevronDown, ChevronUp
+  User, Package, Heart, ChevronDown, ChevronUp, Mail, Pencil, Check, X, Image as ImageIcon
 } from 'lucide-react';
 
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +14,8 @@ import ProductCard from '../components/ProductCard';
 import type { Product } from '../types/product';
 import { addWishlistListener, getWishlist } from '../utils/wishlist';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import Input from '../components/ui/Input';
+import UserAPI from '../api/users';
 
 type Tab = 'profile' | 'orders' | 'wishlist';
 
@@ -31,9 +33,17 @@ const ORDER_STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-red-50 text-red-700 border-red-200',
 };
 
+const getOrderItemImage = (item: any) => {
+  const images = item?.product?.images;
+  if (Array.isArray(images) && images.length > 0) {
+    return images[0]?.url || images[0]?.image_url || images[0];
+  }
+  return null;
+};
+
 export default function Profile() {
 
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const getTabFromSearchParams = (): Tab => {
@@ -53,6 +63,10 @@ export default function Profile() {
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<number | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [profileErrors, setProfileErrors] = useState<{ name?: string; email?: string }>({});
 
   useEffect(() => {
     setSearchParams({ tab: activeTab });
@@ -118,7 +132,75 @@ export default function Profile() {
     return addWishlistListener(fetchWishlist);
   }, [activeTab]);
 
+  useEffect(() => {
+    if (!user) return;
+    setProfileForm({
+      name: user.name || '',
+      email: user.email || '',
+    });
+    setProfileErrors({});
+  }, [user]);
+
   if (!user) return null;
+
+  const validateProfileForm = () => {
+    const nextErrors: { name?: string; email?: string } = {};
+
+    if (!profileForm.name.trim()) {
+      nextErrors.name = 'Name is required';
+    }
+
+    if (!profileForm.email.trim()) {
+      nextErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileForm.email)) {
+      nextErrors.email = 'Enter a valid email address';
+    }
+
+    setProfileErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const resetProfileEdit = () => {
+    setProfileForm({
+      name: user.name || '',
+      email: user.email || '',
+    });
+    setProfileErrors({});
+    setIsEditingProfile(false);
+  };
+
+  const handleProfileSave = async () => {
+    if (!validateProfileForm()) return;
+
+    setIsSavingProfile(true);
+    try {
+      const response = await UserAPI.update(Number(user.id), {
+        name: profileForm.name.trim(),
+        email_address: profileForm.email.trim(),
+      });
+
+      if (!response.success || !response.data) {
+        toast.error(response.message || 'Failed to update profile');
+        return;
+      }
+
+      updateUser({
+        ...user,
+        name: response.data.name || profileForm.name.trim(),
+        email: response.data.email_address || profileForm.email.trim(),
+        phone: response.data.phone_number || user.phone,
+        role: response.data.role || user.role,
+        createdAt: response.data.created_at || user.createdAt,
+      });
+      setIsEditingProfile(false);
+      setProfileErrors({});
+      toast.success('Profile updated successfully');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to update profile');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const handleCancelOrder = (orderId: number) => {
     setOrderToCancel(orderId);
@@ -211,11 +293,46 @@ export default function Profile() {
           <div className="min-w-0">
             {activeTab === "profile" && (
               <div className="bg-white border border-neutral-100 rounded-3xl shadow-lg shadow-neutral-200/40 overflow-hidden animate-fade-in">
-                <div className="px-6 sm:px-8 py-8 border-b border-neutral-100 bg-neutral-50/50">
-                  <h2 className="text-2xl font-display font-bold text-neutral-900">Personal Information</h2>
-                  <p className="text-sm text-neutral-500 mt-1">
-                    Manage your account details and profile information.
-                  </p>
+                <div className="px-6 sm:px-8 py-8 border-b border-neutral-100 bg-neutral-50/50 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-2xl font-display font-bold text-neutral-900">Personal Information</h2>
+                    <p className="text-sm text-neutral-500 mt-1">
+                      Manage your account details and profile information.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {isEditingProfile ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={resetProfileEdit}
+                          disabled={isSavingProfile}
+                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-bold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <X className="w-4 h-4" />
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleProfileSave}
+                          disabled={isSavingProfile}
+                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-accent-600 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:from-primary-500 hover:to-accent-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <Check className="w-4 h-4" />
+                          {isSavingProfile ? 'Saving...' : 'Save changes'}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingProfile(true)}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary-200 bg-white px-4 py-2.5 text-sm font-bold text-primary-700 transition-colors hover:bg-primary-50"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Edit profile
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="px-6 sm:px-8 py-8 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -223,11 +340,40 @@ export default function Profile() {
                     <p className="text-xs font-bold uppercase tracking-widest text-primary-600/60 mb-1 flex items-center gap-2">
                        <User className="w-4 h-4" /> Full Name
                     </p>
-                    <p className="text-lg font-bold text-neutral-900">{user.name || 'Not provided'}</p>
+                    {isEditingProfile ? (
+                      <Input
+                        value={profileForm.name}
+                        onChange={(e) => {
+                          setProfileForm((current) => ({ ...current, name: e.target.value }));
+                          setProfileErrors((current) => ({ ...current, name: undefined }));
+                        }}
+                        error={profileErrors.name}
+                        placeholder="Enter your full name"
+                        leftIcon={<User className="w-4 h-4" />}
+                        className="mt-2 h-12 rounded-xl border-neutral-200 bg-neutral-50/60 font-medium text-neutral-900"
+                      />
+                    ) : (
+                      <p className="text-lg font-bold text-neutral-900">{user.name || 'Not provided'}</p>
+                    )}
                   </div>
                   <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm px-6 py-5 hover:border-primary-200 transition-colors">
                     <p className="text-xs font-bold uppercase tracking-widest text-primary-600/60 mb-1">Email Address</p>
-                    <p className="text-lg font-bold text-neutral-900">{user.email || 'Not provided'}</p>
+                    {isEditingProfile ? (
+                      <Input
+                        type="email"
+                        value={profileForm.email}
+                        onChange={(e) => {
+                          setProfileForm((current) => ({ ...current, email: e.target.value }));
+                          setProfileErrors((current) => ({ ...current, email: undefined }));
+                        }}
+                        error={profileErrors.email}
+                        placeholder="Enter your email address"
+                        leftIcon={<Mail className="w-4 h-4" />}
+                        className="mt-2 h-12 rounded-xl border-neutral-200 bg-neutral-50/60 font-medium text-neutral-900"
+                      />
+                    ) : (
+                      <p className="text-lg font-bold text-neutral-900">{user.email || 'Not provided'}</p>
+                    )}
                   </div>
                   <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm px-6 py-5 hover:border-primary-200 transition-colors">
                     <p className="text-xs font-bold uppercase tracking-widest text-primary-600/60 mb-1">Phone Number</p>
@@ -287,6 +433,8 @@ export default function Profile() {
                           ORDER_STATUS_COLORS[order.status?.toLowerCase?.()] ??
                           "bg-neutral-50 text-neutral-600 border-neutral-200";
                         const isExpanded = expandedOrders.includes(order.id);
+                        const firstItem = order.order_items?.[0];
+                        const previewImage = getOrderItemImage(firstItem);
 
                         return (
                           <div
@@ -298,15 +446,34 @@ export default function Profile() {
                               <button
                                 type="button"
                                 onClick={() => toggleOrderDetails(order.id)}
-                                className="flex-1 text-left sm:pr-4"
+                                className="flex flex-1 items-start gap-4 text-left sm:pr-4"
                               >
-                                <p className="font-display font-bold text-lg text-neutral-900">
-                                  Order #{order.order_number}
-                                </p>
-                                <p className="mt-1 flex items-center gap-1.5 text-xs text-primary-600 font-bold bg-primary-50 w-fit px-2.5 py-1 rounded-lg">
-                                  {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                                  {isExpanded ? 'Hide items' : 'View structured items'}
-                                </p>
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm flex items-center justify-center shrink-0">
+                                  {previewImage ? (
+                                    <img
+                                      src={previewImage}
+                                      alt={firstItem?.product_name || 'Ordered product'}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <ImageIcon className="w-7 h-7 text-neutral-300" />
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-display font-bold text-lg text-neutral-900 break-words">
+                                    Order #{order.order_number}
+                                  </p>
+                                  {firstItem?.product_name && (
+                                    <p className="mt-1 text-sm font-medium text-neutral-500 truncate">
+                                      {firstItem.product_name}
+                                      {order.order_items?.length > 1 ? ` +${order.order_items.length - 1} more item${order.order_items.length - 1 > 1 ? 's' : ''}` : ''}
+                                    </p>
+                                  )}
+                                  <p className="mt-2 flex items-center gap-1.5 text-xs text-primary-600 font-bold bg-primary-50 w-fit px-2.5 py-1 rounded-lg">
+                                    {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                    {isExpanded ? 'Hide items' : 'View structured items'}
+                                  </p>
+                                </div>
                               </button>
 
                               <div className="flex items-center gap-3 self-start sm:self-auto">

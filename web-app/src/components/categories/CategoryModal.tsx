@@ -182,28 +182,9 @@ export default function CategoryModal({
               <p className="text-[11px] font-bold text-primary-600 tracking-widest mb-0.5 uppercase">
                 {draft?.id ? "Editing Category" : "Creating Category"}
               </p>
-              {isEdit ? (
-                <div>
-                  <input
-                    ref={(el) => (inputRefs.current.name = el)}
-                    type="text"
-                    placeholder="Category name..."
-                    value={draft.name}
-                    onChange={e => {
-                      const value = e.target.value;
-                      const slug = value.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-                      set("name", value);
-                      set("slug", slug);
-                    }}
-                    className={`w-full bg-transparent text-xl sm:text-2xl font-display font-bold text-slate-900 placeholder:text-slate-300 outline-none transition-all ${
-                      errors.name ? "border-b-2 border-rose-400" : "border-b-2 border-transparent focus:border-primary-200"
-                    }`}
-                  />
-                  <FieldError error={errors.name} />
-                </div>
-              ) : (
-                <h2 className="text-xl sm:text-2xl font-display font-bold text-slate-900">{draft.name}</h2>
-              )}
+              <h2 className="text-xl sm:text-2xl font-display font-bold text-slate-900 truncate">
+                {draft.name || "Untitled Category"}
+              </h2>
             </div>
           </div>
 
@@ -350,7 +331,31 @@ export default function CategoryModal({
 
               <section>
                 <SectionLabel icon={<Eye className="w-4 h-4" />}>General</SectionLabel>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <InfoCard label="Category Name">
+                    {isEdit ? (
+                      <div data-err={errors.name ? true : undefined}>
+                        <input
+                          ref={(el) => (inputRefs.current.name = el)}
+                          type="text"
+                          placeholder="Category name..."
+                          value={draft.name}
+                          onChange={e => {
+                            const value = e.target.value;
+                            const slug = value.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+                            set("name", value);
+                            set("slug", slug);
+                          }}
+                          className={inputCls(!!errors.name)}
+                        />
+                        <FieldError error={errors.name} />
+                      </div>
+                    ) : (
+                      <p className="text-sm font-semibold text-slate-800 mt-2">{draft.name}</p>
+                    )}
+                  </InfoCard>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InfoCard label="Status">
                     {isEdit ? (
                         <div data-err={errors.is_active ? true : undefined}>
@@ -404,6 +409,7 @@ export default function CategoryModal({
                         </p>
                         )}
                   </InfoCard>
+                  </div>
                 </div>
               </section>
 
