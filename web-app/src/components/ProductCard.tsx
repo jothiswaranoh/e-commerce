@@ -1,10 +1,10 @@
 import { ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
-import { getWishlist, toggleWishlistItem } from '../utils/wishlist';
+import { addWishlistListener, getWishlist, toggleWishlistItem } from '../utils/wishlist';
 import { ROUTES } from '../config/routes.constants';
 
 interface ProductCardProps {
@@ -44,7 +44,18 @@ export default function ProductCard({
 
   const isOutOfStock = stock <= 0;
 
-  const cartItem = items.find((item) => String(item.product_id) === String(id));
+  useEffect(() => {
+    setIsWishlisted(getWishlist().has(id));
+
+    return addWishlistListener(() => {
+      setIsWishlisted(getWishlist().has(id));
+    });
+  }, [id]);
+
+  const cartItem = items.find((item) => {
+    const sameProduct = String(item.product_id) === String(id);
+    return sameProduct;
+  });
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -189,7 +200,13 @@ export default function ProductCard({
         {/* Wishlist button */}
         <button
           onClick={handleWishlist}
-          className="absolute top-3 right-3 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all duration-200 shadow-sm hover:shadow-md opacity-100 sm:opacity-0 sm:group-hover:opacity-100 active:scale-90"
+          className="absolute top-3 right-3 z-10 p-2 bg-white/90 backdrop-blur-sm
+                     rounded-full hover:bg-white transition-all duration-200
+                     shadow-sm hover:shadow-md
+                     opacity-100 sm:opacity-100
+                     sm:scale-100
+                     sm:group-hover:opacity-100
+                     active:scale-90"
           aria-label="Toggle wishlist"
         >
           <Heart

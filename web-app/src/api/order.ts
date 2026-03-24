@@ -46,6 +46,10 @@ const OrderAPI = {
         }>(BASE_PATH, params);
     },
 
+    create(payload: any) {
+        return apiService.post<Order>(BASE_PATH, payload);
+    },
+
     get(id: number) {
         return apiService.get<Order>(`${BASE_PATH}/${id}`);
     },

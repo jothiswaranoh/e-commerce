@@ -111,21 +111,28 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+
+      {/* ── Breadcrumb / Back Bar ── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900 text-white">
         <div className="absolute -top-16 -right-16 w-72 h-72 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-8">
-          <button onClick={() => navigate('/products')} className="inline-flex items-center gap-2 text-sm text-primary-300 hover:text-white transition-colors font-medium">
-            <ArrowLeft className="w-4 h-4" /> Back to Products
+        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-8">
+          <button
+            onClick={() => navigate('/products')}
+            className="inline-flex items-center gap-2 text-sm text-primary-300 hover:text-white transition-colors font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Products
           </button>
           <h1 className="text-2xl font-bold mt-2 tracking-tight line-clamp-1">{product.name}</h1>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid md:grid-cols-2 gap-10">
+      {/* ── Main Content ── */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-14">
 
-          {/* Image Gallery */}
-          <div>
+          {/* ── LEFT: Image Gallery ── */}
+          <div className="lg:col-span-7 flex flex-col lg:pr-4">
             <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm mb-4 group">
               <button
                 onClick={handleWishlist}
@@ -182,8 +189,10 @@ export default function ProductDetail() {
             )}
           </div>
 
-          {/* Details */}
-          <div className="flex flex-col">
+          {/* ── RIGHT: Details ── */}
+          <div className="lg:col-span-5 flex flex-col">
+
+            {/* Category badge */}
             {product.category && (
               <span className="inline-block px-3 py-1 bg-primary-50 border border-primary-100 text-primary-700 text-xs font-bold rounded-full mb-4 self-start">
                 {product.category.name}

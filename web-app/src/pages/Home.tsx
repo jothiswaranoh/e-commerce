@@ -28,14 +28,26 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+      {/* ══════════════════════════════════════
+          HERO
+      ══════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900 text-white">
+        {/* Decorative blobs */}
         <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 -left-24 w-80 h-80 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-accent-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 md:py-32">
+        {/* Subtle grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+
+        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-20 md:py-32">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full mb-7">
               <Sparkles className="w-3.5 h-3.5 text-primary-300" />
@@ -81,7 +93,7 @@ export default function Home() {
 
       {/* FEATURE STRIP */}
       <section className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-0">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-0">
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-gray-100">
             {features.map((f, i) => (
               <div key={i} className="flex items-center gap-4 px-6 py-6 hover:bg-gray-50 transition-colors">
@@ -100,11 +112,15 @@ export default function Home() {
 
       <CategoriesSection />
 
-      {/* PROMOTIONAL BANNER */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+      {/* ══════════════════════════════════════
+          PROMOTIONAL BANNER
+      ══════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900">
+        {/* Blobs */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-500/15 rounded-full blur-2xl pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20">
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/15 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-20">
           <div className="max-w-xl mx-auto text-center">
             <span className="inline-block px-3 py-1 bg-primary-500/20 border border-primary-500/30 rounded-full text-primary-300 text-xs font-bold uppercase tracking-wider mb-5">
               Limited Time
@@ -127,7 +143,7 @@ export default function Home() {
 
       {/* NEWSLETTER */}
       <section className="bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center mx-auto mb-6">
               <Mail className="w-6 h-6 text-primary-500" />

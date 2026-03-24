@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Layers, CheckCircle, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
+
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import { TableRowSkeleton } from "../../components/ui/Skeleton";
 
@@ -16,7 +16,7 @@ import {
 } from "../../hooks/useCategory";
 
 import CategoryModal from "../../components/categories/CategoryModal";
-import { Category, CategoryPayload } from "../../api/category";
+import { CategoryPayload } from "../../api/category";
 import CategoryDataGrid from "../../components/categories/CategoryDataGrid";
 
 export default function AdminCategories() {
@@ -52,7 +52,7 @@ export default function AdminCategories() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] =
-    useState<Category | null>(null);
+    useState<any>(null);
 
   const handleCreate = async (payload: CategoryPayload) => {
     try {
@@ -115,8 +115,8 @@ export default function AdminCategories() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-neutral-900">Categories</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="text-3xl font-display font-bold text-neutral-900 tracking-tight">Categories</h1>
+          <p className="text-sm text-neutral-500 mt-1">
             Manage product categories and hierarchy
           </p>
         </div>
@@ -130,84 +130,50 @@ export default function AdminCategories() {
       {meta && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                
-                <p className="text-sm text-neutral-600">Total Categories</p>
-                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Total Categories</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {meta.total_count}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-amber-50 transition-transform duration-300 group-hover:scale-110">
+                <Layers className="w-6 h-6 text-amber-600" />
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Active Categories</p>
-                <p className="text-2xl font-bold text-green-700 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Active Categories</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {activeCategoryCount}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-emerald-50 transition-transform duration-300 group-hover:scale-110">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-neutral-500 to-neutral-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Inactive Categories</p>
-                <p className="text-2xl font-bold text-amber-700 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Inactive Categories</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {inactiveCategoryCount}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-amber-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M18.364 5.636l-1.414-1.414L12 9.172 7.05 4.222 5.636 5.636 10.586 10.586 5.636 15.536 7.05 16.95 12 12l4.95 4.95 1.414-1.414-4.95-4.95 4.95-4.95z"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-neutral-100 transition-transform duration-300 group-hover:scale-110">
+                <Clock className="w-6 h-6 text-neutral-600" />
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       )}
 
@@ -217,7 +183,7 @@ export default function AdminCategories() {
             <table className="w-full">
               <tbody>
                 {[...Array(5)].map((_, i) => (
-                  <TableRowSkeleton key={i} columns={5} />
+                  <TableRowSkeleton key={i} cols={5} />
                 ))}
               </tbody>
             </table>

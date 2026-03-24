@@ -38,7 +38,7 @@ export default function FeaturedProductsSection() {
   if (loading) {
     return (
       <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto grid grid-cols-4 gap-6">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-96 bg-neutral-100 rounded-xl animate-shimmer" />
           ))}
@@ -53,7 +53,7 @@ export default function FeaturedProductsSection() {
 
   return (
     <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-[1400px] mx-auto px-4">
         <div className="flex items-center justify-between mb-12">
           <div>
             <h2 className="text-4xl font-bold">{HOME.sections.featured.title}</h2>
@@ -67,16 +67,16 @@ export default function FeaturedProductsSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
-  <ProductCard
-    key={product.id}
-    id={String(product.id)}
-    name={product.name}
-    price={product.variants?.[0]?.price ?? 0}
-    stock={product.variants?.[0]?.stock ?? 0}
-    category={product.category?.name ?? 'Uncategorized'}
-    images={product.images}   // ✅ THIS IS THE FIX
-  />
-))}
+            <ProductCard
+              key={product.id}
+              id={String(product.id)}
+              name={product.name}
+              price={product.variants?.[0]?.price ?? 0}
+              stock={product.variants?.[0]?.stock ?? 0}
+              category={product.category?.name ?? 'Uncategorized'}
+              images={product.images as any}   // ✅ THIS IS THE FIX
+            />
+          ))}
         </div>
       </div>
     </section>

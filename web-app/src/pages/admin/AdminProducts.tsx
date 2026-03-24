@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Package } from "lucide-react";
+import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import { TableRowSkeleton } from "../../components/ui/Skeleton";
 
@@ -164,8 +163,8 @@ const outOfStockProducts = products.filter((p: any) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900">Products</h1>
-          <p className="text-neutral-600 mt-1">
+          <h1 className="text-3xl font-display font-bold text-neutral-900 tracking-tight">Products</h1>
+          <p className="text-sm text-neutral-500 mt-1">
             Manage your product catalog
           </p>
         </div>
@@ -178,109 +177,65 @@ const outOfStockProducts = products.filter((p: any) => {
 
       {meta && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 to-primary-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Total Products</p>
-                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Total Products</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {meta.total_count}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-primary-50 transition-transform duration-300 group-hover:scale-110">
+                <Package className="w-6 h-6 text-primary-600" />
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Active</p>
-                <p className="text-2xl font-bold text-green-700 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Active</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {activeProducts}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-emerald-50 transition-transform duration-300 group-hover:scale-110">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Low Stock</p>
-                <p className="text-2xl font-bold text-amber-700 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Low Stock</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {lowStockProducts}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-amber-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-amber-50 transition-transform duration-300 group-hover:scale-110">
+                <AlertTriangle className="w-6 h-6 text-amber-600" />
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card>
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-white rounded-2xl p-6 border border-neutral-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-400 opacity-80`} />
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-neutral-600">Out of Stock</p>
-                <p className="text-2xl font-bold text-red-700 mt-1">
+                <p className="text-sm font-medium text-neutral-500 mb-1">Out of Stock</p>
+                <p className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
                   {outOfStockProducts}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-red-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+              <div className="p-3 rounded-xl bg-red-50 transition-transform duration-300 group-hover:scale-110">
+                <XCircle className="w-6 h-6 text-red-600" />
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       )}
 
@@ -289,8 +244,8 @@ const outOfStockProducts = products.filter((p: any) => {
           <div className="p-6">
             <table className="w-full">
               <tbody>
-                {[...Array(pageSize)].map((_, i) => (
-                  <TableRowSkeleton key={i} columns={5} />
+                {[...Array(Number(pageSize) || 5)].map((_, i) => (
+                  <TableRowSkeleton key={i} cols={5} />
                 ))}
               </tbody>
             </table>
