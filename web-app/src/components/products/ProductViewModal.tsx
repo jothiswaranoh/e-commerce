@@ -353,24 +353,9 @@ export default function ProductModal({
               <p className="text-[11px] font-bold text-primary-600 tracking-wider mb-0.5 uppercase">
                 {isEdit ? "Edit Product" : "New Product"}
               </p>
-              {isEdit ? (
-                <input
-                  ref={(el) => (inputRefs.current.name = el)}
-                  type="text"
-                  placeholder="Product name..."
-                  value={draft.name}
-                  onChange={(e) => {
-                    set("name", e.target.value);
-                    set("slug", e.target.value.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
-                  }}
-                  className={`w-full bg-transparent text-xl sm:text-2xl font-display font-bold text-slate-900 placeholder:text-slate-300 outline-none transition-all ${
-                    errors.name ? "border-b-2 border-rose-400" : "border-b-2 border-transparent focus:border-primary-200"
-                  }`}
-                />
-              ) : (
-                <h2 className="text-xl sm:text-2xl font-display font-bold text-slate-900">{draft.name}</h2>
-              )}
-              <FieldError error={errors.name} />
+              <h2 className="text-xl sm:text-2xl font-display font-bold text-slate-900 truncate">
+                {draft.name || "Untitled Product"}
+              </h2>
             </div>
           </div>
 
@@ -550,6 +535,28 @@ export default function ProductModal({
             {/* ── DETAILS TAB ── */}
             {tab === "details" && (
               <div className="space-y-7">
+
+                <section>
+                  <SectionHeading icon={<Package className="h-4 w-4" />}>Product Name</SectionHeading>
+                  {isEdit ? (
+                    <div data-err={errors.name ? true : undefined}>
+                      <input
+                        ref={(el) => (inputRefs.current.name = el)}
+                        type="text"
+                        placeholder="Product name..."
+                        value={draft.name}
+                        onChange={(e) => {
+                          set("name", e.target.value);
+                          set("slug", e.target.value.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
+                        }}
+                        className={inputCls(!!errors.name)}
+                      />
+                      <FieldError error={errors.name} />
+                    </div>
+                  ) : (
+                    <p className="text-sm font-semibold text-slate-800">{draft.name}</p>
+                  )}
+                </section>
 
                 <section>
                   <SectionHeading icon={<Pencil className="h-4 w-4" />}>Description</SectionHeading>
