@@ -256,7 +256,7 @@ export default function ProductModal({
     onClose();
   };
 
-  const set = <K extends keyof Product>(key: K, val: Product[K]) => {
+  const set = <K extends keyof Product,>(key: K, val: Product[K]) => {
     setDraft((p) => (p ? { ...p, [key]: val } : p));
     clearErr(key as string);
   };
