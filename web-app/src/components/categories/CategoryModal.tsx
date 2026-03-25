@@ -81,7 +81,7 @@ export default function CategoryModal({
     onClose();
   };
 
-  const set = <K extends keyof Category>(key: K, val: Category[K]) => {
+  const set = <K extends keyof Category,>(key: K, val: Category[K]) => {
     setDraft(p => p ? { ...p, [key]: val } : p);
   };
 

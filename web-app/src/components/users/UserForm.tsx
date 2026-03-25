@@ -61,7 +61,7 @@ export default function UserForm({
     return true;
   };
 
-  const handleChange = <K extends keyof FormData>(key: K, value: FormData[K]) => {
+  const handleChange = <K extends keyof FormData,>(key: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) {
       setErrors((prev) => ({ ...prev, [key]: undefined }));

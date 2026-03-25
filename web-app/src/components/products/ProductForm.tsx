@@ -111,7 +111,7 @@ export default function ProductForm({
     /* ----------------------------------------
        Handlers
     ---------------------------------------- */
-    const handleChange = <K extends keyof FormData>(
+    const handleChange = <K extends keyof FormData,>(
         key: K,
         value: FormData[K]
     ) => setForm((prev) => ({ ...prev, [key]: value }));
