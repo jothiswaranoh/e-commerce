@@ -31,7 +31,7 @@ Rails.application.routes.draw do
       end
 
       # Orders
-      resources :orders, only: [:index, :show, :create, :update] do
+      resources :orders, only: [:index, :show, :create, :update ,:destroy] do
         member do
           patch :cancel
         end
