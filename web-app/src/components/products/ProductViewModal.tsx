@@ -1,8 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import {
-  X, Pencil, Check, Trash2, Plus,
-  ChevronLeft, ChevronRight, AlertCircle,
-  Package, Tag, Eye, Hash, Image
+  X,
+  Pencil,
+  Check,
+  Trash2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Package,
+  Tag,
+  Eye,
+  Hash,
+  Image,
 } from "lucide-react";
 import { z } from "zod";
 
@@ -32,7 +42,19 @@ type Product = {
   variants?: Variant[];
 };
 
-/* ─── Schema ───────────────────────────────────── */
+interface Props {
+  product: Product | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave?: (updated: Product) => void;
+  categories?: { id: number; name: string }[];
+  initialMode?: "view" | "edit";
+}
+
+type Tab = "details" | "variants";
+type ValidationErrors = Record<string, string>;
+
+/* ─── Zod Schemas ───────────────────────────────── */
 const variantSchema = z.object({
   id: z.number().optional(),
   name: z.string().optional(),
@@ -154,14 +176,39 @@ export default function ProductModal({
           </div>
         </div>
 
-        {/* TABS */}
-        <div className="flex gap-4 border-b px-5">
-          {["details", "variants"].map((t) => (
-            <button key={t} onClick={() => setTab(t as any)}>
-              {t}
-            </button>
-          ))}
-        </div>
+        {/* ══ TAB ROW ══ */}
+        <div className="flex gap-6 px-4 sm:px-8 bg-slate-50/50 border-b border-slate-100/80">
+            {[
+              { id: "details", label: "Details" },
+              { id: "variants", label: "Variants", count: draft.variants?.filter((v) => !v._destroy).length || 0 },
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id as Tab)}
+                className={`relative py-4 text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 rounded-sm ${
+                  tab === t.id
+                    ? "text-primary-700 font-semibold"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {t.label}
+                  {t.count !== undefined && (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs transition-colors ${
+                        tab === t.id ? "bg-primary-100 text-primary-700" : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
+                      {t.count}
+                    </span>
+                  )}
+                </div>
+                {tab === t.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-500 rounded-t-full shadow-[0_-2px_8px_rgba(99,102,241,0.5)]" />
+                )}
+              </button>
+            ))}
+          </div>
 
         {/* BODY */}
         <div className="p-5">
@@ -198,60 +245,7 @@ export default function ProductModal({
                 </select>
               </div>
 
-              <div>
-                <label>Description</label>
-                <textarea
-                  value={draft.description || ""}
-                  onChange={(e) =>
-                    set("description", e.target.value)
-                  }
-                />
-              </div>
-
-            </div>
-          )}
-
-          {tab === "variants" && (
-            <div className="space-y-4">
-              {(draft.variants || []).map((v: any, i: number) => (
-                <div key={i} className="border p-3 rounded">
-
-                  <input
-                    placeholder="SKU"
-                    value={v.sku}
-                    onChange={(e) => {
-                      const arr = [...draft.variants];
-                      arr[i].sku = e.target.value;
-                      set("variants", arr);
-                    }}
-                  />
-
-                  <input
-                    placeholder="Price"
-                    value={v.price}
-                    onChange={(e) => {
-                      const arr = [...draft.variants];
-                      arr[i].price = e.target.value;
-                      set("variants", arr);
-                    }}
-                  />
-
-                </div>
-              ))}
-
-              <button
-                onClick={() =>
-                  set("variants", [
-                    ...(draft.variants || []),
-                    { sku: "", price: "", stock: 0 },
-                  ])
-                }
-              >
-                Add Variant
-              </button>
-            </div>
-          )}
-
+          </div>
         </div>
       </div>
     </div>
