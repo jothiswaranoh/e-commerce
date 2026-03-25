@@ -196,26 +196,6 @@ export default function ProductForm({
                 />
             </Field>
 
-            {/* Slug */}
-            <Field
-                label="Slug"
-                required
-                error={errors.slug}
-                hint="URL-friendly identifier"
-            >
-                <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                        /
-                    </span>
-                    <input
-                        value={form.slug}
-                        onChange={(e) => handleChange("slug", e.target.value)}
-                        placeholder="smartphone-xyz"
-                        className={`${inputClass(!!errors.slug)} pl-6 font-mono`}
-                    />
-                </div>
-            </Field>
-
             {/* Category */}
             <Field label="Category" required error={errors.category_id}>
                 <div className="relative">

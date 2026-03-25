@@ -139,17 +139,6 @@ export default function CategoryDataGrid({
             },
         },
         {
-            field: "slug",
-            headerName: "Slug",
-            flex: 1,
-            minWidth: 180,
-            renderCell: (params) => (
-                <span className="text-neutral-600 font-mono text-sm">
-                    {params.value}
-                </span>
-            ),
-        },
-        {
             field: "is_active",
             headerName: "Status",
             sortable: false,

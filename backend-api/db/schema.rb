@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_14_161000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_24_170209) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -67,13 +67,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_14_161000) do
   create_table "categories", force: :cascade do |t|
     t.bigint "org_id", null: false
     t.string "name", null: false
-    t.string "slug", null: false
     t.bigint "parent_id"
     t.boolean "is_active", default: true
     t.integer "sort_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["org_id", "slug"], name: "index_categories_on_org_id_and_slug", unique: true
     t.index ["org_id"], name: "index_categories_on_org_id"
     t.index ["parent_id"], name: "index_categories_on_parent_id"
   end
@@ -158,14 +156,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_14_161000) do
     t.bigint "org_id", null: false
     t.bigint "category_id", null: false
     t.string "name", null: false
-    t.string "slug", null: false
     t.text "description"
     t.string "status", default: "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "image_url"
     t.index ["category_id"], name: "index_products_on_category_id"
-    t.index ["org_id", "slug"], name: "index_products_on_org_id_and_slug", unique: true
     t.index ["org_id"], name: "index_products_on_org_id"
   end
 

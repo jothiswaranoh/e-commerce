@@ -3,7 +3,6 @@ class ProductBlueprint < Blueprinter::Base
 
   fields :org_id,
          :name,
-         :slug,
          :description,
          :status,
          :category_id,

@@ -66,8 +66,6 @@ export default function CategoryTable({
         </span>
       </td>
 
-      <td className="px-6 py-4 text-neutral-600">{cat.slug}</td>
-
       <td className="px-6 py-4">
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -118,9 +116,6 @@ export default function CategoryTable({
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600">
               Name
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600">
-              Slug
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-600">
               Status
