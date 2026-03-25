@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import {
   X, Pencil, Check, Trash2,
-  Plus, Eye, Layers, Folder, Image as ImageIcon,
+  Plus, Eye, Folder, Image as ImageIcon,
   AlertCircle
 } from "lucide-react";
 
@@ -437,35 +437,6 @@ export default function CategoryModal({
                     ) : (
                     <p className="text-sm font-semibold text-slate-800 mt-2">
                         {categories.find(c => c.id === draft.parent_id)?.name || "— (Top Level)"}
-                    </p>
-                    )}
-                </InfoCard>
-              </section>
-
-              <section>
-                <SectionLabel icon={<Layers className="w-4 h-4" />}>Routing & SEO</SectionLabel>
-                <InfoCard label="URL Slug">
-                  {isEdit ? (
-                    <div data-err={errors.slug ? true : undefined}>
-                      <div className="flex overflow-hidden rounded-xl border border-slate-200 focus-within:ring-4 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all duration-300 shadow-sm">
-                        <span className="flex items-center border-r border-slate-200 bg-slate-50/50 px-4 text-sm font-mono text-slate-400 whitespace-nowrap">
-                          mysite.com/c/
-                        </span>
-                        <input
-                            ref={(el) => (inputRefs.current.slug = el)}
-                            value={draft.slug}
-                            onChange={e => set("slug", e.target.value)}
-                            className="flex-1 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm font-mono text-slate-800 outline-none placeholder:text-slate-300 disabled:bg-transparent"
-                        />
-                      </div>
-                      <FieldError error={errors.slug} />
-                      <p className="mt-2 text-xs text-slate-400 font-medium">
-                        Must be unique, lowercase, and use hyphens for spaces.
-                      </p>
-                    </div>
-                    ) : (
-                    <p className="text-sm font-mono text-primary-600 break-all mt-2 py-1.5 px-3 bg-primary-50/50 rounded border border-primary-100 w-fit">
-                        {draft.slug}
                     </p>
                     )}
                 </InfoCard>

@@ -12,9 +12,7 @@ import {
   Tag,
   Eye,
   Hash,
-  Link2,
   Image,
-  Layout,
 } from "lucide-react";
 import { z } from "zod";
 
@@ -55,7 +53,7 @@ interface Props {
   initialMode?: "view" | "edit";
 }
 
-type Tab = "details" | "variants" | "meta";
+type Tab = "details" | "variants";
 type ValidationErrors = Record<string, string>;
 
 /* ─── Zod Schemas ───────────────────────────────── */
@@ -408,7 +406,6 @@ export default function ProductModal({
             {[
               { id: "details", label: "Details" },
               { id: "variants", label: "Variants", count: draft.variants?.filter((v) => !v._destroy).length || 0 },
-              { id: "meta", label: "Meta & SEO" },
             ].map((t) => (
               <button
                 key={t.id}
@@ -724,54 +721,6 @@ export default function ProductModal({
                     <Plus className="h-4 w-4" /> Add variant
                   </button>
                 )}
-              </div>
-            )}
-
-            {/* ── META & SEO TAB ── */}
-            {tab === "meta" && (
-              <div className="space-y-8 animate-in fade-in duration-300">
-                <section>
-                  <SectionHeading icon={<Layout className="w-4 h-4" />}>Search Engine Optimization</SectionHeading>
-                  <div className="space-y-5">
-                    
-                    <div className="bg-gradient-to-br from-indigo-50/50 to-purple-50/50 p-5 rounded-2xl border border-indigo-100/50 shadow-sm relative overflow-hidden group">
-                      <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors duration-500" />
-                      <label className="block text-[11px] font-bold uppercase tracking-widest text-indigo-400 mb-2">
-                        Preview
-                      </label>
-                      <div className="mb-1 text-sm text-indigo-900/40 font-medium truncate flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-indigo-400" />
-                        mysite.com / products / {draft.slug || "new-product"}
-                      </div>
-                      <div className="text-lg font-display font-bold text-indigo-700 truncate decoration-indigo-300 underline-offset-4 hover:underline cursor-pointer transition-all">
-                        {draft.name || "Product Name"}
-                      </div>
-                      <div className="mt-1.5 text-sm text-slate-600 line-clamp-2 leading-relaxed">
-                        {draft.description || "Product description will appear here..."}
-                      </div>
-                    </div>
-
-                    <div data-err={errors.slug ? true : undefined}>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">URL Slug</label>
-                      <div className="flex overflow-hidden rounded-xl border border-slate-200 focus-within:ring-4 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all duration-300 shadow-sm">
-                        <span className="flex items-center border-r border-slate-200 bg-slate-50/50 px-4 text-sm font-mono text-slate-400 whitespace-nowrap">
-                          mysite.com/p/
-                        </span>
-                        <input
-                          value={draft.slug}
-                          onChange={(e) => set("slug", e.target.value)}
-                          placeholder="product-slug"
-                          disabled={!isEdit}
-                          className="flex-1 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm font-mono text-slate-800 outline-none placeholder:text-slate-300 disabled:bg-transparent"
-                        />
-                      </div>
-                      <FieldError error={errors.slug} />
-                      <p className="mt-2 text-xs text-slate-400 font-medium">
-                        Must be unique, lowercase, and use hyphens for spaces.
-                      </p>
-                    </div>
-                  </div>
-                </section>
               </div>
             )}
 

@@ -63,14 +63,6 @@ export default function ProductForm({
         required
       />
 
-      <Input
-        label="Slug"
-        value={formData.slug}
-        onChange={(e) =>
-          setFormData((p: any) => ({ ...p, slug: e.target.value }))
-        }
-      />
-
       <Select
         options={categoryOptions}
         placeholder="Category"
