@@ -5,9 +5,9 @@
  */
 
 export const SHOP_NAME = 'Looks Mens';
-export const SHOP_ADDRESS = 'machine street,pullambadi,lalgudi taluk trichy -621711';
-export const SHOP_PHONE = '7558176281';
-export const SHOP_EMAIL = 'support@looksmens.com';
+export const SHOP_ADDRESS = 'Machine Street, Pullambadi,Lalgudi Taluk, Trichy -621711';
+export const SHOP_PHONE = '+91 7558176281';
+export const SHOP_EMAIL = 'Support@looksmens.com';
 
 // Branding related constants
 export const BRAND_TAGLINE = 'Premium Mens Fashion and Lifestyle';
