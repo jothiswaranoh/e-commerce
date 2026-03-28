@@ -64,7 +64,7 @@ export default function CategorySession() {
             return (
             <Link
               key={category.id}
-              to={`${ROUTES.PRODUCTS}?category=${category.name}`}
+              to={`${ROUTES.PRODUCTS}?categories=${encodeURIComponent(category.name)}`}
               className="group relative h-64 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all"
             >
               {imageSrc ? (
