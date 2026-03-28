@@ -224,9 +224,9 @@ export default function Profile() {
         setIsConfirmModalOpen(false);
       }
 
-    } catch {
-      toast.error("Failed to cancel order");
-      setIsConfirmModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.message || error?.error?.error || "Failed to cancel order");
+
     } finally {
       setCancellingId(null);
       setOrderToCancel(null);
