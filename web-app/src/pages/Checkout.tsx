@@ -5,7 +5,7 @@ import { orderService } from '../services/orderService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  Truck, User, Mail, Phone, Home,
+  Truck, MapPin, User, Mail, Phone, Home,
   CheckCircle2, ArrowRight, ArrowLeft, Sparkles
 } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
