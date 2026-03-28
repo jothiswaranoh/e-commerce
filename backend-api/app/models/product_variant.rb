@@ -1,7 +1,7 @@
 class ProductVariant < ApplicationRecord
   belongs_to :product
-  has_many :order_items
-  has_many :cart_items
+  has_many :order_items, dependent: :destroy
+  has_many :cart_items, dependent: :destroy
   
   validates :sku, presence: true, uniqueness: true, unless: :marked_for_destruction?
   validates :price, presence: true, unless: :marked_for_destruction?
