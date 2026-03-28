@@ -150,12 +150,6 @@ export default function Profile() {
       nextErrors.name = 'Name is required';
     }
 
-    if (!profileForm.email.trim()) {
-      nextErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileForm.email)) {
-      nextErrors.email = 'Enter a valid email address';
-    }
-
     setProfileErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -176,7 +170,6 @@ export default function Profile() {
     try {
       const response = await UserAPI.update(Number(user.id), {
         name: profileForm.name.trim(),
-        email_address: profileForm.email.trim(),
       });
 
       if (!response.success || !response.data) {
@@ -187,7 +180,7 @@ export default function Profile() {
       updateUser({
         ...user,
         name: response.data.name || profileForm.name.trim(),
-        email: response.data.email_address || profileForm.email.trim(),
+        email: response.data.email_address || user.email,
         phone: response.data.phone_number || user.phone,
         role: response.data.role || user.role,
         createdAt: response.data.created_at || user.createdAt,
@@ -275,8 +268,8 @@ export default function Profile() {
                   key={tabKey}
                   onClick={() => setActiveTab(tabKey)}
                   className={`flex items-center gap-2 py-4 border-b-2 font-bold text-sm transition-all whitespace-nowrap ${isActive
-                      ? 'border-primary-600 text-primary-700'
-                      : 'border-transparent text-neutral-500 hover:text-neutral-900 hover:border-neutral-300'
+                    ? 'border-primary-600 text-primary-700'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-900 hover:border-neutral-300'
                     }`}
                 >
                   <TabIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-primary-600' : 'text-neutral-400'}`} />
@@ -356,24 +349,14 @@ export default function Profile() {
                       <p className="text-lg font-bold text-neutral-900">{user.name || 'Not provided'}</p>
                     )}
                   </div>
-                  <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm px-6 py-5 hover:border-primary-200 transition-colors">
-                    <p className="text-xs font-bold uppercase tracking-widest text-primary-600/60 mb-1">Email Address</p>
-                    {isEditingProfile ? (
-                      <Input
-                        type="email"
-                        value={profileForm.email}
-                        onChange={(e) => {
-                          setProfileForm((current) => ({ ...current, email: e.target.value }));
-                          setProfileErrors((current) => ({ ...current, email: undefined }));
-                        }}
-                        error={profileErrors.email}
-                        placeholder="Enter your email address"
-                        leftIcon={<Mail className="w-4 h-4" />}
-                        className="mt-2 h-12 rounded-xl border-neutral-200 bg-neutral-50/60 font-medium text-neutral-900"
-                      />
-                    ) : (
-                      <p className="text-lg font-bold text-neutral-900">{user.email || 'Not provided'}</p>
-                    )}
+                  <div className={`rounded-2xl border border-neutral-100 bg-white shadow-sm px-6 py-5 transition-colors ${isEditingProfile ? 'opacity-80 bg-neutral-50/50' : 'hover:border-primary-200'}`}>
+                    <p className="text-xs font-bold uppercase tracking-widest text-primary-600/60 mb-1">
+                      Email Address {isEditingProfile && <span className="text-neutral-400 capitalize normal-case text-[10px] ml-1">(Read-only)</span>}
+                    </p>
+                    <p className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-neutral-400" />
+                      {user.email || 'Not provided'}
+                    </p>
                   </div>
                   <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm px-6 py-5 hover:border-primary-200 transition-colors">
                     <p className="text-xs font-bold uppercase tracking-widest text-primary-600/60 mb-1">Phone Number</p>
