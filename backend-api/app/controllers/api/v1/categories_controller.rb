@@ -40,7 +40,6 @@ module Api
       def resource_params
         params.require(:category).permit(
           :name,
-          :slug,
           :parent_id,
           :is_active,
           :sort_order,

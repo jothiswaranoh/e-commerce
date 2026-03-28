@@ -20,6 +20,21 @@ export interface ApiResponse<T = any> {
 }
 
 // --------------------
+// Utils
+// --------------------
+const formatError = (error: any): string => {
+    if (typeof error === 'string') return error;
+    if (Array.isArray(error)) return error.join(', ');
+    if (typeof error === 'object' && error !== null) {
+        // If it's a Rails error object like { phone: ["is taken"], email: ["is taken"] }
+        return Object.entries(error)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+            .join(' | ');
+    }
+    return 'Unknown error occurred';
+};
+
+// --------------------
 // Axios Instance
 // --------------------
 export const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -127,9 +142,10 @@ export async function service<T = any>(
             const backendError = error.response?.data;
 
             const message =
+                formatError(backendError?.errors) ||
+                formatError(backendError?.error) ||
                 backendError?.message ||
                 backendError?.data?.message ||
-                backendError?.error ||
                 error.response?.statusText ||
                 error.message ||
                 'Something went wrong';

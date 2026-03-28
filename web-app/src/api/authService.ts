@@ -35,12 +35,12 @@ export const authService = {
 
             return {
                 success: false,
-                message: response.data?.error || 'Invalid credentials',
+                message: response.data?.error || response.data?.errors?.join(', ') || 'Invalid credentials',
             };
         } catch (error: any) {
             return {
                 success: false,
-                message: error.response?.data?.error || 'Login failed',
+                message: error.message || 'Login failed',
             };
         }
     },
@@ -92,12 +92,12 @@ export const authService = {
 
             return {
                 success: false,
-                message: response.data?.errors?.join(', ') || 'Registration failed',
+                message: response.data?.errors?.join(', ') || response.data?.error || 'Registration failed',
             };
         } catch (error: any) {
             return {
                 success: false,
-                message: error.response?.data?.errors?.join(', ') || 'Registration failed',
+                message: error.message || 'Registration failed',
             };
         }
     },

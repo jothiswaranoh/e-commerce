@@ -16,8 +16,9 @@ class User < ApplicationRecord
   
 
   validates :role, inclusion: { in: roles.keys }
-  validates :name, presence: true
-  validates :phone_number, uniqueness: true, allow_blank: true
+  validates :email_address, uniqueness: { message: "is already in use" }
+  validates :phone_number, uniqueness: { message: "is already in use" }, allow_blank: true
+  validates :name, uniqueness: { message: "is already in use" }, allow_blank: true
 
   belongs_to :organization, foreign_key: :org_id
   normalizes :email_address, with: ->(e) { e.strip.downcase }

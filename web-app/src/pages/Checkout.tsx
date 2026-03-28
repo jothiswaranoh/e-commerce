@@ -5,7 +5,7 @@ import { orderService } from '../services/orderService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  Truck, MapPin, User, Mail, Phone, Home,
+  Truck, User, Mail, Phone, Home,
   CheckCircle2, ArrowRight, ArrowLeft, Sparkles
 } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
@@ -399,25 +399,6 @@ export default function Checkout() {
                         <p>{shippingInfo.email} · {shippingInfo.phone}</p>
                       </div>
                     </div>
-
-                    {/* Payment
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-bold text-gray-900">Payment Method</h3>
-                        <button onClick={() => setCurrentStep('payment')}
-                          className="text-xs text-indigo-600 hover:text-indigo-700 font-bold">Edit</button>
-                      </div>
-                      <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-gray-500" />
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">
-                            •••• •••• •••• {paymentInfo.cardNumber.slice(-4)}
-                          </p>
-                          <p className="text-xs text-gray-500">{paymentInfo.cardName}</p>
-                        </div>
-                      </div>
-                    </div> 
-                    */}
                   </div>
                 </div>
 
