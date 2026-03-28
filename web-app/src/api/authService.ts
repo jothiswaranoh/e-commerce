@@ -4,6 +4,7 @@ import type { User, AuthResponse } from '../types';
 
 // Auth Service
 export const authService = {
+
     loginUser: async (identifier: string, password: string): Promise<AuthResponse> => {
         try {
             const response = await service<any>({
@@ -13,10 +14,16 @@ export const authService = {
             });
 
             if (response.success && response.data?.token) {
+
+                // store token first
                 await TokenManager.setToken(response.data.token);
 
-                // Fetch the user profile after login
+                // allow interceptors to read token
+                await Promise.resolve();
+
+                // fetch profile
                 const userResult = await authService.getCurrentUser();
+
                 if (!userResult?.user) {
                     await TokenManager.clearToken();
                     return {
@@ -37,6 +44,7 @@ export const authService = {
                 success: false,
                 message: response.data?.error || 'Invalid credentials',
             };
+
         } catch (error: any) {
             return {
                 success: false,
@@ -69,10 +77,12 @@ export const authService = {
             });
 
             if (response.success && response.data?.token) {
-                await TokenManager.setToken(response.data.token);
 
-                // Fetch the user profile after signup
+                await TokenManager.setToken(response.data.token);
+                await Promise.resolve();
+
                 const userResult = await authService.getCurrentUser();
+
                 if (!userResult?.user) {
                     await TokenManager.clearToken();
                     return {
@@ -94,6 +104,7 @@ export const authService = {
                 success: false,
                 message: response.data?.errors?.join(', ') || 'Registration failed',
             };
+
         } catch (error: any) {
             return {
                 success: false,
@@ -109,6 +120,7 @@ export const authService = {
             console.error('Logout request failed:', error);
         } finally {
             await TokenManager.clearToken();
+
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('shophub_current_user');
             }
@@ -117,6 +129,7 @@ export const authService = {
 
     getCurrentUser: async (): Promise<{ success: boolean; user?: User } | null> => {
         try {
+
             const hasToken = TokenManager.hasValidToken();
             if (!hasToken) return null;
 
@@ -127,6 +140,7 @@ export const authService = {
             }
 
             const userData = response.data;
+
             const user: User = {
                 id: userData.id.toString(),
                 name: userData.name || userData.email_address?.split('@')[0] || 'User',
@@ -135,14 +149,18 @@ export const authService = {
                 role: userData.role || 'customer',
                 emailVerified: true,
                 createdAt: userData.created_at || new Date().toISOString(),
+
+                // keep white-label organization support
+                organization: userData.organization || null
             };
 
             localStorage.setItem('shophub_current_user', JSON.stringify(user));
 
             return {
                 success: true,
-                user,
+                user
             };
+
         } catch (error) {
             console.error('Error fetching current user:', error);
             return null;

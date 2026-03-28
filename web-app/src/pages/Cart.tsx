@@ -17,7 +17,6 @@ export default function Cart() {
 
   const shipping = subtotal > 999 ? 0 : 50;
   const total = subtotal + shipping;
-
   const freeShippingLeft = 1000 - subtotal;
   const freeShippingProgress = Math.min((subtotal / 1000) * 100, 100);
 
@@ -49,9 +48,7 @@ export default function Cart() {
 
   const handleQtyUpdate = async (itemId: number, newQty: number) => {
     if (newQty < 1) return;
-
     setUpdatingId(itemId);
-
     try {
       await updateQuantity(itemId, newQty);
     } catch {
@@ -60,8 +57,6 @@ export default function Cart() {
       setUpdatingId(null);
     }
   };
-
-  /* ───────── Loading ───────── */
 
   if (isLoading && items.length === 0) {
     return (
@@ -92,8 +87,6 @@ export default function Cart() {
     );
   }
 
-  /* ───────── Empty Cart ───────── */
-
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-32 px-4">
@@ -120,8 +113,6 @@ export default function Cart() {
       </div>
     );
   }
-
-  /* ───────── Main Cart ───────── */
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -257,8 +248,6 @@ export default function Cart() {
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>
-
-                      {/* Price */}
                       <div className="text-right">
                         <p className="text-xl font-bold text-neutral-900 tracking-tight">
                           ₹{item.total.toLocaleString('en-IN')}

@@ -4,9 +4,9 @@ module Api
       include Authorization
       include Crudable
 
-      load_and_authorize_resource
+      load_and_authorize_resource except: [:me]
 
-      # 🔥 IMPORTANT: Skip Crudable's set_resource for :me
+      # Skip Crudable's set_resource for :me
       skip_before_action :set_resource, only: [:me]
       skip_load_and_authorize_resource only: [:me]
 
@@ -43,8 +43,7 @@ module Api
         )
       end
 
-      # show, create, update, destroy
-      # inherited from Crudable
+      # show, create, update, destroy inherited from Crudable
 
       private
 
@@ -105,6 +104,21 @@ module Api
           per_page: collection.per_page,
           total_pages: collection.total_pages,
           total_count: collection.total_entries
+        }
+      end
+
+      # --------------------
+      # Organization payload
+      # --------------------
+      def organization_payload
+        return nil unless current_user&.organization
+
+        {
+          id: current_user.organization.id,
+          store_name: current_user.organization.store_name,
+          primary_color: current_user.organization.primary_color,
+          secondary_color: current_user.organization.secondary_color,
+          logo_url: current_user.organization.logo_url
         }
       end
     end
