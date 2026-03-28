@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone, Github, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone, Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
 import { UI_CONFIG } from '../../config/ui.config';
 import Input from '../../components/ui/Input';
@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import PasswordStrengthIndicator from '../../components/auth/PasswordStrengthIndicator';
 import { validateEmail, validatePhone, validatePassword } from '../../utils/validators';
 
-const { auth, brand, messages, images } = UI_CONFIG;
+const { auth, messages } = UI_CONFIG;
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -201,28 +201,6 @@ export default function Register() {
               )}
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="relative my-7">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-gray-50 text-gray-400 font-medium">{auth.register.orSignUpWith}</span>
-            </div>
-          </div>
-
-          {/* Social */}
-          <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all text-sm font-medium text-gray-700">
-              <img src={images.socialIcons.google} alt="Google" className="w-4 h-4" />
-              Google
-            </button>
-            <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all text-sm font-medium text-gray-700">
-              <Github className="w-4 h-4 text-gray-800" />
-              GitHub
-            </button>
-          </div>
 
           {/* Footer */}
           <p className="mt-8 text-center text-sm text-gray-500">
