@@ -35,7 +35,7 @@ export default function ProductDetail() {
         if (response.success && response.data) {
           setProduct(response.data);
           setCurrentImageIndex(0);
-          setIsWishlisted(getWishlist().has(id));
+          setIsWishlisted(isAuthenticated ? getWishlist().has(id) : false);
           const variants = response.data.variants || [];
           if (variants.length > 0) {
             const cheapest = [...variants].sort((a, b) => a.price - b.price)[0];
@@ -49,7 +49,7 @@ export default function ProductDetail() {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;

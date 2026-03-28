@@ -33,7 +33,7 @@ export default function ProductCard({
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  const [isWishlisted, setIsWishlisted] = useState(() => getWishlist().has(id));
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { addToCart, items, updateQuantity, removeFromCart } = useCart();
   const [isAdding, setIsAdding] = useState(false);
@@ -41,12 +41,22 @@ export default function ProductCard({
   const isOutOfStock = stock <= 0;
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsWishlisted(false);
+      return;
+    }
+
     setIsWishlisted(getWishlist().has(id));
 
     return addWishlistListener(() => {
+      if (!isAuthenticated) {
+        setIsWishlisted(false);
+        return;
+      }
+
       setIsWishlisted(getWishlist().has(id));
     });
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   // Match by product_id AND variant_id (if provided) to avoid matching wrong variant
   const cartItem = items.find((item) => {
