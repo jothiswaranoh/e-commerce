@@ -23,15 +23,16 @@ export interface ApiResponse<T = any> {
 // Utils
 // --------------------
 const formatError = (error: any): string => {
+    if (!error) return '';
     if (typeof error === 'string') return error;
     if (Array.isArray(error)) return error.join(', ');
-    if (typeof error === 'object' && error !== null) {
+    if (typeof error === 'object') {
         // If it's a Rails error object like { phone: ["is taken"], email: ["is taken"] }
         return Object.entries(error)
             .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
             .join(' | ');
     }
-    return 'Unknown error occurred';
+    return 'An error occurred';
 };
 
 // --------------------

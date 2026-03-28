@@ -3,8 +3,8 @@
 puts "🌱 Seeding database..."
 
 # 1. Create Default Organization
-org = Organization.find_or_create_by!(slug: "lookz-men") do |o|
-  o.name = "Lookz Men"
+org = Organization.find_or_create_by!(slug: "looks-mens") do |o|
+  o.name = "Looks Mens"
   o.is_active = true
 end
 puts "✅ Organization '#{org.name}' ready."
