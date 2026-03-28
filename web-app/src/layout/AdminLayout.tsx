@@ -19,12 +19,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
             {/* Main Content */}
             <div
-                className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
-                    }`}
+                className={`transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}
             >
                 <AdminHeader />
 
-                <main className="p-4 md:p-8">
+                {/* pt-28: mobile needs space for the fixed top bar (14px brand + nav strip) */}
+                <main className="p-4 md:p-8 pt-28 lg:pt-4">
                     {children}
                 </main>
             </div>

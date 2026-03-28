@@ -53,11 +53,18 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;
+
+    if (!isAuthenticated) {
+      toast.info('Please login to add items to cart');
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
     try {
       await addToCart(product.id, quantity, selectedVariant.id);
       toast.success('Product successfully added to cart');
-    } catch {
-      toast.error('Failed to add to cart. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add to cart. Please try again.');
     }
   };
 
@@ -66,8 +73,8 @@ export default function ProductDetail() {
     try {
       await addToCart(product.id, quantity, selectedVariant.id);
       navigate('/checkout');
-    } catch {
-      toast.error('Failed to add to cart. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add to cart. Please try again.');
     }
   };
 
@@ -112,7 +119,7 @@ export default function ProductDetail() {
   const images =
     product.images && product.images.length > 0
       ? product.images.map((img: any) => img.url || img.image_url)
-      : ['https://via.placeholder.com/600?text=No+Image'];
+      : ['https://placehold.co/600x600?text=No+Image'];
 
   const goNext = () => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
   const goPrev = () => setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
@@ -144,17 +151,15 @@ export default function ProductDetail() {
             <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm mb-4 group">
               <button
                 onClick={handleWishlist}
-                className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-xl border-2 flex items-center justify-center backdrop-blur-sm shadow-sm transition-all active:scale-90 ${
-                  isWishlisted
-                    ? 'border-red-300 bg-red-50/95 text-red-500'
-                    : 'border-white/80 bg-white/90 text-gray-400 hover:text-indigo-500 hover:border-indigo-200'
-                }`}
+                className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-xl border-2 flex items-center justify-center backdrop-blur-sm shadow-sm transition-all active:scale-90 ${isWishlisted
+                  ? 'border-red-300 bg-red-50/95 text-red-500'
+                  : 'border-white/80 bg-white/90 text-gray-400 hover:text-indigo-500 hover:border-indigo-200'
+                  }`}
                 aria-label="Toggle wishlist"
               >
                 <Heart
-                  className={`w-5 h-5 transition-all duration-200 ${
-                    isWishlisted ? 'fill-red-500 text-red-500 scale-110' : ''
-                  }`}
+                  className={`w-5 h-5 transition-all duration-200 ${isWishlisted ? 'fill-red-500 text-red-500 scale-110' : ''
+                    }`}
                 />
               </button>
 
@@ -163,7 +168,7 @@ export default function ProductDetail() {
                 alt={product.name}
                 className="w-full h-full object-cover transition-all duration-300"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600?text=Image+Error';
+                  (e.target as HTMLImageElement).src = 'https://placehold.co/600x600?text=No+Image';
                 }}
               />
 
@@ -199,7 +204,7 @@ export default function ProductDetail() {
                   <button
                     key={img}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`w-18 h-18 flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${currentImageIndex === index
+                    className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${currentImageIndex === index
                       ? 'border-indigo-500 shadow-md shadow-indigo-100'
                       : 'border-gray-200 hover:border-indigo-300'
                       }`}

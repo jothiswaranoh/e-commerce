@@ -10,8 +10,6 @@ class Category < ApplicationRecord
   before_save :purge_image_if_requested
   
   validates :name, presence: true
-  validates :slug, presence: true
-  validates :slug, uniqueness: { scope: :org_id }
 
   private
 

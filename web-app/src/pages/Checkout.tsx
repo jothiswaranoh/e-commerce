@@ -5,7 +5,7 @@ import { orderService } from '../services/orderService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  Truck, MapPin, User, Mail, Phone, Home,
+  Truck, User, Mail, Phone, Home,
   CheckCircle2, ArrowRight, ArrowLeft, Sparkles
 } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
@@ -18,17 +18,10 @@ export default function Checkout() {
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '', email: '', phone: '', address: '', city: '', state: '', zipCode: '',
   });
-  {/*
-    const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '', cardName: '', expiryDate: '', cvv: '',
-  });
-  const [expiryMonthValue, setExpiryMonthValue] = useState(''); 
-  */}
   const [placingOrder, setPlacingOrder] = useState(false);
 
   const steps = [
     { id: 'shipping' as CheckoutStep, label: 'Shipping', icon: Truck },
-    //{ id: 'payment' as CheckoutStep, label: 'Payment', icon: CreditCard },
     { id: 'review' as CheckoutStep, label: 'Review', icon: CheckCircle2 },
   ];
 
@@ -63,35 +56,6 @@ export default function Checkout() {
           <button
             type="submit"
             form="checkout-shipping-form"
-            
-    //          className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${
-    //           sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
-    //         }`}
-    //       >
-    //         Continue to Payment <ArrowRight className="w-4 h-4" />
-    //       </button>
-    //     </div>
-    //   );
-    // }
-
-    // if (currentStep === 'payment') {
-    //   return (
-    //     <div className={wrapperClass}>
-    //       <button
-    //         type="button"
-    //         onClick={() => setCurrentStep('shipping')}
-    //         className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
-    //           sidebar
-    //             ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-    //             : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-    //         }`}
-    //       >
-    //         <ArrowLeft className="w-4 h-4" /> Back
-    //       </button>
-    //       <button
-    //         type="submit"
-    //         form="checkout-payment-form" 
-            
             className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
               }`}
           >
@@ -105,7 +69,6 @@ export default function Checkout() {
       <div className={wrapperClass}>
         <button
           type="button"
-          //onClick={() => setCurrentStep('payment')}
           onClick={() => setCurrentStep('shipping')}
           className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${sidebar
             ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
@@ -139,47 +102,8 @@ export default function Checkout() {
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    {/* 
-    setCurrentStep('payment');
-  };
-
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
-    */}
     setCurrentStep('review');
-    {/* 
-      };
-
-  const handleCardNumberChange = (value: string) => {
-    const digitsOnly = value.replace(/\D/g, '').slice(0, 16);
-    const formatted = digitsOnly.replace(/(\d{4})(?=\d)/g, '$1 ');
-    setPaymentInfo({ ...paymentInfo, cardNumber: formatted });
   };
-
-  const handleCardNameChange = (value: string) => {
-    const sanitized = value.replace(/[^a-zA-Z\s]/g, '').replace(/\s{2,}/g, ' ');
-    setPaymentInfo({ ...paymentInfo, cardName: sanitized }); 
-    */}
-  };
-
-  {/* 
-    const handleExpiryDateChange = (value: string) => {
-    setExpiryMonthValue(value);
-    if (!value) {
-      setPaymentInfo({ ...paymentInfo, expiryDate: '' });
-      return;
-    }
-
-    const [year, month] = value.split('-');
-    if (!year || !month) return;
-    setPaymentInfo({ ...paymentInfo, expiryDate: `${month}/${year.slice(-2)}` });
-  };
-
-  const handleCvvChange = (value: string) => {
-    const digitsOnly = value.replace(/\D/g, '').slice(0, 3);
-    setPaymentInfo({ ...paymentInfo, cvv: digitsOnly });
-  }; 
-  */}
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
@@ -338,91 +262,99 @@ export default function Checkout() {
                     leftIcon={<Home className="w-4 h-4" />} required
                   />
                   <div className="grid sm:grid-cols-3 gap-5">
-                    <Input label="City" placeholder="Mumbai"
-                      value={shippingInfo.city}
-                      onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
-                      leftIcon={<MapPin className="w-4 h-4" />} required
-                    />
-                    <Input label="State" placeholder="Maharashtra"
-                      value={shippingInfo.state}
-                      onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
-                      required
-                    />
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                        State
+                      </label>
+                      <select
+                        value={shippingInfo.state}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value, city: '' })}
+                        required
+                        className="w-full text-sm font-medium h-11 px-4 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm bg-white appearance-none"
+                        style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23111827%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.7rem top 50%', backgroundSize: '0.65rem auto' }}
+                      >
+                        <option value="" disabled>Select State</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Delhi">Delhi</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                        City
+                      </label>
+                      <select
+                        value={shippingInfo.city}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                        required
+                        className="w-full text-sm font-medium h-11 px-4 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm bg-white appearance-none"
+                        style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23111827%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.7rem top 50%', backgroundSize: '0.65rem auto' }}
+                        disabled={!shippingInfo.state}
+                      >
+                        <option value="" disabled>Select City</option>
+                        {shippingInfo.state === 'Maharashtra' && (
+                          <>
+                            <option value="Mumbai">Mumbai</option>
+                            <option value="Pune">Pune</option>
+                            <option value="Nagpur">Nagpur</option>
+                          </>
+                        )}
+                        {shippingInfo.state === 'Karnataka' && (
+                          <>
+                            <option value="Bengaluru">Bengaluru</option>
+                            <option value="Mysuru">Mysuru</option>
+                            <option value="Mangaluru">Mangaluru</option>
+                          </>
+                        )}
+                        {shippingInfo.state === 'Tamil Nadu' && (
+                          <>
+                            <option value="Chennai">Chennai</option>
+                            <option value="Coimbatore">Coimbatore</option>
+                            <option value="Madurai">Madurai</option>
+                          </>
+                        )}
+                        {shippingInfo.state === 'Kerala' && (
+                          <>
+                            <option value="Kochi">Kochi</option>
+                            <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                            <option value="Kozhikode">Kozhikode</option>
+                          </>
+                        )}
+                        {shippingInfo.state === 'Andhra Pradesh' && (
+                          <>
+                            <option value="Visakhapatnam">Visakhapatnam</option>
+                            <option value="Vijayawada">Vijayawada</option>
+                            <option value="Guntur">Guntur</option>
+                          </>
+                        )}
+                        {shippingInfo.state === 'Telangana' && (
+                          <>
+                            <option value="Hyderabad">Hyderabad</option>
+                            <option value="Warangal">Warangal</option>
+                            <option value="Nizamabad">Nizamabad</option>
+                          </>
+                        )}
+                        {shippingInfo.state === 'Delhi' && (
+                          <>
+                            <option value="New Delhi">New Delhi</option>
+                            <option value="North Delhi">North Delhi</option>
+                            <option value="South Delhi">South Delhi</option>
+                          </>
+                        )}
+                        {/* Fallback for Custom Cities if needed */}
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                     <Input label="ZIP Code" placeholder="400001"
                       value={shippingInfo.zipCode}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
                       required
-                      
-            //             />
-            //       </div>
-            //       <div className="lg:hidden">
-            //         {renderStepActions()}
-            //       </div>
-            //     </form>
-            //   </div>
-            // )}
-            // {currentStep === 'payment' && (
-            //   <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-            //     <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-            //       <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
-            //         <CreditCard className="w-4 h-4 text-indigo-600" />
-            //       </div>
-            //       <div>
-            //         <h2 className="text-lg font-bold text-gray-900">Payment Details</h2>
-            //         <p className="text-xs text-gray-400">Enter your payment information</p>
-            //       </div>
-            //     </div>
-            //     <form id="checkout-payment-form" onSubmit={handlePaymentSubmit} className="px-6 py-6 space-y-5">
-            //       <Input
-            //         label="Card Number" placeholder="1234 5678 9012 3456"
-            //         value={paymentInfo.cardNumber}
-            //         onChange={(e) => handleCardNumberChange(e.target.value)}
-            //         leftIcon={<CreditCard className="w-4 h-4" />} required
-            //         inputMode="numeric"
-            //         autoComplete="cc-number"
-            //         maxLength={19}
-            //       />
-            //       <Input
-            //         label="Cardholder Name" placeholder="John Doe"
-            //         value={paymentInfo.cardName}
-            //         onChange={(e) => handleCardNameChange(e.target.value)}
-            //         required
-            //         autoComplete="cc-name"
-            //       />
-            //       <div className="grid sm:grid-cols-2 gap-5">
-            //         <div className="w-full">
-            //           <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-            //             Expiry Date
-            //           </label>
-            //           <input
-            //             type="month"
-            //             value={expiryMonthValue}
-            //             onChange={(e) => handleExpiryDateChange(e.target.value)}
-            //             required
-            //             min={new Date().toISOString().slice(0, 7)}
-            //             autoComplete="cc-exp"
-            //             className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            //           />
-            //         </div>
-            //         <Input
-            //           label="CVV" placeholder="123" type="password" maxLength={3}
-            //           value={paymentInfo.cvv}
-            //           onChange={(e) => handleCvvChange(e.target.value)}
-            //           leftIcon={<Lock className="w-4 h-4" />} required
-            //           inputMode="numeric"
-            //           autoComplete="cc-csc" 
-                      
                     />
                   </div>
-                  {/* Secure note
-                  <div className="flex items-start gap-3 px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-xl">
-                    <Lock className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-indigo-900">Secure Payment</p>
-                      <p className="text-xs text-indigo-600">Your payment is encrypted and secure. We never store your card details.</p>
-                    </div>
-                  </div> 
-                  */}
                   <div className="lg:hidden">
                     {renderStepActions()}
                   </div>
@@ -459,25 +391,6 @@ export default function Checkout() {
                         <p>{shippingInfo.email} · {shippingInfo.phone}</p>
                       </div>
                     </div>
-
-                    {/* Payment
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-bold text-gray-900">Payment Method</h3>
-                        <button onClick={() => setCurrentStep('payment')}
-                          className="text-xs text-indigo-600 hover:text-indigo-700 font-bold">Edit</button>
-                      </div>
-                      <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-gray-500" />
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">
-                            •••• •••• •••• {paymentInfo.cardNumber.slice(-4)}
-                          </p>
-                          <p className="text-xs text-gray-500">{paymentInfo.cardName}</p>
-                        </div>
-                      </div>
-                    </div> 
-                    */}
                   </div>
                 </div>
 
