@@ -116,7 +116,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-neutral-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-neutral-400">
-            <p>&copy; {currentYear} ShopHub. All rights reserved.</p>
+            <p>&copy; {currentYear} {BRAND.name}. All rights reserved.</p>
             <div className="flex gap-6">
               <Link to="#" className="hover:text-primary-400 transition-colors">
                 {FOOTER.legal.privacyPolicy}

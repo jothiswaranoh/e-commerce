@@ -1,22 +1,24 @@
+import { SHOP_NAME, SHOP_ADDRESS, SHOP_PHONE, SHOP_EMAIL, BRAND_TAGLINE, LOGO_PATH, LOGO_ALT } from '../constants';
+
 /**
  * UI Configuration
  * Centralized configuration for all UI text and images
- * Organize by component/page for easy maintenance
+ * Based on the established design system
  */
 
 // ==================== BRAND ====================
 export const BRAND = {
-    name: 'ShopHub',
-    tagline: 'Your Premium Shopping Destination',
-    logo: '/logo.svg',
-    logoAlt: 'ShopHub Logo',
+    name: SHOP_NAME,
+    tagline: BRAND_TAGLINE,
+    logo: LOGO_PATH,
+    logoAlt: LOGO_ALT,
 } as const;
 
 // ==================== CONTACT ====================
 export const CONTACT = {
-    email: 'support@shophub.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Shopping Street, Commerce City, CC 12345',
+    email: SHOP_EMAIL,
+    phone: SHOP_PHONE,
+    address: SHOP_ADDRESS,
 } as const;
 
 // ==================== SOCIAL ====================

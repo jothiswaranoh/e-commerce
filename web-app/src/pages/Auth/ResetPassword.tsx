@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Lock, ArrowLeft, Package, CheckCircle2 } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
+import { BRAND } from '../../config/ui.config';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { toast } from 'react-toastify';
@@ -84,7 +85,7 @@ export default function ResetPassword() {
                         <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
                             <Package className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-2xl font-bold gradient-text">ShopHub</span>
+                        <span className="text-2xl font-bold gradient-text">{BRAND.name}</span>
                     </Link>
                 </div>
 
