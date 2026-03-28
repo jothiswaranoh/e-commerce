@@ -20,6 +20,7 @@ class Ability
   can :create, Order
   can :read, Order, user_id: user.id
   can :update, Order, user_id: user.id
+  can :cancel, Order, user_id: user.id
     end
   end
 end

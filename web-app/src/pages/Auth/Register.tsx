@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone, Github } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Package, Shield, Sparkles, Phone, Github, Eye, EyeOff } from 'lucide-react';
 import { ROUTES } from '../../config/routes.constants';
 import { UI_CONFIG } from '../../config/ui.config';
 import Input from '../../components/ui/Input';
@@ -19,6 +19,8 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -106,30 +108,58 @@ export default function Register() {
             <Input
               type="tel"
               label={auth.register.fields.phone.label}
-              placeholder={auth.register.fields.phone.placeholder}
+              placeholder="+91 XXXXX XXXXX"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               leftIcon={<Phone className="w-4 h-4" />}
             />
             <div className="space-y-3">
               <Input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 label={auth.register.fields.password.label}
                 placeholder={auth.register.fields.password.placeholder}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 leftIcon={<Lock className="w-4 h-4" />}
+                rightIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(prev => !prev)}
+                    className="focus:outline-none"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                }
                 required
               />
               <PasswordStrengthIndicator password={formData.password} showRequirements={false} />
             </div>
             <Input
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               label={auth.register.fields.confirmPassword.label}
               placeholder={auth.register.fields.confirmPassword.placeholder}
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               leftIcon={<Lock className="w-4 h-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(prev => !prev)}
+                  className="focus:outline-none"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              }
               required
             />
 

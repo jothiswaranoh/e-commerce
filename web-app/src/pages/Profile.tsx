@@ -211,24 +211,25 @@ export default function Profile() {
     if (!orderToCancel) return;
 
     setCancellingId(orderToCancel);
-    setIsConfirmModalOpen(false);
 
     try {
-
       const res = await orderService.cancelOrder(orderToCancel);
 
       if (res.success) {
         toast.success("Order cancelled successfully");
+        setIsConfirmModalOpen(false);
         fetchOrders();
       } else {
         toast.error(res.message || "Failed to cancel order");
+        setIsConfirmModalOpen(false);
       }
 
     } catch {
       toast.error("Failed to cancel order");
-
+      setIsConfirmModalOpen(false);
     } finally {
       setCancellingId(null);
+      setOrderToCancel(null);
     }
   };
 
@@ -242,7 +243,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      
+
       {/* ── Hero / Header ── */}
       <div className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900 text-white shadow-md">
         <div className="absolute -top-16 -right-16 w-80 h-80 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
@@ -265,26 +266,25 @@ export default function Profile() {
       {/* ── Tabs Navigation ── */}
       <div className="bg-white border-b border-neutral-200 sticky top-16 z-40 shadow-sm overflow-x-auto hide-scrollbar">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex gap-6 sm:gap-10 min-w-max">
-              {(Object.keys(TAB_META) as Tab[]).map((tabKey) => {
-                const { icon: TabIcon, label } = TAB_META[tabKey];
-                const isActive = activeTab === tabKey;
-                return (
-                  <button
-                    key={tabKey}
-                    onClick={() => setActiveTab(tabKey)}
-                    className={`flex items-center gap-2 py-4 border-b-2 font-bold text-sm transition-all whitespace-nowrap ${
-                      isActive 
-                        ? 'border-primary-600 text-primary-700' 
-                        : 'border-transparent text-neutral-500 hover:text-neutral-900 hover:border-neutral-300'
+          <div className="flex gap-6 sm:gap-10 min-w-max">
+            {(Object.keys(TAB_META) as Tab[]).map((tabKey) => {
+              const { icon: TabIcon, label } = TAB_META[tabKey];
+              const isActive = activeTab === tabKey;
+              return (
+                <button
+                  key={tabKey}
+                  onClick={() => setActiveTab(tabKey)}
+                  className={`flex items-center gap-2 py-4 border-b-2 font-bold text-sm transition-all whitespace-nowrap ${isActive
+                      ? 'border-primary-600 text-primary-700'
+                      : 'border-transparent text-neutral-500 hover:text-neutral-900 hover:border-neutral-300'
                     }`}
-                  >
-                    <TabIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-primary-600' : 'text-neutral-400'}`} />
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
+                >
+                  <TabIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-primary-600' : 'text-neutral-400'}`} />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -338,7 +338,7 @@ export default function Profile() {
                 <div className="px-6 sm:px-8 py-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm px-6 py-5 hover:border-primary-200 transition-colors">
                     <p className="text-xs font-bold uppercase tracking-widest text-primary-600/60 mb-1 flex items-center gap-2">
-                       <User className="w-4 h-4" /> Full Name
+                      <User className="w-4 h-4" /> Full Name
                     </p>
                     {isEditingProfile ? (
                       <Input
@@ -405,20 +405,20 @@ export default function Profile() {
 
                     {ordersLoading ? (
                       <div className="space-y-4">
-                        {[0,1,2].map(i => (
+                        {[0, 1, 2].map(i => (
                           <OrderRowSkeleton key={i} />
                         ))}
                       </div>
                     ) : orders.length === 0 ? (
                       <div className="text-center py-20 px-4">
                         <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                           <Package className="w-10 h-10 text-primary-400"/>
+                          <Package className="w-10 h-10 text-primary-400" />
                         </div>
                         <h4 className="text-2xl font-display font-bold text-neutral-900 mb-3">
                           No orders yet
                         </h4>
                         <p className="text-neutral-500 mb-8 max-w-sm mx-auto">
-                           When you place an order, it will appear here so you can track its progress securely.
+                          When you place an order, it will appear here so you can track its progress securely.
                         </p>
                         <Link to={ROUTES.PRODUCTS}>
                           <button className="px-8 py-3.5 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-500 hover:to-accent-500 text-white rounded-2xl font-bold transition-all shadow-md">
@@ -428,122 +428,122 @@ export default function Profile() {
                       </div>
                     ) : (
                       <div className="space-y-6">
-                      {orders.map((order:any) => {
-                        const statusClass =
-                          ORDER_STATUS_COLORS[order.status?.toLowerCase?.()] ??
-                          "bg-neutral-50 text-neutral-600 border-neutral-200";
-                        const isExpanded = expandedOrders.includes(order.id);
-                        const firstItem = order.order_items?.[0];
-                        const previewImage = getOrderItemImage(firstItem);
+                        {orders.map((order: any) => {
+                          const statusClass =
+                            ORDER_STATUS_COLORS[order.status?.toLowerCase?.()] ??
+                            "bg-neutral-50 text-neutral-600 border-neutral-200";
+                          const isExpanded = expandedOrders.includes(order.id);
+                          const firstItem = order.order_items?.[0];
+                          const previewImage = getOrderItemImage(firstItem);
 
-                        return (
-                          <div
-                            key={order.id}
-                            className={`border rounded-3xl p-5 sm:p-6 transition-all duration-300 ${isExpanded ? 'border-primary-200 shadow-md bg-white' : 'border-neutral-100 bg-white hover:border-primary-100 hover:shadow-sm'}`}
-                          >
+                          return (
+                            <div
+                              key={order.id}
+                              className={`border rounded-3xl p-5 sm:p-6 transition-all duration-300 ${isExpanded ? 'border-primary-200 shadow-md bg-white' : 'border-neutral-100 bg-white hover:border-primary-100 hover:shadow-sm'}`}
+                            >
 
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-                              <button
-                                type="button"
-                                onClick={() => toggleOrderDetails(order.id)}
-                                className="flex flex-1 items-start gap-4 text-left sm:pr-4"
-                              >
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm flex items-center justify-center shrink-0">
-                                  {previewImage ? (
-                                    <img
-                                      src={previewImage}
-                                      alt={firstItem?.product_name || 'Ordered product'}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <ImageIcon className="w-7 h-7 text-neutral-300" />
-                                  )}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="font-display font-bold text-lg text-neutral-900 break-words">
-                                    Order #{order.order_number}
-                                  </p>
-                                  {firstItem?.product_name && (
-                                    <p className="mt-1 text-sm font-medium text-neutral-500 truncate">
-                                      {firstItem.product_name}
-                                      {order.order_items?.length > 1 ? ` +${order.order_items.length - 1} more item${order.order_items.length - 1 > 1 ? 's' : ''}` : ''}
+                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleOrderDetails(order.id)}
+                                  className="flex flex-1 items-start gap-4 text-left sm:pr-4"
+                                >
+                                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm flex items-center justify-center shrink-0">
+                                    {previewImage ? (
+                                      <img
+                                        src={previewImage}
+                                        alt={firstItem?.product_name || 'Ordered product'}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <ImageIcon className="w-7 h-7 text-neutral-300" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="font-display font-bold text-lg text-neutral-900 break-words">
+                                      Order #{order.order_number}
                                     </p>
-                                  )}
-                                  <p className="mt-2 flex items-center gap-1.5 text-xs text-primary-600 font-bold bg-primary-50 w-fit px-2.5 py-1 rounded-lg">
-                                    {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                                    {isExpanded ? 'Hide items' : 'View structured items'}
-                                  </p>
-                                </div>
-                              </button>
+                                    {firstItem?.product_name && (
+                                      <p className="mt-1 text-sm font-medium text-neutral-500 truncate">
+                                        {firstItem.product_name}
+                                        {order.order_items?.length > 1 ? ` +${order.order_items.length - 1} more item${order.order_items.length - 1 > 1 ? 's' : ''}` : ''}
+                                      </p>
+                                    )}
+                                    <p className="mt-2 flex items-center gap-1.5 text-xs text-primary-600 font-bold bg-primary-50 w-fit px-2.5 py-1 rounded-lg">
+                                      {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                      {isExpanded ? 'Hide items' : 'View structured items'}
+                                    </p>
+                                  </div>
+                                </button>
 
-                              <div className="flex items-center gap-3 self-start sm:self-auto">
-                                <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-xl border uppercase tracking-wider ${statusClass}`}>
-                                  {order.status}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between border-t border-neutral-100 pt-4 mt-2">
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs font-medium text-neutral-500">
-                                <span className="text-base text-neutral-900">
-                                  Total: <span className="font-bold text-xl ml-1">₹{parseFloat(order.total).toLocaleString("en-IN")}</span>
-                                </span>
-                                {order.created_at && (
-                                  <span className="sm:border-l sm:border-neutral-200 sm:pl-4">
-                                    {new Date(order.created_at).toLocaleDateString("en-IN",{
-                                      day:"numeric",
-                                      month:"long",
-                                      year:"numeric"
-                                    })}
+                                <div className="flex items-center gap-3 self-start sm:self-auto">
+                                  <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-xl border uppercase tracking-wider ${statusClass}`}>
+                                    {order.status}
                                   </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between border-t border-neutral-100 pt-4 mt-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs font-medium text-neutral-500">
+                                  <span className="text-base text-neutral-900">
+                                    Total: <span className="font-bold text-xl ml-1">₹{parseFloat(order.total).toLocaleString("en-IN")}</span>
+                                  </span>
+                                  {order.created_at && (
+                                    <span className="sm:border-l sm:border-neutral-200 sm:pl-4">
+                                      {new Date(order.created_at).toLocaleDateString("en-IN", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric"
+                                      })}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {order.status === "pending" && (
+                                  <button
+                                    disabled={cancellingId === order.id}
+                                    onClick={() => handleCancelOrder(order.id)}
+                                    className="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
+                                  >
+                                    {cancellingId === order.id
+                                      ? "Cancelling..."
+                                      : "Cancel Order"}
+                                  </button>
                                 )}
                               </div>
 
-                              {order.status === "pending" && (
-                                <button
-                                  disabled={cancellingId === order.id}
-                                  onClick={() => handleCancelOrder(order.id)}
-                                  className="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
-                                >
-                                  {cancellingId === order.id
-                                    ? "Cancelling..."
-                                    : "Cancel Order"}
-                                </button>
-                              )}
-                            </div>
-
-                            {isExpanded && (
-                              <div className="mt-5 border-t border-neutral-100 pt-5 animate-fade-in">
-                                <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-4 px-2">
-                                  Items Shipped
-                                </p>
-                                <div className="space-y-3">
-                                  {(order.order_items || []).map((item: any) => (
-                                    <div
-                                      key={item.id}
-                                      className="flex items-center justify-between gap-4 rounded-2xl bg-neutral-50 border border-neutral-100 px-5 py-4"
-                                    >
-                                      <div className="min-w-0">
-                                        <p className="text-sm font-bold text-neutral-900">
-                                          {item.product_name}
-                                        </p>
-                                        <p className="text-xs font-medium text-neutral-500 mt-1">
-                                          Qty: {item.quantity} · Rate: ₹{Number(item.price).toLocaleString("en-IN")}
+                              {isExpanded && (
+                                <div className="mt-5 border-t border-neutral-100 pt-5 animate-fade-in">
+                                  <p className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-4 px-2">
+                                    Items Shipped
+                                  </p>
+                                  <div className="space-y-3">
+                                    {(order.order_items || []).map((item: any) => (
+                                      <div
+                                        key={item.id}
+                                        className="flex items-center justify-between gap-4 rounded-2xl bg-neutral-50 border border-neutral-100 px-5 py-4"
+                                      >
+                                        <div className="min-w-0">
+                                          <p className="text-sm font-bold text-neutral-900">
+                                            {item.product_name}
+                                          </p>
+                                          <p className="text-xs font-medium text-neutral-500 mt-1">
+                                            Qty: {item.quantity} · Rate: ₹{Number(item.price).toLocaleString("en-IN")}
+                                          </p>
+                                        </div>
+                                        <p className="text-lg font-bold text-neutral-900 whitespace-nowrap">
+                                          ₹{Number(item.total).toLocaleString("en-IN")}
                                         </p>
                                       </div>
-                                      <p className="text-lg font-bold text-neutral-900 whitespace-nowrap">
-                                        ₹{Number(item.total).toLocaleString("en-IN")}
-                                      </p>
-                                    </div>
-                                  ))}
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
 
-                          </div>
+                            </div>
 
-                        );
-                      })}
+                          );
+                        })}
                       </div>
                     )}
 
@@ -564,7 +564,7 @@ export default function Profile() {
                   ) : wishlistProducts.length === 0 ? (
                     <div className="text-center py-20 px-4">
                       <div className="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                         <Heart className="w-10 h-10 text-pink-400" />
+                        <Heart className="w-10 h-10 text-pink-400" />
                       </div>
                       <h4 className="text-2xl font-display font-bold text-neutral-900 mb-3">
                         No favorites yet

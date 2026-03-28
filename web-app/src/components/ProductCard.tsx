@@ -5,7 +5,7 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { addWishlistListener, getWishlist, toggleWishlistItem } from '../utils/wishlist';
-import { ROUTES } from '../config/routes.constants';
+import { getProductRoute, ROUTES } from '../config/routes.constants';
 
 interface ProductCardProps {
   id?: string;
@@ -48,9 +48,14 @@ export default function ProductCard({
     });
   }, [id]);
 
+  // Match by product_id AND variant_id (if provided) to avoid matching wrong variant
   const cartItem = items.find((item) => {
     const sameProduct = String(item.product_id) === String(id);
-    return sameProduct;
+    if (!sameProduct) return false;
+    if (variantId !== undefined && variantId !== null) {
+      return String(item.product_variant_id) === String(variantId);
+    }
+    return true;
   });
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -133,7 +138,7 @@ export default function ProductCard({
       : image
         ? image
         : 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
-        
+
   return (
     <div className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
                     hover:shadow-xl hover:border-gray-200 transition-all duration-300
@@ -143,53 +148,53 @@ export default function ProductCard({
       {/* ── IMAGE ── */}
       <div className="relative aspect-square bg-gray-50 overflow-hidden">
         <Link
-          to={`/product/${id}`}
+          to={getProductRoute(id)}
           className="absolute inset-0 block"
         >
-        {/* Skeleton while loading */}
-        {!isImageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-        )}
-
-        <img
-          src={imageSrc}
-          alt={name}
-          loading="lazy"
-          onLoad={() => setIsImageLoaded(true)}
-          onError={(e) => {
-            e.currentTarget.src =
-              'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
-            setIsImageLoaded(true);
-          }}
-          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isImageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-        />
-
-        {isOutOfStock && (
-          <div className="absolute inset-0 bg-white/35 backdrop-blur-[1px] pointer-events-none" />
-        )}
-
-        {/* Category badge */}
-        <div className="absolute top-3 left-3 flex flex-col items-start gap-2">
-          <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-[11px] font-bold text-indigo-700 rounded-full border border-indigo-100">
-            {category}
-          </span>
-          {isOutOfStock && (
-            <span className="px-2.5 py-1 bg-red-50/95 backdrop-blur-sm text-[11px] font-bold text-red-600 rounded-full border border-red-200">
-              Out of Stock
-            </span>
+          {/* Skeleton while loading */}
+          {!isImageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
           )}
-        </div>
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent
+          <img
+            src={imageSrc}
+            alt={name}
+            loading="lazy"
+            onLoad={() => setIsImageLoaded(true)}
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=400';
+              setIsImageLoaded(true);
+            }}
+            className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isImageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+          />
+
+          {isOutOfStock && (
+            <div className="absolute inset-0 bg-white/35 backdrop-blur-[1px] pointer-events-none" />
+          )}
+
+          {/* Category badge */}
+          <div className="absolute top-3 left-3 flex flex-col items-start gap-2">
+            <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-[11px] font-bold text-indigo-700 rounded-full border border-indigo-100">
+              {category}
+            </span>
+            {isOutOfStock && (
+              <span className="px-2.5 py-1 bg-red-50/95 backdrop-blur-sm text-[11px] font-bold text-red-600 rounded-full border border-red-200">
+                Out of Stock
+              </span>
+            )}
+          </div>
+
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent
                         opacity-0 group-hover:opacity-100
                         transition-opacity duration-300
                         flex items-end justify-center pb-4">
-          <span className="text-white text-xs font-bold tracking-wide uppercase">
-            View Details
-          </span>
-        </div>
+            <span className="text-white text-xs font-bold tracking-wide uppercase">
+              View Details
+            </span>
+          </div>
         </Link>
 
         {/* Like / Wishlist button */}
@@ -216,7 +221,7 @@ export default function ProductCard({
       {/* ── CONTENT ── */}
       <div className="p-4 flex flex-col flex-grow">
 
-        <Link to={`/product/${id}`} className="block mb-3">
+        <Link to={getProductRoute(id)} className="block mb-3">
           <h3 className="text-sm font-bold text-gray-900
                          hover:text-indigo-600 transition-colors
                          line-clamp-2 min-h-[2.6rem] leading-snug">

@@ -23,8 +23,7 @@ categories = [
 category_map = {}
 
 categories.each do |cat_name|
-  category = Category.find_or_create_by!(slug: cat_name.downcase.parameterize, organization: org) do |c|
-    c.name = cat_name
+  category = Category.find_or_create_by!(name: cat_name, organization: org) do |c|
     c.is_active = true
   end
   category_map[cat_name] = category
@@ -103,7 +102,6 @@ products_data.each do |p_data|
   product = Product.find_or_initialize_by(name: p_data[:name], organization: org)
   product.category = category_map[p_data[:category]]
   product.description = p_data[:description]
-  product.slug = p_data[:name].downcase.parameterize
   product.status = "active"
   product.image_url = p_data[:image_url]
 
