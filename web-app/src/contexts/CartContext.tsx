@@ -23,7 +23,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     const clearCart = () => {
         setCart(null);
     };
@@ -84,39 +84,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     typeof response.message === 'string'
                         ? response.message
                         : typeof response.error === 'string'
-                        ? response.error
-                        : 'Failed to add item'
-                    );
+                            ? response.error
+                            : 'Failed to add item'
+                );
             }
         } catch (err: any) {
             const msg = err?.message || 'Failed to add item to cart';
             setError(msg);
             throw new Error(msg);
-        }finally {
+        } finally {
             setIsLoading(false);
         }
     };
 
-   const updateQuantity = async (itemId: number, quantity: number) => {
-  if (quantity < 1) return;
+    const updateQuantity = async (itemId: number, quantity: number) => {
+        if (quantity < 1) return;
 
-  setIsLoading(true);
+        setIsLoading(true);
 
-  try {
-    const response = await cartService.updateItem(itemId, quantity);
+        try {
+            const response = await cartService.updateItem(itemId, quantity);
 
-    if (response.success && response.data) {
-      setCart(response.data);
-      setError(null);
-    } else {
-      setError(response.message || 'Failed to update quantity');
-    }
-  } catch (err: any) {
-    setError(err.response?.data?.error || 'Failed to update quantity');
-  } finally {
-    setIsLoading(false);
-  }
-};
+            if (response.success && response.data) {
+                setCart(response.data);
+                setError(null);
+            } else {
+                const msg = response.message || 'Failed to update quantity';
+                setError(msg);
+                throw new Error(msg);
+            }
+        } catch (err: any) {
+            const msg = err?.message || err?.response?.data?.error || 'Failed to update quantity';
+            setError(msg);
+            throw new Error(msg);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const removeFromCart = async (itemId: number) => {
         setIsLoading(true);
@@ -126,10 +130,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 setCart(response.data);
                 setError(null);
             } else {
-                setError(response.message || 'Failed to remove item');
+                const msg = response.message || 'Failed to remove item';
+                setError(msg);
+                throw new Error(msg);
             }
         } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to remove item');
+            const msg = err?.message || err?.response?.data?.error || 'Failed to remove item';
+            setError(msg);
+            throw new Error(msg);
         } finally {
             setIsLoading(false);
         }

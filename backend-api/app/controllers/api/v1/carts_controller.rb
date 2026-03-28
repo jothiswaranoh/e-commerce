@@ -108,11 +108,7 @@ module Api
               total: item.total.to_f,
               image: (
                 if item.product&.images&.attached?
-                  Rails.application.routes.url_helpers.rails_blob_url(
-                    item.product.images.first
-                  )
-                else
-                  nil
+                  rails_blob_path(item.product.images.first, only_path: true)
                 end
               )
             }

@@ -70,11 +70,12 @@ export default function FeaturedProductsSection() {
             <ProductCard
               key={product.id}
               id={String(product.id)}
+              variantId={product.variants?.[0]?.id}
               name={product.name}
               price={product.variants?.[0]?.price ?? 0}
               stock={product.variants?.[0]?.stock ?? 0}
               category={product.category?.name ?? 'Uncategorized'}
-              images={product.images as any}   // ✅ THIS IS THE FIX
+              images={product.images as any}
             />
           ))}
         </div>
