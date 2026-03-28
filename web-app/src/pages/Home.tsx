@@ -76,7 +76,7 @@ export default function Home() {
           }}
         />
 
-        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-20 md:py-32">
+        <div className="relative max-w-[1400px] mx-auto px-4 lg:px-8 py-16 md:py-32">
           <div className="max-w-2xl">
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full mb-7">
@@ -87,7 +87,7 @@ export default function Home() {
             </div>
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
               {HOME.hero.title}
               <span className="block text-indigo-300 mt-1">
                 {/* subtitle slot — rendered from config */}
@@ -133,8 +133,8 @@ export default function Home() {
           FEATURE STRIP
       ══════════════════════════════════════ */}
       <section className="bg-white border-b border-gray-100">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-0">
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-gray-100">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-x lg:divide-y-0 divide-gray-100">
             {features.map((f, i) => (
               <div
                 key={i}
@@ -166,12 +166,12 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/15 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-20">
+        <div className="relative max-w-[1400px] mx-auto px-4 lg:px-8 py-16 md:py-20">
           <div className="max-w-xl mx-auto text-center">
             <span className="inline-block px-3 py-1 bg-indigo-500/20 border border-indigo-500/30 rounded-full text-indigo-300 text-xs font-bold uppercase tracking-wider mb-5">
               Limited Time
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight mb-4">
               {HOME.sections.promotion.title}
             </h2>
             <p className="text-slate-400 text-lg mb-8">
@@ -196,14 +196,14 @@ export default function Home() {
           NEWSLETTER
       ══════════════════════════════════════ */}
       <section className="bg-white border-t border-gray-100">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-16">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12 md:py-16">
           <div className="max-w-2xl mx-auto text-center">
             {/* Icon */}
             <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-6">
               <Mail className="w-6 h-6 text-indigo-500" />
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-2">
               {HOME.sections.newsletter.title}
             </h2>
             <p className="text-gray-400 mb-8">
