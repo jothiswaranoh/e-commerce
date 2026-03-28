@@ -143,6 +143,20 @@ export default function Checkout() {
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const normalizedZipCode = shippingInfo.zipCode.replace(/\D/g, '');
+    if (normalizedZipCode.length !== 6) {
+      toast.error('ZIP Code must be exactly 6 digits.');
+      return;
+    }
+
+    if (normalizedZipCode !== shippingInfo.zipCode) {
+      setShippingInfo((current) => ({
+        ...current,
+        zipCode: normalizedZipCode,
+      }));
+    }
+
     setCurrentStep('review');
   };
 
@@ -346,7 +360,7 @@ export default function Checkout() {
                           onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
                           required
                           disabled={!shippingInfo.state}
-                          className="w-full rounded-lg border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+                          className="w-full rounded-lg border border-neutral-300 bg-white py-2.5 pl-12 pr-4 text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
                         >
                           <option value="">{shippingInfo.state ? 'Select City' : 'Select State First'}</option>
                           {cityOptions.map((city) => (
@@ -359,7 +373,13 @@ export default function Checkout() {
                     </div>
                     <Input label="ZIP Code" placeholder="400001"
                       value={shippingInfo.zipCode}
-                      onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
+                      onChange={(e) => setShippingInfo({
+                        ...shippingInfo,
+                        zipCode: e.target.value.replace(/\D/g, '').slice(0, 6),
+                      })}
+                      inputMode="numeric"
+                      pattern="[0-9]{6}"
+                      maxLength={6}
                       required
                     />
                   </div>
