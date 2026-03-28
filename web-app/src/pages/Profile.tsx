@@ -224,11 +224,12 @@ export default function Profile() {
         toast.error(res.message || "Failed to cancel order");
       }
 
-    } catch {
-      toast.error("Failed to cancel order");
+    } catch (error: any) {
+      toast.error(error?.message || error?.error?.error || "Failed to cancel order");
 
     } finally {
       setCancellingId(null);
+      setOrderToCancel(null);
     }
   };
 

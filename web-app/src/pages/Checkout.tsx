@@ -13,22 +13,54 @@ import Input from '../components/ui/Input';
 
 type CheckoutStep = 'shipping' | 'review';
 
+const INDIA_STATE_CITY_OPTIONS: Record<string, string[]> = {
+  'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati', 'Other'],
+  'Arunachal Pradesh': ['Itanagar', 'Naharlagun', 'Tawang', 'Pasighat', 'Other'],
+  Assam: ['Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Other'],
+  Bihar: ['Patna', 'Gaya', 'Muzaffarpur', 'Bhagalpur', 'Other'],
+  Chhattisgarh: ['Raipur', 'Bilaspur', 'Durg', 'Bhilai', 'Other'],
+  Goa: ['Panaji', 'Margao', 'Mapusa', 'Vasco da Gama', 'Other'],
+  Gujarat: ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Other'],
+  Haryana: ['Gurugram', 'Faridabad', 'Panipat', 'Ambala', 'Other'],
+  'Himachal Pradesh': ['Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Other'],
+  Jharkhand: ['Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Other'],
+  Karnataka: ['Bengaluru', 'Mysuru', 'Mangaluru', 'Hubballi', 'Other'],
+  Kerala: ['Kochi', 'Thiruvananthapuram', 'Kozhikode', 'Thrissur', 'Other'],
+  'Madhya Pradesh': ['Indore', 'Bhopal', 'Jabalpur', 'Gwalior', 'Other'],
+  Maharashtra: ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Other'],
+  Manipur: ['Imphal', 'Thoubal', 'Bishnupur', 'Churachandpur', 'Other'],
+  Meghalaya: ['Shillong', 'Tura', 'Jowai', 'Nongpoh', 'Other'],
+  Mizoram: ['Aizawl', 'Lunglei', 'Champhai', 'Serchhip', 'Other'],
+  Nagaland: ['Kohima', 'Dimapur', 'Mokokchung', 'Tuensang', 'Other'],
+  Odisha: ['Bhubaneswar', 'Cuttack', 'Rourkela', 'Puri', 'Other'],
+  Punjab: ['Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Other'],
+  Rajasthan: ['Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Other'],
+  Sikkim: ['Gangtok', 'Namchi', 'Gyalshing', 'Mangan', 'Other'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Other'],
+  Telangana: ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Other'],
+  Tripura: ['Agartala', 'Udaipur', 'Dharmanagar', 'Kailasahar', 'Other'],
+  'Uttar Pradesh': ['Lucknow', 'Noida', 'Kanpur', 'Varanasi', 'Other'],
+  Uttarakhand: ['Dehradun', 'Haridwar', 'Haldwani', 'Roorkee', 'Other'],
+  'West Bengal': ['Kolkata', 'Howrah', 'Siliguri', 'Durgapur', 'Other'],
+  'Andaman and Nicobar Islands': ['Port Blair', 'Other'],
+  Chandigarh: ['Chandigarh', 'Other'],
+  'Dadra and Nagar Haveli and Daman and Diu': ['Daman', 'Diu', 'Silvassa', 'Other'],
+  Delhi: ['New Delhi', 'North Delhi', 'South Delhi', 'Dwarka', 'Other'],
+  'Jammu and Kashmir': ['Srinagar', 'Jammu', 'Anantnag', 'Baramulla', 'Other'],
+  Ladakh: ['Leh', 'Kargil', 'Other'],
+  Lakshadweep: ['Kavaratti', 'Other'],
+  Puducherry: ['Puducherry', 'Karaikal', 'Mahe', 'Yanam', 'Other'],
+};
+
 export default function Checkout() {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('shipping');
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '', email: '', phone: '', address: '', city: '', state: '', zipCode: '',
   });
-  {/*
-    const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '', cardName: '', expiryDate: '', cvv: '',
-  });
-  const [expiryMonthValue, setExpiryMonthValue] = useState(''); 
-  */}
   const [placingOrder, setPlacingOrder] = useState(false);
 
   const steps = [
     { id: 'shipping' as CheckoutStep, label: 'Shipping', icon: Truck },
-    //{ id: 'payment' as CheckoutStep, label: 'Payment', icon: CreditCard },
     { id: 'review' as CheckoutStep, label: 'Review', icon: CheckCircle2 },
   ];
 
@@ -38,6 +70,8 @@ export default function Checkout() {
   const shipping = subtotal > 999 ? 0 : 50;
   const tax = subtotal * 0.18;
   const total = subtotal + shipping + tax;
+  const stateOptions = Object.keys(INDIA_STATE_CITY_OPTIONS);
+  const cityOptions = shippingInfo.state ? INDIA_STATE_CITY_OPTIONS[shippingInfo.state] ?? [] : [];
 
   const getCurrentStepIndex = () => steps.findIndex(s => s.id === currentStep);
 
@@ -63,35 +97,6 @@ export default function Checkout() {
           <button
             type="submit"
             form="checkout-shipping-form"
-            
-    //          className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${
-    //           sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
-    //         }`}
-    //       >
-    //         Continue to Payment <ArrowRight className="w-4 h-4" />
-    //       </button>
-    //     </div>
-    //   );
-    // }
-
-    // if (currentStep === 'payment') {
-    //   return (
-    //     <div className={wrapperClass}>
-    //       <button
-    //         type="button"
-    //         onClick={() => setCurrentStep('shipping')}
-    //         className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${
-    //           sidebar
-    //             ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-    //             : 'px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
-    //         }`}
-    //       >
-    //         <ArrowLeft className="w-4 h-4" /> Back
-    //       </button>
-    //       <button
-    //         type="submit"
-    //         form="checkout-payment-form" 
-            
             className={`inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-colors shadow-sm shadow-indigo-200 ${sidebar ? 'order-2 w-full px-6 py-3' : 'px-6 py-2.5'
               }`}
           >
@@ -105,7 +110,6 @@ export default function Checkout() {
       <div className={wrapperClass}>
         <button
           type="button"
-          //onClick={() => setCurrentStep('payment')}
           onClick={() => setCurrentStep('shipping')}
           className={`inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors ${sidebar
             ? 'order-1 w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
@@ -139,47 +143,16 @@ export default function Checkout() {
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    {/* 
-    setCurrentStep('payment');
-  };
-
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
-    */}
     setCurrentStep('review');
-    {/* 
-      };
-
-  const handleCardNumberChange = (value: string) => {
-    const digitsOnly = value.replace(/\D/g, '').slice(0, 16);
-    const formatted = digitsOnly.replace(/(\d{4})(?=\d)/g, '$1 ');
-    setPaymentInfo({ ...paymentInfo, cardNumber: formatted });
   };
 
-  const handleCardNameChange = (value: string) => {
-    const sanitized = value.replace(/[^a-zA-Z\s]/g, '').replace(/\s{2,}/g, ' ');
-    setPaymentInfo({ ...paymentInfo, cardName: sanitized }); 
-    */}
+  const handleStateChange = (state: string) => {
+    setShippingInfo((current) => ({
+      ...current,
+      state,
+      city: '',
+    }));
   };
-
-  {/* 
-    const handleExpiryDateChange = (value: string) => {
-    setExpiryMonthValue(value);
-    if (!value) {
-      setPaymentInfo({ ...paymentInfo, expiryDate: '' });
-      return;
-    }
-
-    const [year, month] = value.split('-');
-    if (!year || !month) return;
-    setPaymentInfo({ ...paymentInfo, expiryDate: `${month}/${year.slice(-2)}` });
-  };
-
-  const handleCvvChange = (value: string) => {
-    const digitsOnly = value.replace(/\D/g, '').slice(0, 3);
-    setPaymentInfo({ ...paymentInfo, cvv: digitsOnly });
-  }; 
-  */}
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
@@ -311,7 +284,7 @@ export default function Checkout() {
                 <form id="checkout-shipping-form" onSubmit={handleShippingSubmit} className="px-6 py-6 space-y-5">
                   <Input
                     label="Full Name"
-                    placeholder="John Doe"
+                    placeholder="Name"
                     value={shippingInfo.fullName}
                     onChange={(e) => setShippingInfo({ ...shippingInfo, fullName: e.target.value })}
                     leftIcon={<User className="w-4 h-4" />}
@@ -319,110 +292,77 @@ export default function Checkout() {
                   />
                   <div className="grid sm:grid-cols-2 gap-5">
                     <Input
-                      type="email" label="Email" placeholder="john@example.com"
+                      type="email" label="Email" placeholder="Email"
                       value={shippingInfo.email}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
                       leftIcon={<Mail className="w-4 h-4" />} required
                     />
                     <Input
-                      type="tel" label="Phone" placeholder="+91 98765 43210"
+                      type="tel" label="Phone"
                       value={shippingInfo.phone}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
                       leftIcon={<Phone className="w-4 h-4" />} required
                     />
                   </div>
                   <Input
-                    label="Address" placeholder="123 Main Street, Apartment 4B"
+                    label="Address"
                     value={shippingInfo.address}
                     onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
                     leftIcon={<Home className="w-4 h-4" />} required
                   />
                   <div className="grid sm:grid-cols-3 gap-5">
-                    <Input label="City" placeholder="Mumbai"
-                      value={shippingInfo.city}
-                      onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
-                      leftIcon={<MapPin className="w-4 h-4" />} required
-                    />
-                    <Input label="State" placeholder="Maharashtra"
-                      value={shippingInfo.state}
-                      onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
-                      required
-                    />
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5" htmlFor="shipping-state">
+                        State
+                      </label>
+                      <div className="relative">
+                        <select
+                          id="shipping-state"
+                          value={shippingInfo.state}
+                          onChange={(e) => handleStateChange(e.target.value)}
+                          required
+                          className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                          <option value="">Select State</option>
+                          {stateOptions.map((state) => (
+                            <option key={state} value={state}>
+                              {state}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5" htmlFor="shipping-city">
+                        City
+                      </label>
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <select
+                          id="shipping-city"
+                          value={shippingInfo.city}
+                          onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                          required
+                          disabled={!shippingInfo.state}
+                          className="w-full rounded-lg border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+                        >
+                          <option value="">{shippingInfo.state ? 'Select City' : 'Select State First'}</option>
+                          {cityOptions.map((city) => (
+                            <option key={city} value={city}>
+                              {city}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                     <Input label="ZIP Code" placeholder="400001"
                       value={shippingInfo.zipCode}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
                       required
-                      
-            //             />
-            //       </div>
-            //       <div className="lg:hidden">
-            //         {renderStepActions()}
-            //       </div>
-            //     </form>
-            //   </div>
-            // )}
-            // {currentStep === 'payment' && (
-            //   <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-            //     <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-            //       <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
-            //         <CreditCard className="w-4 h-4 text-indigo-600" />
-            //       </div>
-            //       <div>
-            //         <h2 className="text-lg font-bold text-gray-900">Payment Details</h2>
-            //         <p className="text-xs text-gray-400">Enter your payment information</p>
-            //       </div>
-            //     </div>
-            //     <form id="checkout-payment-form" onSubmit={handlePaymentSubmit} className="px-6 py-6 space-y-5">
-            //       <Input
-            //         label="Card Number" placeholder="1234 5678 9012 3456"
-            //         value={paymentInfo.cardNumber}
-            //         onChange={(e) => handleCardNumberChange(e.target.value)}
-            //         leftIcon={<CreditCard className="w-4 h-4" />} required
-            //         inputMode="numeric"
-            //         autoComplete="cc-number"
-            //         maxLength={19}
-            //       />
-            //       <Input
-            //         label="Cardholder Name" placeholder="John Doe"
-            //         value={paymentInfo.cardName}
-            //         onChange={(e) => handleCardNameChange(e.target.value)}
-            //         required
-            //         autoComplete="cc-name"
-            //       />
-            //       <div className="grid sm:grid-cols-2 gap-5">
-            //         <div className="w-full">
-            //           <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-            //             Expiry Date
-            //           </label>
-            //           <input
-            //             type="month"
-            //             value={expiryMonthValue}
-            //             onChange={(e) => handleExpiryDateChange(e.target.value)}
-            //             required
-            //             min={new Date().toISOString().slice(0, 7)}
-            //             autoComplete="cc-exp"
-            //             className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            //           />
-            //         </div>
-            //         <Input
-            //           label="CVV" placeholder="123" type="password" maxLength={3}
-            //           value={paymentInfo.cvv}
-            //           onChange={(e) => handleCvvChange(e.target.value)}
-            //           leftIcon={<Lock className="w-4 h-4" />} required
-            //           inputMode="numeric"
-            //           autoComplete="cc-csc" 
-                      
                     />
                   </div>
-                  {/* Secure note
-                  <div className="flex items-start gap-3 px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-xl">
-                    <Lock className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-indigo-900">Secure Payment</p>
-                      <p className="text-xs text-indigo-600">Your payment is encrypted and secure. We never store your card details.</p>
-                    </div>
-                  </div> 
-                  */}
                   <div className="lg:hidden">
                     {renderStepActions()}
                   </div>

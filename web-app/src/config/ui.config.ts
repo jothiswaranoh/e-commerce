@@ -143,7 +143,7 @@ export const AUTH = {
         subtitle: 'Sign in to your account to continue shopping',
         submitButton: 'Sign In',
         identifierLabel: 'Email Address or Phone Number',
-        identifierPlaceholder: 'you@example.com or +1 (555) 000-0000',
+        identifierPlaceholder: 'Enter your email or phone',
         forgotPassword: 'Forgot password?',
         noAccount: "Don't have an account?",
         createAccount: 'Create account',
@@ -212,15 +212,15 @@ export const AUTH = {
         fields: {
             fullName: {
                 label: 'Full Name',
-                placeholder: 'John Doe',
+                placeholder: 'Name',
             },
             email: {
                 label: 'Email Address',
-                placeholder: 'you@example.com',
+                placeholder: 'Email',
             },
             phone: {
                 label: 'Phone Number (Optional)',
-                placeholder: '+1 (555) 000-0000',
+                placeholder: 'Mobile number',
             },
             password: {
                 label: 'Password',
