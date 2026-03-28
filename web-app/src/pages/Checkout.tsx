@@ -5,13 +5,52 @@ import { orderService } from '../services/orderService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
-  Truck, User, Mail, Phone, Home,
+  Truck, MapPin, User, Mail, Phone, Home,
   CheckCircle2, ArrowRight, ArrowLeft, Sparkles
 } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
 import Input from '../components/ui/Input';
 
 type CheckoutStep = 'shipping' | 'review';
+
+const INDIA_STATE_CITY_OPTIONS: Record<string, string[]> = {
+  'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati', 'Other'],
+  'Arunachal Pradesh': ['Itanagar', 'Naharlagun', 'Tawang', 'Pasighat', 'Other'],
+  Assam: ['Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Other'],
+  Bihar: ['Patna', 'Gaya', 'Muzaffarpur', 'Bhagalpur', 'Other'],
+  Chhattisgarh: ['Raipur', 'Bilaspur', 'Durg', 'Bhilai', 'Other'],
+  Goa: ['Panaji', 'Margao', 'Mapusa', 'Vasco da Gama', 'Other'],
+  Gujarat: ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Other'],
+  Haryana: ['Gurugram', 'Faridabad', 'Panipat', 'Ambala', 'Other'],
+  'Himachal Pradesh': ['Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Other'],
+  Jharkhand: ['Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Other'],
+  Karnataka: ['Bengaluru', 'Mysuru', 'Mangaluru', 'Hubballi', 'Other'],
+  Kerala: ['Kochi', 'Thiruvananthapuram', 'Kozhikode', 'Thrissur', 'Other'],
+  'Madhya Pradesh': ['Indore', 'Bhopal', 'Jabalpur', 'Gwalior', 'Other'],
+  Maharashtra: ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Other'],
+  Manipur: ['Imphal', 'Thoubal', 'Bishnupur', 'Churachandpur', 'Other'],
+  Meghalaya: ['Shillong', 'Tura', 'Jowai', 'Nongpoh', 'Other'],
+  Mizoram: ['Aizawl', 'Lunglei', 'Champhai', 'Serchhip', 'Other'],
+  Nagaland: ['Kohima', 'Dimapur', 'Mokokchung', 'Tuensang', 'Other'],
+  Odisha: ['Bhubaneswar', 'Cuttack', 'Rourkela', 'Puri', 'Other'],
+  Punjab: ['Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Other'],
+  Rajasthan: ['Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Other'],
+  Sikkim: ['Gangtok', 'Namchi', 'Gyalshing', 'Mangan', 'Other'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Other'],
+  Telangana: ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Other'],
+  Tripura: ['Agartala', 'Udaipur', 'Dharmanagar', 'Kailasahar', 'Other'],
+  'Uttar Pradesh': ['Lucknow', 'Noida', 'Kanpur', 'Varanasi', 'Other'],
+  Uttarakhand: ['Dehradun', 'Haridwar', 'Haldwani', 'Roorkee', 'Other'],
+  'West Bengal': ['Kolkata', 'Howrah', 'Siliguri', 'Durgapur', 'Other'],
+  'Andaman and Nicobar Islands': ['Port Blair', 'Other'],
+  Chandigarh: ['Chandigarh', 'Other'],
+  'Dadra and Nagar Haveli and Daman and Diu': ['Daman', 'Diu', 'Silvassa', 'Other'],
+  Delhi: ['New Delhi', 'North Delhi', 'South Delhi', 'Dwarka', 'Other'],
+  'Jammu and Kashmir': ['Srinagar', 'Jammu', 'Anantnag', 'Baramulla', 'Other'],
+  Ladakh: ['Leh', 'Kargil', 'Other'],
+  Lakshadweep: ['Kavaratti', 'Other'],
+  Puducherry: ['Puducherry', 'Karaikal', 'Mahe', 'Yanam', 'Other'],
+};
 
 export default function Checkout() {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('shipping');
@@ -31,6 +70,8 @@ export default function Checkout() {
   const shipping = subtotal > 999 ? 0 : 50;
   const tax = subtotal * 0.18;
   const total = subtotal + shipping + tax;
+  const stateOptions = Object.keys(INDIA_STATE_CITY_OPTIONS);
+  const cityOptions = shippingInfo.state ? INDIA_STATE_CITY_OPTIONS[shippingInfo.state] ?? [] : [];
 
   const getCurrentStepIndex = () => steps.findIndex(s => s.id === currentStep);
 
@@ -103,6 +144,14 @@ export default function Checkout() {
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentStep('review');
+  };
+
+  const handleStateChange = (state: string) => {
+    setShippingInfo((current) => ({
+      ...current,
+      state,
+      city: '',
+    }));
   };
 
   const handlePlaceOrder = async () => {
@@ -235,7 +284,7 @@ export default function Checkout() {
                 <form id="checkout-shipping-form" onSubmit={handleShippingSubmit} className="px-6 py-6 space-y-5">
                   <Input
                     label="Full Name"
-                    placeholder="John Doe"
+                    placeholder="Name"
                     value={shippingInfo.fullName}
                     onChange={(e) => setShippingInfo({ ...shippingInfo, fullName: e.target.value })}
                     leftIcon={<User className="w-4 h-4" />}
@@ -243,111 +292,70 @@ export default function Checkout() {
                   />
                   <div className="grid sm:grid-cols-2 gap-5">
                     <Input
-                      type="email" label="Email" placeholder="john@example.com"
+                      type="email" label="Email" placeholder="Email"
                       value={shippingInfo.email}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
                       leftIcon={<Mail className="w-4 h-4" />} required
                     />
                     <Input
-                      type="tel" label="Phone" placeholder="+91 98765 43210"
+                      type="tel" label="Phone"
                       value={shippingInfo.phone}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
                       leftIcon={<Phone className="w-4 h-4" />} required
                     />
                   </div>
                   <Input
-                    label="Address" placeholder="123 Main Street, Apartment 4B"
+                    label="Address"
                     value={shippingInfo.address}
                     onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
                     leftIcon={<Home className="w-4 h-4" />} required
                   />
                   <div className="grid sm:grid-cols-3 gap-5">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5" htmlFor="shipping-state">
                         State
                       </label>
-                      <select
-                        value={shippingInfo.state}
-                        onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value, city: '' })}
-                        required
-                        className="w-full text-sm font-medium h-11 px-4 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm bg-white appearance-none"
-                        style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23111827%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.7rem top 50%', backgroundSize: '0.65rem auto' }}
-                      >
-                        <option value="" disabled>Select State</option>
-                        <option value="Andhra Pradesh">Andhra Pradesh</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="Kerala">Kerala</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Telangana">Telangana</option>
-                        <option value="Delhi">Delhi</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          id="shipping-state"
+                          value={shippingInfo.state}
+                          onChange={(e) => handleStateChange(e.target.value)}
+                          required
+                          className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                          <option value="">Select State</option>
+                          {stateOptions.map((state) => (
+                            <option key={state} value={state}>
+                              {state}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5" htmlFor="shipping-city">
                         City
                       </label>
-                      <select
-                        value={shippingInfo.city}
-                        onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
-                        required
-                        className="w-full text-sm font-medium h-11 px-4 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm bg-white appearance-none"
-                        style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23111827%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.7rem top 50%', backgroundSize: '0.65rem auto' }}
-                        disabled={!shippingInfo.state}
-                      >
-                        <option value="" disabled>Select City</option>
-                        {shippingInfo.state === 'Maharashtra' && (
-                          <>
-                            <option value="Mumbai">Mumbai</option>
-                            <option value="Pune">Pune</option>
-                            <option value="Nagpur">Nagpur</option>
-                          </>
-                        )}
-                        {shippingInfo.state === 'Karnataka' && (
-                          <>
-                            <option value="Bengaluru">Bengaluru</option>
-                            <option value="Mysuru">Mysuru</option>
-                            <option value="Mangaluru">Mangaluru</option>
-                          </>
-                        )}
-                        {shippingInfo.state === 'Tamil Nadu' && (
-                          <>
-                            <option value="Chennai">Chennai</option>
-                            <option value="Coimbatore">Coimbatore</option>
-                            <option value="Madurai">Madurai</option>
-                          </>
-                        )}
-                        {shippingInfo.state === 'Kerala' && (
-                          <>
-                            <option value="Kochi">Kochi</option>
-                            <option value="Thiruvananthapuram">Thiruvananthapuram</option>
-                            <option value="Kozhikode">Kozhikode</option>
-                          </>
-                        )}
-                        {shippingInfo.state === 'Andhra Pradesh' && (
-                          <>
-                            <option value="Visakhapatnam">Visakhapatnam</option>
-                            <option value="Vijayawada">Vijayawada</option>
-                            <option value="Guntur">Guntur</option>
-                          </>
-                        )}
-                        {shippingInfo.state === 'Telangana' && (
-                          <>
-                            <option value="Hyderabad">Hyderabad</option>
-                            <option value="Warangal">Warangal</option>
-                            <option value="Nizamabad">Nizamabad</option>
-                          </>
-                        )}
-                        {shippingInfo.state === 'Delhi' && (
-                          <>
-                            <option value="New Delhi">New Delhi</option>
-                            <option value="North Delhi">North Delhi</option>
-                            <option value="South Delhi">South Delhi</option>
-                          </>
-                        )}
-                        {/* Fallback for Custom Cities if needed */}
-                        <option value="Other">Other</option>
-                      </select>
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <select
+                          id="shipping-city"
+                          value={shippingInfo.city}
+                          onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                          required
+                          disabled={!shippingInfo.state}
+                          className="w-full rounded-lg border border-neutral-300 bg-white py-2.5 pl-10 pr-4 text-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+                        >
+                          <option value="">{shippingInfo.state ? 'Select City' : 'Select State First'}</option>
+                          {cityOptions.map((city) => (
+                            <option key={city} value={city}>
+                              {city}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                     <Input label="ZIP Code" placeholder="400001"
                       value={shippingInfo.zipCode}
