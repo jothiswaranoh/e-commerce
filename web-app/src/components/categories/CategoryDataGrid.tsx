@@ -46,13 +46,14 @@ export default function CategoryDataGrid({
     const buildTree = (categories: Category[]): CategoryRow[] => {
         const childrenMap = new Map<number, Category[]>();
         const roots: Category[] = [];
+        const categoryMap = new Map(categories.map(c => [c.id, c]));
 
         categories.forEach(cat => {
-            if (cat.parent_id === null) {
-            roots.push(cat);
+            if (cat.parent_id === null || !categoryMap.has(cat.parent_id)) {
+                roots.push(cat);
             } else {
-            if (!childrenMap.has(cat.parent_id)) childrenMap.set(cat.parent_id, []);
-            childrenMap.get(cat.parent_id)!.push(cat);
+                if (!childrenMap.has(cat.parent_id)) childrenMap.set(cat.parent_id, []);
+                childrenMap.get(cat.parent_id)!.push(cat);
             }
         });
 
