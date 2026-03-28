@@ -209,12 +209,12 @@ export default function Checkout() {
             backgroundSize: '48px 48px',
           }}
         />
-        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-14">
+        <div className="relative max-w-[1400px] mx-auto px-4 lg:px-8 py-10 lg:py-14">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full mb-4 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-primary-300" />
             <span className="text-xs font-bold tracking-wider uppercase text-primary-200">Secure Checkout</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-display font-bold tracking-tight">Checkout</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold tracking-tight">Checkout</h1>
           <p className="text-primary-100/80 mt-2 font-medium">Complete your purchase securely</p>
         </div>
       </div>

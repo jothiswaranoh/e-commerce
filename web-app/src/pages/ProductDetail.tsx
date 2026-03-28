@@ -130,7 +130,7 @@ export default function ProductDetail() {
       {/* ── Breadcrumb / Back Bar ── */}
       <div className="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-primary-950 to-neutral-900 text-white">
         <div className="absolute -top-16 -right-16 w-72 h-72 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-8">
+        <div className="relative max-w-[1400px] mx-auto px-4 lg:px-8 py-6 lg:py-8">
           <button
             onClick={() => navigate('/products')}
             className="inline-flex items-center gap-2 text-sm text-primary-300 hover:text-white transition-colors font-medium"
@@ -138,7 +138,7 @@ export default function ProductDetail() {
             <ArrowLeft className="w-4 h-4" />
             Back to Products
           </button>
-          <h1 className="text-2xl font-bold mt-2 tracking-tight line-clamp-1">{product.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mt-2 tracking-tight line-clamp-1">{product.name}</h1>
         </div>
       </div>
 
@@ -226,13 +226,13 @@ export default function ProductDetail() {
               </span>
             )}
 
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-3">
               {product.name}
             </h2>
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-5">
-              <span className="text-3xl font-bold text-indigo-600">
+              <span className="text-2xl sm:text-3xl font-bold text-indigo-600">
                 {selectedVariant ? `₹${selectedVariant.price.toLocaleString('en-IN')}` : 'Unavailable'}
               </span>
               {selectedVariant && selectedVariant.stock <= 5 && selectedVariant.stock > 0 && (

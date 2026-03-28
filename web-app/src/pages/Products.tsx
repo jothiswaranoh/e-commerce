@@ -84,16 +84,15 @@ function FilterSidebar({
           {categories.map(cat => {
             const isSelected = selectedCategories.includes(cat.name);
             return (
-              <button 
-                key={cat.id} 
+              <button
+                key={cat.id}
                 onClick={() => toggleCategory(cat.name)}
                 className="w-full flex items-center gap-3 cursor-pointer group text-left"
               >
-                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 ${
-                  isSelected 
-                    ? 'bg-primary-600 border-primary-600 shadow-sm shadow-primary-500/30 text-white' 
+                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 ${isSelected
+                    ? 'bg-primary-600 border-primary-600 shadow-sm shadow-primary-500/30 text-white'
                     : 'border-neutral-300 bg-white group-hover:border-primary-400 text-transparent'
-                }`}>
+                  }`}>
                   <Check className={`w-3.5 h-3.5 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all duration-200`} />
                 </div>
                 <span className={`text-sm select-none transition-colors ${isSelected ? 'font-semibold text-neutral-900' : 'text-neutral-600 group-hover:text-neutral-900'}`}>
@@ -233,12 +232,12 @@ export default function Products() {
             backgroundSize: '48px 48px',
           }}
         />
-        <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-16">
+        <div className="relative max-w-[1400px] mx-auto px-4 lg:px-8 py-10 lg:py-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/10 rounded-full mb-6 shadow-lg shadow-black/10">
             <Sparkles className="w-4 h-4 text-primary-300" />
             <span className="text-xs font-bold tracking-widest uppercase text-primary-100">Shop Everything</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight mb-4 drop-shadow-sm">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight mb-4 drop-shadow-sm">
             {searchParam ? `Results for "${searchParam}"` : "All Products"}
           </h1>
           <p className="text-primary-100/80 mt-2 text-lg font-medium max-w-xl">
@@ -260,10 +259,10 @@ export default function Products() {
 
       {/* ── Content ── */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Mobile Filter Toggle */}
         <div className="flex items-center justify-between lg:hidden mb-6">
-          <button 
+          <button
             onClick={() => setShowMobileFilters(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-white border border-neutral-200 rounded-xl shadow-sm text-sm font-bold text-neutral-800 hover:bg-neutral-50 active:scale-95 transition-all"
           >
@@ -289,7 +288,7 @@ export default function Products() {
           {/* Grid */}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
@@ -311,7 +310,7 @@ export default function Products() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
                 {displayed.map(product => (
                   <ProductCard
                     key={product.id}
@@ -335,11 +334,11 @@ export default function Products() {
       {showMobileFilters && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm transition-opacity" 
-            onClick={() => setShowMobileFilters(false)} 
+          <div
+            className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowMobileFilters(false)}
           />
-          
+
           {/* Drawer Wrapper */}
           <div className="relative mr-auto flex h-full w-full max-w-[280px] flex-col bg-neutral-50 shadow-2xl overflow-hidden animate-in slide-in-from-left duration-300">
             <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-neutral-200">
@@ -347,25 +346,25 @@ export default function Products() {
                 <SlidersHorizontal className="w-5 h-5 text-primary-600" />
                 Filters
               </h2>
-              <button 
-                onClick={() => setShowMobileFilters(false)} 
+              <button
+                onClick={() => setShowMobileFilters(false)}
                 className="p-2 bg-neutral-200 hover:bg-neutral-300 rounded-full transition-colors"
               >
                 <X className="w-4 h-4 text-neutral-700" />
               </button>
             </div>
-            
+
             {/* Embedded Sidebar Content */}
             <div className="flex-1 overflow-y-auto w-full">
-               <FilterSidebar 
-                 {...SidebarProps} 
-                 className="flex flex-col h-full bg-white" 
-               />
+              <FilterSidebar
+                {...SidebarProps}
+                className="flex flex-col h-full bg-white"
+              />
             </div>
-            
+
             {/* Mobile Actions Overlay */}
             <div className="p-4 border-t border-neutral-200 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-              <button 
+              <button
                 onClick={() => setShowMobileFilters(false)}
                 className="w-full px-4 py-3 bg-neutral-900 text-white font-bold rounded-xl shadow-md active:scale-95 transition-all text-sm"
               >
