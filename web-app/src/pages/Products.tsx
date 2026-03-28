@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   SlidersHorizontal, X, Search, Tag, Sparkles, Check
 } from 'lucide-react';
@@ -31,6 +31,40 @@ function FilterSidebar({
   clearAll,
   className = "bg-white rounded-2xl border border-neutral-200/60 shadow-lg shadow-neutral-200/30 overflow-hidden flex flex-col sticky top-24"
 }: FilterSidebarProps) {
+  const categoryListRef = useRef<HTMLDivElement | null>(null);
+
+  const orderedCategories = useMemo(() => {
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return categories;
+    }
+
+    const getRank = (categoryName: string) => {
+      const normalizedName = categoryName.toLowerCase();
+
+      if (normalizedName === normalizedSearch) return 0;
+      if (normalizedName.startsWith(normalizedSearch)) return 1;
+      if (normalizedName.includes(normalizedSearch)) return 2;
+      return 3;
+    };
+
+    return [...categories].sort((a, b) => {
+      const rankDiff = getRank(a.name) - getRank(b.name);
+      if (rankDiff !== 0) return rankDiff;
+
+      const selectedDiff =
+        Number(selectedCategories.includes(b.name)) - Number(selectedCategories.includes(a.name));
+      if (selectedDiff !== 0) return selectedDiff;
+
+      return a.name.localeCompare(b.name);
+    });
+  }, [categories, searchQuery, selectedCategories]);
+
+  useEffect(() => {
+    categoryListRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [searchQuery]);
+
   return (
     <div className={className}>
       <div className="p-5 border-b border-neutral-100 bg-neutral-50/50">
@@ -80,8 +114,8 @@ function FilterSidebar({
           <Tag className="w-3.5 h-3.5" /> Categories
         </p>
 
-        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-          {categories.map(cat => {
+        <div ref={categoryListRef} className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          {orderedCategories.map(cat => {
             const isSelected = selectedCategories.includes(cat.name);
             return (
               <button 
