@@ -81,13 +81,6 @@ const variantSchema = z.object({
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required").min(3, "At least 3 characters"),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Lowercase letters, numbers, hyphens only"
-    ),
   status: z.enum(["active", "inactive", "draft"] as const, {
     message: "Select a valid status",
   }),
@@ -220,7 +213,6 @@ export default function ProductModal({
     const catId = draft.category_id ?? draft.category?.id;
     const result = productSchema.safeParse({
       name: draft.name,
-      slug: draft.slug,
       status: draft.status,
       description: draft.description ?? "",
       category_id: catId ? Number(catId) : undefined,
