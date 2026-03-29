@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Pencil,
@@ -206,6 +207,17 @@ export default function ProductModal({
     return () => window.removeEventListener("keydown", h);
   }, [isOpen]); // eslint-disable-line
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen || !product || !draft) return null;
 
   /* ── Validation ── */
@@ -323,7 +335,7 @@ export default function ProductModal({
   const hasErrors = Object.keys(errors).length > 0;
   const statusCfg = STATUS_CONFIG[draft.status] ?? STATUS_CONFIG.inactive;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pb-20 sm:pb-6">
       <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity animate-in fade-in duration-300"
@@ -719,6 +731,7 @@ export default function ProductModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.getElementById("modal-root")!
   );
 }
