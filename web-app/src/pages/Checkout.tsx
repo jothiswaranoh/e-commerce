@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { orderService } from '../services/orderService';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {
@@ -64,7 +65,8 @@ export default function Checkout() {
     { id: 'review' as CheckoutStep, label: 'Review', icon: CheckCircle2 },
   ];
 
-  const { items, subtotal, refreshCart } = useCart();
+  const { items, subtotal, clearCart } = useCart();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const shipping = subtotal > 999 ? 0 : 50;
@@ -72,6 +74,19 @@ export default function Checkout() {
   const total = subtotal + shipping + tax;
   const stateOptions = Object.keys(INDIA_STATE_CITY_OPTIONS);
   const cityOptions = shippingInfo.state ? INDIA_STATE_CITY_OPTIONS[shippingInfo.state] ?? [] : [];
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    setShippingInfo((current) => ({
+      ...current,
+      fullName: current.fullName || user.name || '',
+      email: current.email || user.email || '',
+      phone: current.phone || user.phone || '',
+    }));
+  }, [user]);
 
   const getCurrentStepIndex = () => steps.findIndex(s => s.id === currentStep);
 
@@ -180,6 +195,15 @@ export default function Checkout() {
         order: {
           tax: Math.round(tax),
           shipping_fee: shipping,
+          shipping_address: {
+            full_name: shippingInfo.fullName,
+            email: shippingInfo.email,
+            phone: shippingInfo.phone,
+            address: shippingInfo.address,
+            city: shippingInfo.city,
+            state: shippingInfo.state,
+            zip_code: shippingInfo.zipCode,
+          },
         },
         items: items.map(item => ({
           product_id: item.product_id,
@@ -190,8 +214,8 @@ export default function Checkout() {
       const res = await orderService.placeOrder(payload);
       if (res.success) {
         toast.success('🎉 Order placed successfully!');
-        await refreshCart();
-        navigate('/profile?tab=orders');
+        clearCart();
+        navigate(isAuthenticated ? ROUTES.ORDERS : ROUTES.HOME);
       }
     } catch (error: any) {
       const message =
@@ -199,7 +223,6 @@ export default function Checkout() {
         error?.error?.error ||
         error?.error?.message ||
         (Array.isArray(error?.error?.errors) ? error.error.errors.join(', ') : null) ||
-        (error?.status === 401 ? 'Please log in again to place your order.' : null) ||
         'Failed to place order. Please try again.';
 
       toast.error(message);
