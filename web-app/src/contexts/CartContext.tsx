@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { cartService, CartResponse, CartItem } from '../services/cartService';
+import { guestCart } from '../services/guestCart';
 import { useAuth } from './AuthContext';
+
+interface AddToCartOptions {
+    productName?: string;
+    variantName?: string;
+    price?: number;
+    image?: string;
+}
 
 interface CartContextType {
     cart: CartResponse | null;
@@ -9,7 +17,7 @@ interface CartContextType {
     subtotal: number;
     isLoading: boolean;
     error: string | null;
-    addToCart: (productId: string | number, quantity: number, variantId?: string | number) => Promise<void>;
+    addToCart: (productId: string | number, quantity: number, variantId?: string | number, options?: AddToCartOptions) => Promise<void>;
     updateQuantity: (itemId: number, quantity: number) => Promise<void>;
     removeFromCart: (itemId: number) => Promise<void>;
     refreshCart: () => Promise<void>;
@@ -26,17 +34,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const clearCart = () => {
         setCart(null);
+        if (!isAuthenticated) {
+            guestCart.clear();
+        }
     };
 
     useEffect(() => {
         if (!isAuthenticated) {
-            setCart(null);
+            setCart(guestCart.getCart());
         }
     }, [isAuthenticated]);
 
     const refreshCart = useCallback(async () => {
         if (!isAuthenticated) {
-            setCart(null);
+            setCart(guestCart.getCart());
             return;
         }
 
@@ -63,15 +74,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (isAuthenticated) {
             setIsLoading(true);
             refreshCart().finally(() => setIsLoading(false));
+        } else {
+            setCart(guestCart.getCart());
         }
     }, [isAuthenticated, refreshCart]);
 
-    const addToCart = async (productId: string | number, quantity: number, variantId?: string | number) => {
-        if (!isAuthenticated) {
-            // Ideally dispatch a 'open-login-modal' event or similar, or just throw
-            const msg = 'Please log in to add items to cart';
+    const addToCart = async (
+        productId: string | number,
+        quantity: number,
+        variantId?: string | number,
+        options?: AddToCartOptions
+    ) => {
+        if (!variantId) {
+            const msg = 'Please select a variant before adding this item to cart';
             setError(msg);
             throw new Error(msg);
+        }
+
+        if (!isAuthenticated) {
+            const response = guestCart.addItem({
+                productId,
+                productVariantId: variantId,
+                quantity,
+                productName: options?.productName,
+                variantName: options?.variantName,
+                price: options?.price,
+                image: options?.image,
+            });
+            setCart(response);
+            setError(null);
+            return;
         }
         setIsLoading(true);
         try {
@@ -100,6 +132,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const updateQuantity = async (itemId: number, quantity: number) => {
         if (quantity < 1) return;
 
+        if (!isAuthenticated) {
+            const response = guestCart.updateItem(itemId, quantity);
+            setCart(response);
+            setError(null);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -123,6 +162,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     const removeFromCart = async (itemId: number) => {
+        if (!isAuthenticated) {
+            const response = guestCart.removeItem(itemId);
+            setCart(response);
+            setError(null);
+            return;
+        }
+
         setIsLoading(true);
         try {
             const response = await cartService.removeItem(itemId);
