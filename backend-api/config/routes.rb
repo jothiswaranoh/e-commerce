@@ -45,6 +45,9 @@ Rails.application.routes.draw do
       end
 
       resources :users
+      
+      resources :favourites, only: [:index, :create], param: :product_id
+      delete "favourites/:product_id", to: "favourites#destroy"
 
       get "dashboard", to: "dashboard#index"
     end

@@ -17,9 +17,8 @@ import { Search, Bell, Zap, ChevronRight, MapPin, ShoppingCart } from 'lucide-re
 import AppText from '@/components/AppText';
 import ProductCard from '@/components/ProductCard';
 import { COLORS, SPACING, SHADOWS } from '@/lib/theme';
-import { CATEGORIES } from '@/lib/constants';
 import { useCart } from '@/context/CartContext';
-import { productApi } from '@/lib/api';
+import { productApi, categoryApi, BackendCategory } from '@/lib/api';
 import { mapBackendProduct } from '@/lib/product-utils';
 import { Product } from '@/types/product';
 
@@ -28,6 +27,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<BackendCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -40,11 +40,15 @@ export default function HomeScreen() {
 
     async function loadProducts() {
       try {
-        const response = await productApi.getProducts({ page: 1, per_page: 8 });
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          productApi.getProducts({ page: 1, per_page: 8 }),
+          categoryApi.getCategories({ page: 1, per_page: 10 }),
+        ]);
 
         if (!isMounted) return;
 
-        setProducts(response.data.map(mapBackendProduct));
+        setProducts(productsResponse.data.map(mapBackendProduct));
+        setCategories(categoriesResponse.data);
         setError(null);
       } catch (fetchError) {
         if (!isMounted) return;
@@ -276,8 +280,7 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoriesScrollContainer}
           >
-            {CATEGORIES.map((category) => {
-              const IconComponent = category.icon;
+            {categories.map((category) => {
               return (
                 <TouchableOpacity
                   key={category.id}
@@ -285,7 +288,11 @@ export default function HomeScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={styles.circleCategoryIconWrapper}>
-                    <IconComponent size={24} color={COLORS.neutral[900]} />
+                    {category.image_url ? (
+                      <Image source={{ uri: category.image_url }} style={{ width: 48, height: 48, borderRadius: 24 }} />
+                    ) : (
+                      <Zap size={24} color={COLORS.neutral[900]} />
+                    )}
                   </View>
                   <AppText variant="xs" weight="medium" numberOfLines={1} style={styles.circleCategoryName}>
                     {category.name}

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_24_170209) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_31_165539) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -74,6 +74,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_24_170209) do
     t.datetime "updated_at", null: false
     t.index ["org_id"], name: "index_categories_on_org_id"
     t.index ["parent_id"], name: "index_categories_on_parent_id"
+  end
+
+  create_table "favourites", force: :cascade do |t|
+    t.bigint "org_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "product_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_id"], name: "index_favourites_on_org_id"
+    t.index ["product_id"], name: "index_favourites_on_product_id"
+    t.index ["user_id", "product_id"], name: "index_favourites_on_user_id_and_product_id", unique: true
+    t.index ["user_id"], name: "index_favourites_on_user_id"
   end
 
   create_table "order_items", force: :cascade do |t|
@@ -209,6 +221,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_24_170209) do
   add_foreign_key "carts", "organizations", column: "org_id"
   add_foreign_key "carts", "users"
   add_foreign_key "categories", "organizations", column: "org_id"
+  add_foreign_key "favourites", "organizations", column: "org_id"
+  add_foreign_key "favourites", "products"
+  add_foreign_key "favourites", "users"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"
   add_foreign_key "order_items", "products"
