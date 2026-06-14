@@ -76,7 +76,7 @@ export default function AdminOrders() {
                 </div>
                 <button
                     onClick={() => setIsAddOpen(true)}
-                    className="group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold text-white transition-all duration-300 bg-secondary-600 rounded-xl hover:bg-secondary-500 hover:shadow-lg hover:shadow-secondary-500/20 hover:-translate-y-0.5 active:translate-y-0"
+                    className="group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold text-white transition-all duration-300 bg-primary-600 rounded-xl hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/20 hover:-translate-y-0.5 active:translate-y-0"
                 >
                     <Plus className="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" />
                     <span>Add Order</span>
