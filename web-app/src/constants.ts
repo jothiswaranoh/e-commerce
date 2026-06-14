@@ -4,13 +4,13 @@
  * This file contains centralized constants used throughout the frontend.
  */
 
-export const SHOP_NAME = 'Looks Mens';
+export const SHOP_NAME = 'Zilvo';
 export const SHOP_ADDRESS = 'Machine Street, Pullambadi,Lalgudi Taluk, Trichy -621711';
 export const SHOP_PHONE = '+91 7558176281';
-export const SHOP_EMAIL = 'Support@looksmens.com';
+export const SHOP_EMAIL = 'Support@zilvo.com';
 
 // Branding related constants
-export const BRAND_TAGLINE = 'Premium Mens Fashion and Lifestyle';
+export const BRAND_TAGLINE = 'Premium Fashion and Lifestyle';
 export const LOGO_PATH = '/logo.svg';
 export const LOGO_ALT = `${SHOP_NAME} Logo`;
 

@@ -1,5 +1,6 @@
 import { apiService, service } from './apiService';
 import { TokenManager } from '../services/TokenManager';
+import { STORAGE_KEYS } from '../constants';
 import type { User, AuthResponse } from '../types';
 
 // Auth Service
@@ -110,7 +111,7 @@ export const authService = {
         } finally {
             await TokenManager.clearToken();
             if (typeof window !== 'undefined') {
-                localStorage.removeItem('shophub_current_user');
+                localStorage.removeItem(STORAGE_KEYS.USER_DATA);
             }
         }
     },
@@ -137,7 +138,7 @@ export const authService = {
                 createdAt: userData.created_at || new Date().toISOString(),
             };
 
-            localStorage.setItem('shophub_current_user', JSON.stringify(user));
+            localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
 
             return {
                 success: true,
