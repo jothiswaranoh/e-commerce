@@ -4,6 +4,15 @@ export interface PlaceOrderPayload {
   order: {
     tax: number;
     shipping_fee: number;
+    shipping_address?: {
+      full_name: string;
+      email: string;
+      phone: string;
+      address: string;
+      city: string;
+      state: string;
+      zip_code: string;
+    };
   };
   items: {
     product_id: number;
