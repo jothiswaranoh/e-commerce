@@ -3,6 +3,7 @@ import { apiService } from '../api/apiService';
 export interface CartItem {
     id: number;
     product_id: number;
+    product_variant_id?: number;
     product_name: string;
     variant_name?: string;
     quantity: number;

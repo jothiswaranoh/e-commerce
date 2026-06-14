@@ -45,7 +45,7 @@ function App() {
               <Route path="/" element={<MainLayout><Home /></MainLayout>} />
               <Route path={ROUTES.PRODUCTS} element={<MainLayout><Products /></MainLayout>} />
               <Route path={ROUTES.PRODUCT_DETAIL} element={<MainLayout><ProductDetail /></MainLayout>} />
-              <Route path={ROUTES.CART}element={<ProtectedRoute><MainLayout><Cart /></MainLayout></ProtectedRoute>}/>
+              <Route path={ROUTES.CART} element={<MainLayout><Cart /></MainLayout>} />
 
               {/* Auth Routes */}
               <Route path={ROUTES.LOGIN} element={<MainLayout><Login /></MainLayout>} />
@@ -55,11 +55,7 @@ function App() {
               <Route path={ROUTES.VERIFY_EMAIL} element={<MainLayout><EmailVerification /></MainLayout>} />
 
               {/* Protected Customer Routes */}
-              <Route path={ROUTES.CHECKOUT} element={
-                <ProtectedRoute>
-                  <MainLayout><Checkout /></MainLayout>
-                </ProtectedRoute>
-              } />
+              <Route path={ROUTES.CHECKOUT} element={<MainLayout><Checkout /></MainLayout>} />
               <Route path={ROUTES.PROFILE} element={
                 <ProtectedRoute>
                   <MainLayout><Profile /></MainLayout>
