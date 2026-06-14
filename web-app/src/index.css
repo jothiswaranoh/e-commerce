@@ -215,3 +215,18 @@
     @apply bg-neutral-500;
   }
 }
+
+/* ── Fix MUI DataGrid horizontal overflow in admin panel ── */
+.MuiDataGrid-root {
+  overflow: hidden !important;
+}
+
+.MuiDataGrid-virtualScroller {
+  overflow-x: hidden !important;
+}
+
+.MuiDataGrid-columnHeadersInner,
+.MuiDataGrid-virtualScrollerContent {
+  width: 100% !important;
+  min-width: unset !important;
+}
