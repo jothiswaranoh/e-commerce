@@ -73,17 +73,16 @@ export default function ProductCard({
     e.stopPropagation();
     if (isAdding) return;
 
-    if (!isAuthenticated) {
-      navigate(ROUTES.LOGIN);
-      return;
-    }
-
     try {
       setIsAdding(true);
-      await addToCart(id, 1, variantId);
+      await addToCart(id, 1, variantId, {
+        productName: name,
+        price,
+        image: imageSrc,
+      });
       toast.success('Product successfully added to cart');
     } catch (error: any) {
-      toast.error('Failed to add to cart. Please try again.');
+      toast.error(error?.message || 'Failed to add to cart. Please try again.');
     } finally {
       setIsAdding(false);
     }

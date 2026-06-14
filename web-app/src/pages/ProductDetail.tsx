@@ -54,14 +54,13 @@ export default function ProductDetail() {
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;
 
-    if (!isAuthenticated) {
-      toast.info('Please login to add items to cart');
-      navigate(ROUTES.LOGIN);
-      return;
-    }
-
     try {
-      await addToCart(product.id, quantity, selectedVariant.id);
+      await addToCart(product.id, quantity, selectedVariant.id, {
+        productName: product.name,
+        variantName: selectedVariant.name,
+        price: selectedVariant.price,
+        image: images[0],
+      });
       toast.success('Product successfully added to cart');
     } catch (error: any) {
       toast.error(error.message || 'Failed to add to cart. Please try again.');
@@ -71,7 +70,12 @@ export default function ProductDetail() {
   const handleBuyNow = async () => {
     if (!product || !selectedVariant) return;
     try {
-      await addToCart(product.id, quantity, selectedVariant.id);
+      await addToCart(product.id, quantity, selectedVariant.id, {
+        productName: product.name,
+        variantName: selectedVariant.name,
+        price: selectedVariant.price,
+        image: images[0],
+      });
       navigate('/checkout');
     } catch (error: any) {
       toast.error(error.message || 'Failed to add to cart. Please try again.');
