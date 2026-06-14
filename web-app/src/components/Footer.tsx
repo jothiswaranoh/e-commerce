@@ -12,9 +12,8 @@ export default function Footer() {
 
         {/* Top: Logo + Tagline centered */}
         <div className="flex flex-col items-center text-center mb-10">
-          <Link to={ROUTES.HOME} className="flex items-center gap-2 mb-3">
-            <img src="/logo.svg" alt={`${BRAND.name} Logo`} className="w-8 h-8 rounded-md" />
-            <span className="text-2xl font-bold text-white">{BRAND.name}</span>
+          <Link to={ROUTES.HOME} className="flex items-center mb-3">
+            <img src="/logo.svg" alt={`${BRAND.name} Logo`} className="h-10 w-auto" />
           </Link>
           <p className="text-sm text-neutral-400 max-w-md">
             Welcome to {BRAND.name}, where style meets comfort! At {BRAND.name.toLowerCase()}, we believe that every one deserves to best gift.
