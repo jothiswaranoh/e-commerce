@@ -1,137 +1,96 @@
 import { Link } from 'react-router-dom';
-import { Package, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Phone, Mail } from 'lucide-react';
 import { ROUTES } from '../config/routes.constants';
-import { FOOTER,CONTACT,SOCIAL,BRAND} from '../config/ui.config';
+import { CONTACT, BRAND } from '../config/ui.config';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-neutral-900 text-neutral-300">
+    <footer className="bg-black text-neutral-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div>
-            <Link to={ROUTES.HOME} className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-white">{BRAND.name}</span>
-            </Link>
-            <p className="text-sm text-neutral-400 mb-4">
-              {FOOTER.description}
-            </p>
 
-            {/* Social Media */}
-            <div className="flex gap-3">
-              <a href={SOCIAL.facebook} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href={SOCIAL.twitter} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href={SOCIAL.instagram} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href={SOCIAL.linkedin} className="p-2 bg-neutral-800 hover:bg-primary-600 rounded-lg transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
+        {/* Top: Logo + Tagline centered */}
+        <div className="flex flex-col items-center text-center mb-10">
+          <Link to={ROUTES.HOME} className="flex items-center mb-3">
+            <img src="/logo.svg" alt={`${BRAND.name} Logo`} className="h-10 w-auto" />
+          </Link>
+          <p className="text-sm text-neutral-400 max-w-md">
+            Welcome to {BRAND.name}, where style meets comfort! At {BRAND.name.toLowerCase()}, we believe that every one deserves to best gift.
+          </p>
+        </div>
 
-          {/* Quick Links */}
+        {/* 4 Columns */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+
+          {/* Account */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">{FOOTER.sections.quickLinks.title}</h3>
+            <h3 className="text-white text-base font-semibold mb-4">Account</h3>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link to={ROUTES.HOME} className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.quickLinks.home}
-                </Link>
-              </li>
-              <li>
-                <Link to={ROUTES.PRODUCTS} className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.quickLinks.products}
-                </Link>
-              </li>
-              <li>
-                <Link to={ROUTES.CART} className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.quickLinks.cart}
-                </Link>
-              </li>
-              <li>
-                <Link to="#" className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.quickLinks.about}
-                </Link>
-              </li>
+              <li><Link to={ROUTES.PROFILE} className="hover:text-white transition-colors">My Account</Link></li>
+              <li><Link to={ROUTES.REGISTER} className="hover:text-white transition-colors">Register</Link></li>
+              <li><Link to={ROUTES.LOGIN} className="hover:text-white transition-colors">Login</Link></li>
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* Useful Links */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">{FOOTER.sections.customerService.title}</h3>
+            <h3 className="text-white text-base font-semibold mb-4">Useful Links</h3>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="#" className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.customerService.contact}
-                </Link>
-              </li>
-              <li>
-                <Link to="#" className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.customerService.shipping}
-                </Link>
-              </li>
-              <li>
-                <Link to="#" className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.customerService.returns}
-                </Link>
-              </li>
-              <li>
-                <Link to="#" className="hover:text-primary-400 transition-colors">
-                  {FOOTER.sections.customerService.faq}
-                </Link>
-              </li>
+              <li><Link to={ROUTES.HOME} className="hover:text-white transition-colors">Home</Link></li>
+              <li><Link to={ROUTES.PRODUCTS} className="hover:text-white transition-colors">All Products</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">Contact Us</Link></li>
+              <li><Link to={ROUTES.ORDERS} className="hover:text-white transition-colors">Track Your Orders</Link></li>
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Help */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">{FOOTER.sections.contactUs.title}</h3>
+            <h3 className="text-white text-base font-semibold mb-4">Help</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">FAQ's</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">Exchange/Return Policy</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">Shipping Policy</Link></li>
+              <li><Link to="#" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
+            </ul>
+          </div>
+
+          {/* Get in Touch */}
+          <div>
+            <h3 className="text-white text-base font-semibold mb-4">Get in Touch</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <Mail className="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5" />
-                <span>{CONTACT.email}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Phone className="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5" />
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                 <span>{CONTACT.phone}</span>
               </li>
-              <li className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 text-primary-400 flex-shrink-0 mt-0.5" />
-                <span>{CONTACT.address}</span>
+              <li className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                <span>{CONTACT.email}</span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-neutral-800 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-neutral-400">
-            <p>&copy; {currentYear} {BRAND.name}. All rights reserved.</p>
-            <div className="flex gap-6">
-              <Link to="#" className="hover:text-primary-400 transition-colors">
-                {FOOTER.legal.privacyPolicy}
-              </Link>
-              <Link to="#" className="hover:text-primary-400 transition-colors">
-                {FOOTER.legal.termsOfService}
-              </Link>
-              <Link to="#" className="hover:text-primary-400 transition-colors">
-                {FOOTER.legal.cookiePolicy}
-              </Link>
-            </div>
+        <div className="border-t border-neutral-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-neutral-500">
+          <p>© {currentYear} {BRAND.name.toUpperCase()}. All Rights Reserved.</p>
+
+          {/* Payment Icons */}
+          <div className="flex items-center gap-2">
+            {['Razorpay', 'VISA', 'MC', 'UPI'].map((method) => (
+              <span
+                key={method}
+                className="px-2 py-1 bg-neutral-800 text-neutral-300 text-xs font-semibold rounded border border-neutral-700"
+              >
+                {method}
+              </span>
+            ))}
           </div>
         </div>
+
       </div>
     </footer>
   );
 }
-

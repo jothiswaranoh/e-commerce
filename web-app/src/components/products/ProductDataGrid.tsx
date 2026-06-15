@@ -95,7 +95,7 @@ export default function ProductDataGrid({
             field: "name",
             headerName: "Name",
             flex: 1,
-            minWidth: 220,
+            minWidth: 160,
             renderCell: (params) => {
                 const product = params.row;
 
@@ -116,7 +116,7 @@ export default function ProductDataGrid({
         {
             field: "category",
             headerName: "Category",
-            width: 200,
+            width: 160,
             valueGetter: (_value, row) => row.category?.name || "",
             renderCell: (params) => (
                 <div className="flex items-center gap-2">
@@ -132,7 +132,7 @@ export default function ProductDataGrid({
         {
             field: "price",
             headerName: "Price",
-            width: 170,
+            width: 130,
             valueGetter: (_value, row) => {
                 const variants = row.variants || [];
                 if (!variants.length) return 0;
@@ -172,7 +172,7 @@ export default function ProductDataGrid({
         {
             field: "stock",
             headerName: "Stock",
-            width: 160,
+            width: 140,
             valueGetter: (_value, row) => {
                 const variants = row.variants || [];
                 return variants.reduce(
@@ -214,7 +214,7 @@ export default function ProductDataGrid({
         {
             field: "status",
             headerName: "Status",
-            width: 120,
+            width: 100,
             renderCell: (params) => {
                 const isActive = params.value === "active";
 
@@ -233,7 +233,7 @@ export default function ProductDataGrid({
         {
             field: "actions",
             headerName: "Actions",
-            width: 100,
+            width: 80,
             sortable: false,
             renderCell: (params) => (
                 <div className="w-full h-full flex items-center gap-1">
