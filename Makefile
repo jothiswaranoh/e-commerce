@@ -10,7 +10,8 @@ help: ## Show this help message
 
 stop-containers: ## Stop and remove running Docker containers
 	@echo "Cleaning up existing containers..."
-	docker-compose down 2>/dev/null || true
+	docker compose -f docker-compose.yml down 2>/dev/null || true
+	docker compose -f docker-compose.prod.yml down 2>/dev/null || true
 
 clear-nodemodules: ## Remove frontend node_modules and lock file
 	@echo "Cleaning frontend dependencies..."
@@ -24,9 +25,8 @@ dev-containers: stop-containers ## Build and start dev Docker containers
 	@echo "   Backend:  http://localhost:3000"
 
 prod-containers: stop-containers ## Build and start prod Docker containers
-	@echo "Starting AI Prompt Playground in Production Mode..."
-	docker-compose up --build
+	@echo "Starting E-commerce App in Production Mode..."
+	docker compose -f docker-compose.prod.yml up --build -d
 	@echo "Application should be running at:"
-	@echo "   Frontend: http://localhost:3000"
-	@echo "   Backend:  http://localhost:8001"
-
+	@echo "   Frontend: https://zilvo.ddns.net"
+	@echo "   Backend API: https://zilvo.ddns.net/api/v1"

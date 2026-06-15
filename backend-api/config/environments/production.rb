@@ -33,13 +33,13 @@ Rails.application.configure do
 
   # Mailer URL configuration
   config.action_mailer.default_url_options = {
-    host: "looksmen.freedynamicdns.org",
+    host: "zilvo.ddns.net",
     protocol: "https"
   }
 
   # URL helpers (important for ActiveStorage / serializers / Blueprinter)
   Rails.application.routes.default_url_options = {
-    host: "looksmen.freedynamicdns.org",
+    host: "zilvo.ddns.net",
     protocol: "https"
   }
 
