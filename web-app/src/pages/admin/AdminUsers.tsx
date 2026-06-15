@@ -93,7 +93,7 @@ export default function AdminUsers() {
 
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold text-white transition-all duration-300 bg-accent-600 rounded-xl hover:bg-accent-500 hover:shadow-lg hover:shadow-accent-500/20 hover:-translate-y-0.5 active:translate-y-0"
+          className="group relative inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold text-white transition-all duration-300 bg-primary-600 rounded-xl hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/20 hover:-translate-y-0.5 active:translate-y-0"
         >
           <UserPlus className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" />
           <span>Add User</span>

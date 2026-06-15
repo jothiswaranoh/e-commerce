@@ -66,11 +66,8 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center gap-8">
-            <Link to={ROUTES.HOME} className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold gradient-text hidden sm:block">{BRAND.name}</span>
+            <Link to={ROUTES.HOME} className="flex items-center">
+              <img src="/logo.svg" alt="Zilvo" className="h-10 w-auto" />
             </Link>
 
             {/* Desktop Navigation */}

@@ -251,21 +251,21 @@ export default function ProductCard({
               Out of Stock
             </div>
           ) : cartItem ? (
-            <div className="flex items-center rounded-xl overflow-hidden border border-indigo-200 bg-indigo-50">
+            <div className="flex items-center flex-shrink-0 rounded-xl border border-indigo-200 bg-indigo-50">
               <button
                 onClick={handleDecrease}
                 disabled={isUpdatingQty}
-                className="px-3 py-2 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
+                className="px-2.5 py-2 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 rounded-l-xl"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="min-w-8 text-center text-sm font-bold text-indigo-700">
+              <span className="w-6 text-center text-sm font-bold text-indigo-700">
                 {cartItem.quantity}
               </span>
               <button
                 onClick={handleIncrease}
                 disabled={isUpdatingQty}
-                className="px-3 py-2 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
+                className="px-2.5 py-2 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 rounded-r-xl"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>

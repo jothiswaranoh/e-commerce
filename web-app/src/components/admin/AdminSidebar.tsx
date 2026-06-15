@@ -29,9 +29,7 @@ export default function AdminSidebar({ isCollapsed, onToggle }: AdminSidebarProp
                 <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-800 flex-shrink-0">
                     {!isCollapsed && (
                         <Link to={ROUTES.ADMIN_DASHBOARD} className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
-                                <Package className="w-5 h-5" />
-                            </div>
+                            <img src="/logo.svg" alt="Zilvo" className="h-8 w-auto" />
                             <span className="text-lg font-bold">Admin Panel</span>
                         </Link>
                     )}
