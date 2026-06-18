@@ -441,3 +441,38 @@ export const orderApi = {
     return response.data;
   },
 };
+
+export const favouriteApi = {
+  getFavourites: async (): Promise<BackendProduct[]> => {
+    const response = await apiRequest<BackendProduct[]>(
+      '/favourites',
+      {},
+      { authenticated: true }
+    );
+    return response;
+  },
+
+  addFavourite: async (productId: string): Promise<any> => {
+    const response = await apiRequest<any>(
+      '/favourites',
+      {
+        method: 'POST',
+        body: JSON.stringify({ product_id: productId }),
+      },
+      { authenticated: true }
+    );
+    return response;
+  },
+
+  removeFavourite: async (productId: string): Promise<any> => {
+    const response = await apiRequest<any>(
+      `/favourites/${productId}`,
+      {
+        method: 'DELETE',
+      },
+      { authenticated: true }
+    );
+    return response;
+  },
+};
+

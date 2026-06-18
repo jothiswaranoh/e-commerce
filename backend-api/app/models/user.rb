@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :orders, dependent: :destroy
   has_one :cart, dependent: :destroy
+  has_many :favourites, dependent: :destroy
 
   enum :role, {
     admin: "admin",

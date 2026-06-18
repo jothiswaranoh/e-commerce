@@ -1,17 +1,19 @@
-import { View, StyleSheet, ScrollView, TouchableOpacity, Image, Animated } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRef, useEffect } from 'react';
-import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react-native';
+import { ArrowLeft, Heart } from 'lucide-react-native';
 import AppText from '@/components/AppText';
 import AppButton from '@/components/AppButton';
 import ProductCard from '@/components/ProductCard';
 import { COLORS, SPACING, BORDERS, SHADOWS } from '@/lib/theme';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
+import { useFavourite } from '@/context/FavouriteContext';
 
 export default function WishlistScreen() {
     const router = useRouter();
     const fadeAnim = useRef(new Animated.Value(0)).current;
+    const { favourites, toggleFavourite } = useFavourite();
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -21,9 +23,6 @@ export default function WishlistScreen() {
         }).start();
     }, []);
 
-    // Mock wishlist items
-    const wishlistItems = [MOCK_PRODUCTS[0], MOCK_PRODUCTS[2], MOCK_PRODUCTS[5]];
-
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
@@ -31,7 +30,9 @@ export default function WishlistScreen() {
                     <ArrowLeft size={24} color={COLORS.neutral[900]} />
                 </TouchableOpacity>
                 <AppText variant="lg" weight="bold">My Wishlist</AppText>
-                <View style={{ width: 44 }} />
+                <AppText variant="sm" color={COLORS.neutral[500]}>
+                    {favourites.length} item{favourites.length !== 1 ? 's' : ''}
+                </AppText>
             </View>
 
             <Animated.ScrollView
@@ -39,25 +40,34 @@ export default function WishlistScreen() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={styles.grid}>
-                    {wishlistItems.map((product) => (
-                        <View key={product.id} style={styles.gridItem}>
-                            <ProductCard
-                                product={product}
-                                variant="compact"
-                                onPress={() => router.push(`/product/${product.id}`)}
-                            />
-                            <TouchableOpacity style={styles.removeHeart} activeOpacity={0.7}>
-                                <Heart size={20} color={COLORS.error.DEFAULT} fill={COLORS.error.DEFAULT} />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </View>
-
-                {wishlistItems.length === 0 && (
+                {favourites.length > 0 ? (
+                    <View style={styles.grid}>
+                        {favourites.map((product) => (
+                            <View key={product.id} style={styles.gridItem}>
+                                <ProductCard
+                                    product={product}
+                                    variant="compact"
+                                    onPress={() => router.push(`/product/${product.id}`)}
+                                />
+                                <TouchableOpacity
+                                    style={styles.removeHeart}
+                                    activeOpacity={0.7}
+                                    onPress={() => toggleFavourite(product)}
+                                >
+                                    <Heart size={20} color={COLORS.error.DEFAULT} fill={COLORS.error.DEFAULT} />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>
+                ) : (
                     <View style={styles.emptyContainer}>
                         <Heart size={80} color={COLORS.neutral[200]} />
-                        <AppText variant="lg" weight="semibold" style={styles.emptyText}>Your wishlist is empty</AppText>
+                        <AppText variant="lg" weight="semibold" style={styles.emptyText}>
+                            Your wishlist is empty
+                        </AppText>
+                        <AppText variant="sm" color={COLORS.neutral[500]} style={styles.emptySubtext}>
+                            Tap the heart icon on any product to save it here.
+                        </AppText>
                         <AppButton
                             title="Browse Products"
                             onPress={() => router.replace('/(tabs)')}
@@ -97,6 +107,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: SPACING.lg,
+        flexGrow: 1,
     },
     grid: {
         flexDirection: 'row',
@@ -126,13 +137,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 100,
+        gap: SPACING.md,
     },
     emptyText: {
-        marginTop: SPACING.xl,
-        color: COLORS.neutral[400],
-        marginBottom: SPACING.xl,
+        color: COLORS.neutral[700],
+    },
+    emptySubtext: {
+        textAlign: 'center',
+        paddingHorizontal: SPACING.xl,
     },
     browseButton: {
+        marginTop: SPACING.md,
         paddingHorizontal: SPACING['2xl'],
     },
 });
