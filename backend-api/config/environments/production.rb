@@ -10,6 +10,9 @@ Rails.application.configure do
   # Disable full error reports
   config.consider_all_requests_local = false
 
+  # Ensures Rails generates HTTPS URLs for images and redirects
+  config.force_ssl = true
+
   # Cache public files for 1 year
   config.public_file_server.headers = {
     "cache-control" => "public, max-age=#{1.year.to_i}"
